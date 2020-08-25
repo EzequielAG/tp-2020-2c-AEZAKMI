@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "proceso1"
+		},
+		{
+			"path": "proceso2"
+		},
+		{
+			"path": "proceso3"
+		},
+		{
+			"path": "shared"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"proceso1.h": "c",
+			"server.h": "c",
+			"utils.h": "c",
+			"proceso2.h": "c"
+		}
+	}
+}

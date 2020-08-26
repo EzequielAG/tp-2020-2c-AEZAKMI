@@ -1,10 +1,16 @@
 #!/bin/bash
 FILE=proceso1
-make $FILE
+
+if [[ ! -d bin ]]; then
+    mkdir bin
+fi
+make bin/$FILE
+
 if [[ ! -e cfg/$FILE.log ]]; then
     mkdir cfg
     touch cfg/$FILE.log
 fi
-if test -f "./$FILE"; then
-    ./$FILE
+
+if test -f "./bin/$FILE"; then
+    ./bin/$FILE
 fi

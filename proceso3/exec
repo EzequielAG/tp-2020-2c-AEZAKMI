@@ -3,7 +3,7 @@ FILE=proceso3
 make $FILE
 if [[ ! -e cfg/$FILE.log ]]; then
     mkdir cfg
-    touch $FILE.log
+    touch cfg/$FILE.log
 fi
 if test -f "./$FILE"; then
     ./$FILE

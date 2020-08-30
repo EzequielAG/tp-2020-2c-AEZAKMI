@@ -1,6 +1,9 @@
 #!/bin/bash
 FILE=cliente
 
+# Ejecuto exec de las shared
+./../shared/exec
+
 if [[ ! -d bin ]]; then
     mkdir bin
 fi

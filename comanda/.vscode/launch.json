@@ -6,10 +6,10 @@
     "configurations": [
 
         {
-            "name": "Proceso1",
+            "name": "Comanda",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/proceso1",
+            "program": "${workspaceFolder}/comanda",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

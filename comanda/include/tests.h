@@ -2,6 +2,6 @@
 #define TESTS_H
 #include <CUnit/Basic.h>
 int run_tests();
-void suma_proceso1();
+void suma_comanda();
 
 #endif

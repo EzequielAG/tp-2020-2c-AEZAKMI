@@ -1,5 +1,5 @@
 #!/bin/bash
-FILE=cliente
+FILE=app
 
 if [[ ! -d bin ]]; then
     mkdir bin

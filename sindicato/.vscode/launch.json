@@ -6,10 +6,10 @@
     "configurations": [
 
         {
-            "name": "Proceso1",
+            "name": "Sindicato",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/proceso1",
+            "program": "${workspaceFolder}/bin/sindicato",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

@@ -16,6 +16,14 @@
             "problemMatcher": [
                 "$gcc"
             ]
+        },
+        {
+            "label": "Cliente Build",
+            "type": "shell",
+            "command": "./build",
+            "problemMatcher": [
+                "$gcc"
+            ]
         }
     ]
 }

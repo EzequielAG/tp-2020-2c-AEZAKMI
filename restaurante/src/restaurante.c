@@ -5,9 +5,5 @@ int main(void){
     log_info(logger, "Soy el MODULO RESTAURANTE! %s", mi_funcion_compartida());
 
      inicio_server("127.0.0.1", "6010",logger);
-
-
-
         log_destroy(logger);
-        
 }

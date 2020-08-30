@@ -6,6 +6,6 @@ int main(void){
 
 
 
-        log_destroy(logger);
+    log_destroy(logger);
         
 }

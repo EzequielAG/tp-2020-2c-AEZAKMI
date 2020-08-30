@@ -1,7 +1,7 @@
 {
 	"folders": [
 		{
-			"path": "proceso1"
+			"path": "cliente"
 		},
 		{
 			"path": "proceso2"
@@ -15,7 +15,7 @@
 	],
 	"settings": {
 		"files.associations": {
-			"proceso1.h": "c",
+			"cliente.h": "c",
 			"server.h": "c",
 			"utils.h": "c",
 			"proceso2.h": "c"

@@ -2,7 +2,7 @@
 int main(void){
 //ESTE VA A ACTUAR DE SERVER
      t_log* logger = log_create("./cfg/cliente.log", "PROCESO1", true, LOG_LEVEL_INFO);
-    log_info(logger, "Soy el proceso 1! %s", mi_funcion_compartida());
+    log_info(logger, "Soy el CLIENTE! %s", mi_funcion_compartida());
 
      inicio_server("127.0.0.1", "6010",logger);
 

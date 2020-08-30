@@ -24,7 +24,8 @@
 			"cliente.h": "c",
 			"server.h": "c",
 			"utils.h": "c",
-			"proceso2.h": "c"
+			"proceso2.h": "c",
+			"log.h": "c"
 		}
 	}
 }

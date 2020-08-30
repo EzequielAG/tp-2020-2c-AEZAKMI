@@ -4,10 +4,16 @@
 			"path": "cliente"
 		},
 		{
-			"path": "proceso2"
+			"path": "app"
 		},
 		{
-			"path": "proceso3"
+			"path": "restaurante"
+		},
+		{
+			"path": "comanda"
+		},
+		{
+			"path": "sindicato"
 		},
 		{
 			"path": "shared"

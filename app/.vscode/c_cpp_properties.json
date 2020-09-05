@@ -37,7 +37,7 @@
                 "databaseFilename": ""
             },
             "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c11",
+            "cStandard": "c99",
             "cppStandard": "c++17"
         }
     ],

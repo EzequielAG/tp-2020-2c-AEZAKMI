@@ -25,7 +25,12 @@
 			"server.h": "c",
 			"utils.h": "c",
 			"proceso2.h": "c",
-			"log.h": "c"
+			"log.h": "c",
+			"netdb.h": "c",
+			"sindicato.h": "c",
+			"list.h": "c",
+			"socket.h": "c",
+			"client.h": "c"
 		}
 	}
 }

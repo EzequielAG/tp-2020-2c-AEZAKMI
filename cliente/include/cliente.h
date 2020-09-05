@@ -1,6 +1,5 @@
 #ifndef CLIENTE_H
 #define CLIENTE_H
-#include <stdio.h>
 #include <commons/log.h>
 #include <commons/config.h>
 #include <stdbool.h>

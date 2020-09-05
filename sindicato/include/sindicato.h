@@ -6,4 +6,7 @@
 #include "shared_utils.h"
 #include "server.h"
 #include "tests.h"
+
+void handler(t_result* resultado);
+
 #endif

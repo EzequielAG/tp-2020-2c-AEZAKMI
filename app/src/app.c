@@ -17,7 +17,7 @@ int main(void){
 
 void app_init(t_app_config** app_config, t_log** logger){
     *app_config = app_config_loader("./cfg/app.config");
-    *logger = log_create((*app_config)->ruta_log, "APP", true, LOG_LEVEL_INFO);
+    *logger = init_logger((*app_config)->ruta_log, "APP", LOG_LEVEL_INFO);
 }
 
 void app_finally(t_app_config* app_config, t_log* logger) {

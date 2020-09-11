@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
 
 void cliente_init(t_cliente_config** cliente_config, t_log** logger){
     *cliente_config = cliente_config_loader("./cfg/cliente.config");
-    *logger = log_create((*cliente_config)->ruta_log, "CLIENTE", true, LOG_LEVEL_INFO);
+    *logger = init_logger((*cliente_config)->ruta_log, "CLIENTE", LOG_LEVEL_INFO);
 }
 
 void cliente_finally(t_cliente_config* cliente_config, t_log* logger) {

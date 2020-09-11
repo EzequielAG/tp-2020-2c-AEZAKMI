@@ -2,11 +2,9 @@
 int main(int argc, char *argv[]){
     cliente_init(&cliente_config, &logger);
 
-    /*
     log_info(logger, "Soy el CLIENTE! %s", mi_funcion_compartida());
     char* mensaje[3] = {"Hola", "Como", "Va"};
     send_messages_and_return_socket("127.0.0.1", "6011", mensaje, 3);
-    */
 
     printf("Imprimiendo el path %s", cliente_config->ruta_log);
 

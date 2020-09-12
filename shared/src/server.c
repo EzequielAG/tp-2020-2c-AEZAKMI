@@ -150,6 +150,21 @@ void escuchar_socket_sin_conexion(int* socket_servidor, void (*f)(t_result*)){
 		serve_client(parametro);
 }
 
+int send_message_and_return_socket(char* ip, char* puerto, char* mensaje) {
+
+	int conexion;
+
+	conexion = crear_conexion(ip, puerto);
+
+	if (conexion == -1){
+		return conexion;
+	}
+
+	send_message_socket(conexion, mensaje);
+
+	return conexion;
+}
+
 int send_messages_and_return_socket(char* ip, char* puerto, char* mensajes[], int cantidadDeMensajes) {
 
 	int conexion;

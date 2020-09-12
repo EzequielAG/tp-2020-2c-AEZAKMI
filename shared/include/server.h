@@ -75,5 +75,6 @@ t_mensajes* receive_messages(int socket_cliente);
 void enviar_mensaje(char* mensaje, int socket_cliente);
 void send_messages_socket(int socket, char* mensajes[], int cantidadDeMensajes);
 char* recibir_mensaje(int socket_cliente);
+int send_message_and_return_socket(char* ip, char* puerto, char* mensaje);
 
 #endif /* CONEXIONES_H_ */

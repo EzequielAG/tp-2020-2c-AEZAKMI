@@ -11,7 +11,7 @@ int main(int argc, char *argv[]){
     if (argc < 2){
         printf("%s\n", "Debe indicar a qué modulo quiere conectarse");
         cliente_finally(cliente_config, logger);
-        return 0;
+        return -1;
     }
 
     t_modulo* modulo = get_modulo_by_name(argv[1]);
@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
     if (modulo == NULL){
         printf("%s\n", "El modulo indicado no existe");
         cliente_finally(cliente_config, logger);
-        return 0;
+        return -1;
     }
 
     int resultado = handshake(modulo);
@@ -27,13 +27,8 @@ int main(int argc, char *argv[]){
     if (resultado != 0){
         printf("%s\n", "No se pudo realizar la conexion con el cliente");
         cliente_finally(cliente_config, logger);
-        return 0;
+        return -1;
     }
-
-    char* mensaje[3] = {"Hola", "Como", "Va"};
-    send_messages_and_return_socket("127.0.0.1", "6011", mensaje, 3);
-
-    printf("Imprimiendo el path %s", cliente_config->ruta_log);
 
     cliente_finally(cliente_config, logger);
     return 0;
@@ -89,17 +84,16 @@ void cliente_destroy(t_cliente_config* cliente_config) {
 t_modulo* get_modulo_by_name(char* nombre_del_modulo){
     t_modulo* modulo = NULL;
     if (!strcmp(nombre_del_modulo, "app")){
-        modulo = crear_modulo(cliente_config->ip_app, cliente_config->puerto_app);
+        modulo = crear_modulo(cliente_config->ip_app, cliente_config->puerto_app, "app");
     }
     return modulo;
 }
 
-t_modulo * crear_modulo(char* ip, char* puerto){
+t_modulo * crear_modulo(char* ip, char* puerto, char* nombre){
     t_modulo* modulo = malloc(sizeof(t_modulo));
-    modulo->ip = string_new();
-    modulo->puerto = string_new();
-    string_append(&modulo->ip, ip);
-    string_append(&modulo->puerto, puerto);
+    modulo->ip = ip;
+    modulo->puerto = puerto;
+    modulo->nombre = nombre;
     return modulo;
 }
 
@@ -110,11 +104,13 @@ int handshake(t_modulo* modulo){
         return -1;
     }
 
-    char * mensaje = receive_message(socket);
+    char * mensaje = receive_simple_message(socket);
 
     if (mensaje == NULL){
         return -1;
     }
+
+    printf("El handshake con el modulo %s fue correcto\n", modulo->nombre);
 
     return 0;
 }

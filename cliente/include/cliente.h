@@ -26,6 +26,7 @@ typedef struct {
 typedef struct {
     char* ip;
     char* puerto;
+    char* nombre;
 } t_modulo;
 
 t_cliente_config* cliente_config;
@@ -37,7 +38,7 @@ void cliente_finally(t_cliente_config* cliente_config, t_log* logger);
 t_cliente_config* cliente_config_loader(char* path_config_file);
 void cliente_config_parser(t_config* config, t_cliente_config* cliente_config);
 void cliente_destroy(t_cliente_config* cliente_config);
-t_modulo * crear_modulo(char* ip, char* puerto);
+t_modulo * crear_modulo(char* ip, char* puerto, char* nombre);
 t_modulo* get_modulo_by_name(char* nombreDelModulo);
 int handshake(t_modulo* modulo);
 

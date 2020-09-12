@@ -3,16 +3,24 @@ int main(void){
 
     app_init(&app_config, &logger);
 
-    /*
-    log_info(logger, "Soy el app! %s", mi_funcion_compartida());
-    char* mensaje[3] = {"Hola", "Como", "Va"};
-    send_messages_and_return_socket("127.0.0.1", "6011", mensaje, 3);
-    */
-
     printf("Imprimiendo el path %s", app_config->ruta_log);
+
+    iniciar_servidor("127.0.0.1", "5004", handle_client);
 
     app_finally(app_config, logger);
     return 0;
+}
+
+void handle_client(t_result* result){
+    
+    if (result->operacion == MENSAJE){
+        if (!strcmp(result->mensaje, "HANDSHAKE")){
+            send_message_socket(result->socket, "OK");
+            liberar_conexion(result->socket);
+        }
+    }
+    
+    return;
 }
 
 void app_init(t_app_config** app_config, t_log** logger){

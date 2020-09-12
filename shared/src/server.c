@@ -313,6 +313,20 @@ char* receive_message(int socket_cliente)
 	return buffer;
 }
 
+char* receive_simple_message(int socket_cliente){
+	int cod_op;
+	char* buffer = NULL;
+	int size;
+	if(recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) == -1){
+		return buffer;
+	}
+	recv(socket_cliente, &size, sizeof(int), MSG_WAITALL);
+	buffer = malloc(sizeof(char)*size);
+	recv(socket_cliente, buffer, size, MSG_WAITALL);
+	return buffer;
+}
+
+
 t_mensajes* receive_messages(int socket_cliente)
 {
 	int* size = malloc(sizeof(int));

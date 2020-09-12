@@ -15,5 +15,5 @@ if [[ ! -e cfg/$FILE.log ]]; then
 fi
 
 if test -f "./bin/$FILE"; then
-    ./bin/$FILE $1 $2 $3 $4 $5
+    ./bin/$FILE $1
 fi

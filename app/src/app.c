@@ -42,7 +42,7 @@ void app_config_parser(t_config* config, t_app_config* app_config) {
     app_config->puerto_escucha = strdup(config_get_string_value(config, "PUERTO_ESCUCHA"));
     app_config->grado_multiprocesamiento = config_get_int_value(config, "GRADO_DE_MULTIPROCESAMIENTO");
     app_config->algoritmo_planificacion = strdup(config_get_string_value(config, "ALGORITMO_DE_PLANIFICACION"));
-    app_config->alpha = config_get_double_value(configuracion_get(), "ALPHA");
+    app_config->alpha = config_get_double_value(config, "ALPHA");
     app_config->estimacion_inicial = config_get_int_value(config, "ESTIMACION_INICIAL");
     app_config->repartidores = config_get_int_value(config, "REPARTIDORES");
     app_config->frecuencia_descanso = config_get_int_value(config, "FRECUENCIA_DE_DESCANSO");
@@ -57,16 +57,7 @@ void app_destroy(t_app_config* app_config) {
     free(app_config->ip_comanda);
     free(app_config->puerto_comanda);
     free(app_config->puerto_escucha);
-    free(app_config->grado_multiprocesamiento);
     free(app_config->algoritmo_planificacion);
-    //free(app_config->alpha);
-    free(app_config->estimacion_inicial);
-    free(app_config->repartidores);
-    free(app_config->frecuencia_descanso);
-    free(app_config->tiempo_descanso);
     free(app_config->ruta_log);
-    free(app_config->platos_default);
-    free(app_config->posicion_rest_default_x);
-    free(app_config->posicion_rest_default_y);
     free(app_config);
 }

@@ -30,8 +30,26 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
+    enviar_mensaje_consultar_restaurantes(modulo);
+    
+
+
     cliente_finally(cliente_config, logger);
     return 0;
+}
+
+void enviar_mensaje_consultar_restaurantes(t_modulo* modulo){
+    
+    char* tipo_mensaje = string_itoa(consultar_restaurantes);
+    char* get_restaurantes[1] = {tipo_mensaje};
+    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, get_restaurantes, 1);
+
+    t_mensajes* respuesta = receive_simple_messages(socket);
+
+    for (int i= 0; i < *respuesta->size; i++){
+        printf("%s ", respuesta->mensajes[i]);
+    }
+    printf("\n");
 }
 
 void cliente_init(t_cliente_config** cliente_config, t_log** logger){

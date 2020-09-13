@@ -344,6 +344,26 @@ t_mensajes* receive_messages(int socket_cliente)
 	return mensajes;
 }
 
+t_mensajes* receive_simple_messages(int socket_cliente){
+	int size;
+	int cod_op;
+	t_mensajes* mensajes = NULL;
+	if(recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) == -1){
+		return mensajes;
+	}
+	mensajes = malloc(sizeof(t_mensajes));
+	mensajes->size = malloc(sizeof(int));
+	recv(socket_cliente, mensajes->size, sizeof(int), MSG_WAITALL);
+	mensajes->mensajes = malloc(sizeof(char) * *mensajes->size);
+	for(int i = 0; i < *mensajes->size; i++){
+		recv(socket_cliente, &size, sizeof(int), MSG_WAITALL);
+		mensajes->mensajes[i] = malloc(size * sizeof(char));
+		recv(socket_cliente, mensajes->mensajes[i], size, MSG_WAITALL);
+	}
+
+	return mensajes;
+}
+
 void liberar_conexion(int socket_cliente)
 {
 	close(socket_cliente);

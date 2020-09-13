@@ -3,8 +3,10 @@
 #include <commons/log.h>
 #include <commons/config.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "shared_utils.h"
 #include "server.h"
+#include "api.h"
 #include "tests.h"
 
 // VARIABLES Y ESTRUCTURAS
@@ -34,5 +36,6 @@ void app_finally(t_app_config* app_config, t_log* logger);
 t_app_config* app_config_loader(char* path_config_file);
 void app_config_parser(t_config* config, t_app_config* app_config);
 void app_destroy(t_app_config* app_config);
+void handle_consultar_restaurantes(int socket);
 
 #endif

@@ -30,7 +30,11 @@
 			"sindicato.h": "c",
 			"list.h": "c",
 			"socket.h": "c",
-			"client.h": "c"
+			"client.h": "c",
+			"shared_utils.h": "c",
+			"app.h": "c",
+			"tests.h": "c",
+			"stdbool.h": "c"
 		}
 	}
 }

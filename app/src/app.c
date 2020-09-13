@@ -18,9 +18,25 @@ void handle_client(t_result* result){
             send_message_socket(result->socket, "OK");
             liberar_conexion(result->socket);
         }
-    }
+    } else {
+        if (result->operacion == MENSAJES){
+            int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
+            if (tipo_mensaje == consultar_restaurantes){
+                handle_consultar_restaurantes(result->socket);
+            }
+        }
+    }    
     
     return;
+}
+
+void handle_consultar_restaurantes(int socket){
+
+    //TODO: Cambiar para leer los restaurantes reales
+    char* respuesta[1] = {"[Restaurante1, Restaurante2, Restaurante3]"};
+
+    send_messages_socket(socket, respuesta, 1);
+    liberar_conexion(socket);
 }
 
 void app_init(t_app_config** app_config, t_log** logger){

@@ -23,11 +23,33 @@ void handle_client(t_result* result){
             int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
             if (tipo_mensaje == consultar_restaurantes){
                 handle_consultar_restaurantes(result->socket);
+            } else if (tipo_mensaje == seleccionar_restaurante){
+                handle_seleccionar_restaurante(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
             }
         }
     }    
     
     return;
+}
+
+void handle_seleccionar_restaurante(int socket, char* restaurante, char* cliente){
+
+    //TODO: Cambiar para leer los restaurantes reales
+    char* respuesta[1];
+
+    if (relacionar(restaurante, cliente)){
+        respuesta[0] = "Ok";
+    } else {
+        respuesta[0] = "Fail";
+    }
+
+    send_messages_socket(socket, respuesta, 1);
+    liberar_conexion(socket);
+}
+
+int relacionar(char* restaurante, char* cliente){
+    //TODO hacer que se relacionen el cliente y el restaurante, devolver 0 ante error
+    return 1;
 }
 
 void handle_consultar_restaurantes(int socket){

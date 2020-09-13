@@ -43,5 +43,6 @@ t_modulo * crear_modulo(char* ip, char* puerto, char* nombre);
 t_modulo* get_modulo_by_name(char* nombreDelModulo);
 int handshake(t_modulo* modulo);
 void enviar_mensaje_consultar_restaurantes(t_modulo* modulo);
+void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* restaurante);
 
 #endif

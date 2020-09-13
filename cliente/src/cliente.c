@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
 
     enviar_mensaje_consultar_restaurantes(modulo);
     
-
+    enviar_mensaje_seleccionar_restaurante(modulo, "Restaurante1");
 
     cliente_finally(cliente_config, logger);
     return 0;
@@ -43,6 +43,22 @@ void enviar_mensaje_consultar_restaurantes(t_modulo* modulo){
     char* tipo_mensaje = string_itoa(consultar_restaurantes);
     char* get_restaurantes[1] = {tipo_mensaje};
     int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, get_restaurantes, 1);
+
+    t_mensajes* respuesta = receive_simple_messages(socket);
+
+    for (int i= 0; i < *respuesta->size; i++){
+        printf("%s ", respuesta->mensajes[i]);
+    }
+    printf("\n");
+}
+
+void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* restaurante){
+    
+    char* tipo_mensaje = string_itoa(seleccionar_restaurante);
+
+    //TODO: Definir como se elige el ID del cliente
+    char* seleccionar_restaurantes[3] = {tipo_mensaje, restaurante, "Cliente 1"};
+    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, seleccionar_restaurantes, 3);
 
     t_mensajes* respuesta = receive_simple_messages(socket);
 

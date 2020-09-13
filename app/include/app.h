@@ -37,5 +37,7 @@ t_app_config* app_config_loader(char* path_config_file);
 void app_config_parser(t_config* config, t_app_config* app_config);
 void app_destroy(t_app_config* app_config);
 void handle_consultar_restaurantes(int socket);
+int relacionar(char* restaurante, char* cliente);
+void handle_seleccionar_restaurante(int socket, char* restaurante, char* cliente);
 
 #endif

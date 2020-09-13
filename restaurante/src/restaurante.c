@@ -1,4 +1,5 @@
 #include "restaurante.h"
+
 int main(void){
 //ESTE VA A ACTUAR DE SERVER
     restaurante_init(&restaurante_config, &logger);
@@ -51,4 +52,21 @@ void restaurante_destroy(t_restaurante_config* restaurante_config) {
     free(restaurante_config->algoritmo_planificador);
     free(restaurante_config->nombre_restaurante);
     free(restaurante_config);
+}
+
+int obtener_id_pedido(){
+    //TODO: Obtener un id de pedido unico para la instancia del restaurante
+    int id_pedido = 435;
+    return id_pedido;
+}
+
+void handle_crear_pedido(int socket){
+
+    int id_pedido = obtener_id_pedido();
+    char* respuesta[1];
+
+    respuesta[0] = string_itoa(id_pedido);
+
+    send_messages_socket(socket, respuesta, 1);
+    liberar_conexion(socket);
 }

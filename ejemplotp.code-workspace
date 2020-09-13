@@ -34,7 +34,9 @@
 			"shared_utils.h": "c",
 			"app.h": "c",
 			"tests.h": "c",
-			"stdbool.h": "c"
+			"stdbool.h": "c",
+			"config.h": "c",
+			"restaurante.h": "c"
 		}
 	}
 }

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <commons/log.h>
 #include <commons/config.h>
+#include <commons/string.h>
 #include <stdbool.h>
 #include "shared_utils.h"
 #include "server.h"
@@ -30,5 +31,7 @@ void restaurante_finally(t_restaurante_config* restaurante_config, t_log* logger
 t_restaurante_config* restaurante_config_loader(char* path_config_file);
 void restaurante_config_parser(t_config* config, t_restaurante_config* restaurante_config);
 void restaurante_destroy(t_restaurante_config* restaurante_config);
+int obtener_id_pedido();
+void handle_crear_pedido(int socket);
 
 #endif

@@ -33,6 +33,8 @@ int main(int argc, char *argv[]){
     enviar_mensaje_consultar_restaurantes(modulo);
     
     enviar_mensaje_seleccionar_restaurante(modulo, "Restaurante1");
+    
+    enviar_mensaje_crear_pedido(modulo);
 
     cliente_finally(cliente_config, logger);
     return 0;
@@ -66,6 +68,18 @@ void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* restaurante)
         printf("%s ", respuesta->mensajes[i]);
     }
     printf("\n");
+}
+
+void enviar_mensaje_crear_pedido(t_modulo* modulo){
+
+    char* tipo_mensaje = string_itoa(crear_pedido);
+    char* crear_pedido_mensajes[1] = {tipo_mensaje};
+    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, crear_pedido_mensajes, 1);
+
+    t_mensajes* respuesta = receive_simple_messages(socket);
+
+    char* id_pedido = respuesta->mensajes[0];
+    printf("%s\n", id_pedido);
 }
 
 void cliente_init(t_cliente_config** cliente_config, t_log** logger){

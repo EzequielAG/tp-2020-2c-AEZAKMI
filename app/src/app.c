@@ -25,11 +25,30 @@ void handle_client(t_result* result){
                 handle_consultar_restaurantes(result->socket);
             } else if (tipo_mensaje == seleccionar_restaurante){
                 handle_seleccionar_restaurante(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
+            } else if (tipo_mensaje == crear_pedido){
+                handle_crear_pedido(result->socket);
             }
         }
     }    
     
     return;
+}
+
+void handle_crear_pedido(int socket){
+
+    int id_pedido = obtener_id_pedido();
+    char* respuesta[1];
+
+    respuesta[0] = string_itoa(id_pedido);
+
+    send_messages_socket(socket, respuesta, 1);
+    liberar_conexion(socket);
+}
+
+int obtener_id_pedido(){
+    //TODO: Obtener un id de pedido, enviando un mensaje al restaurante
+    int id_pedido = 435;
+    return id_pedido;
 }
 
 void handle_seleccionar_restaurante(int socket, char* restaurante, char* cliente){

@@ -2,6 +2,7 @@
 #define APP_H
 #include <commons/log.h>
 #include <commons/config.h>
+#include <commons/string.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include "shared_utils.h"
@@ -39,5 +40,7 @@ void app_destroy(t_app_config* app_config);
 void handle_consultar_restaurantes(int socket);
 int relacionar(char* restaurante, char* cliente);
 void handle_seleccionar_restaurante(int socket, char* restaurante, char* cliente);
+int obtener_id_pedido();
+void handle_crear_pedido(int socket);
 
 #endif

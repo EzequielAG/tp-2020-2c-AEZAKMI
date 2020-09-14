@@ -3,10 +3,12 @@
 #include <stdio.h>
 #include <commons/log.h>
 #include <commons/config.h>
+#include <commons/string.h>
 #include <stdbool.h>
 #include "shared_utils.h"
 #include "server.h"
 #include "tests.h"
+#include "api.h"
 
 // VARIABLES Y ESTRUCTURAS
 typedef struct {
@@ -28,5 +30,8 @@ void comanda_finally(t_comanda_config* comanda_config, t_log* logger);
 t_comanda_config* comanda_config_loader(char* path_config_file);
 void comanda_config_parser(t_config* config, t_comanda_config* comanda_config);
 void comanda_destroy(t_comanda_config* comanda_config);
+void handle_client(t_result* result);
+int guardar_pedido_en_memoria(char* restaurante, char* id_pedido);
+void handle_guardar_pedidos(int socket, char* restaurante, char* id_pedido);
 
 #endif

@@ -4,6 +4,9 @@ int main(int argc, char *argv[]){
 
     printf("Imprimiendo el path %s", comanda_config->ruta_log);
 
+    //HACER QUE ESTO SEA configurable desde archivo
+    iniciar_servidor("127.0.0.1", "5001", handle_client);
+
     comanda_finally(comanda_config, logger);
     return 0;
 }
@@ -44,4 +47,44 @@ void comanda_destroy(t_comanda_config* comanda_config) {
     free(comanda_config->algoritmo_reemplazo);
     free(comanda_config->ruta_log);
     free(comanda_config);
+}
+
+void handle_client(t_result* result){
+    
+    if (result->operacion == MENSAJE){
+        if (!strcmp(result->mensaje, "HANDSHAKE")){
+            send_message_socket(result->socket, "OK");
+            liberar_conexion(result->socket);
+        }
+    } else {
+        if (result->operacion == MENSAJES){
+            int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
+            if (tipo_mensaje == guardar_pedido){
+                handle_guardar_pedidos(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
+            } 
+        }
+    }    
+    
+    return;
+}
+
+
+void handle_guardar_pedidos(int socket, char* restaurante, char* id_pedido){
+    
+    char* respuesta[1];
+
+    if (guardar_pedido_en_memoria(restaurante, id_pedido)){
+        respuesta[0] = "Ok";
+    } else {
+        respuesta[0] = "Fail";
+    }
+
+    send_messages_socket(socket, respuesta, 1);
+    liberar_conexion(socket);
+}
+
+int guardar_pedido_en_memoria(char* restaurante, char* id_pedido){
+    //TODO: Guardar pedido en memoria, 1 OK 0 FAIL
+    
+    return 1;
 }

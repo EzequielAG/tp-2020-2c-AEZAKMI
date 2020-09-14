@@ -36,7 +36,9 @@
 			"tests.h": "c",
 			"stdbool.h": "c",
 			"config.h": "c",
-			"restaurante.h": "c"
+			"restaurante.h": "c",
+			"api.h": "c",
+			"comanda.h": "c"
 		}
 	}
 }

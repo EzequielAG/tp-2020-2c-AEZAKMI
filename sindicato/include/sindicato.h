@@ -7,6 +7,7 @@
 #include "shared_utils.h"
 #include "server.h"
 #include "tests.h"
+#include "api.h"
 
 // VARIABLES Y ESTRUCTURAS
 typedef struct {
@@ -24,6 +25,8 @@ void sindicato_finally(t_sindicato_config* sindicato_config, t_log* logger);
 t_sindicato_config* sindicato_config_loader(char* path_config_file);
 void sindicato_config_parser(t_config* config, t_sindicato_config* sindicato_config);
 void sindicato_destroy(t_sindicato_config* sindicato_config);
-void handler(t_result* resultado);
+int guardar_pedido_en_afip(char* restaurante, char* id_pedido);
+void handle_guardar_pedidos(int socket, char* restaurante, char* id_pedido);
+void handle_client(t_result* result);
 
 #endif

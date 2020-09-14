@@ -24,12 +24,6 @@ typedef struct {
     int posicion_y;
 } t_cliente_config;
 
-typedef struct {
-    char* ip;
-    char* puerto;
-    char* nombre;
-} t_modulo;
-
 t_cliente_config* cliente_config;
 t_log* logger;
 

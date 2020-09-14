@@ -30,11 +30,27 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
+    //TODO: HACER LA INTERFAZ DE USUARIO PARA HACER ESTOsrc/cliente.c:48:14: warning: unused variable ‘modulo_sindicato’ [-Wunused-variable]
+
     enviar_mensaje_consultar_restaurantes(modulo);
     
     enviar_mensaje_seleccionar_restaurante(modulo, "Restaurante1");
     
     enviar_mensaje_crear_pedido(modulo);
+
+    t_modulo modulo_comanda;
+    modulo_comanda.ip = cliente_config->ip_comanda;
+    modulo_comanda.puerto = cliente_config->puerto_comanda;
+    modulo_comanda.nombre = "Comanda";
+
+    enviar_mensaje_guardar_pedido(&modulo_comanda, "Restaurante1", "532");
+
+    t_modulo modulo_sindicato;
+    modulo_sindicato.ip = cliente_config->ip_sindicato;
+    modulo_sindicato.puerto = cliente_config->puerto_sindicato;
+    modulo_sindicato.nombre = "Sindicato";
+
+    enviar_mensaje_guardar_pedido(&modulo_sindicato, "Restaurante1", "532");
 
     cliente_finally(cliente_config, logger);
     return 0;
@@ -52,6 +68,8 @@ void enviar_mensaje_consultar_restaurantes(t_modulo* modulo){
         printf("%s ", respuesta->mensajes[i]);
     }
     printf("\n");
+
+    liberar_conexion(socket);
 }
 
 void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* restaurante){
@@ -68,6 +86,8 @@ void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* restaurante)
         printf("%s ", respuesta->mensajes[i]);
     }
     printf("\n");
+
+    liberar_conexion(socket);
 }
 
 void enviar_mensaje_crear_pedido(t_modulo* modulo){
@@ -80,6 +100,8 @@ void enviar_mensaje_crear_pedido(t_modulo* modulo){
 
     char* id_pedido = respuesta->mensajes[0];
     printf("%s\n", id_pedido);
+
+    liberar_conexion(socket);
 }
 
 void cliente_init(t_cliente_config** cliente_config, t_log** logger){

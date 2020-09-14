@@ -1,3 +1,8 @@
+#ifndef API_H
+#define API_H
+#include "server.h"
+#include <commons/string.h>
+
 typedef enum tipo_mensaje{
     consultar_restaurantes = 1,
     seleccionar_restaurante = 2,
@@ -13,3 +18,14 @@ typedef enum tipo_mensaje{
     terminar_pedido = 12,
     obtener_receta = 13
 } tipo_mensaje_t;
+
+typedef struct {
+    char* ip;
+    char* puerto;
+    char* nombre;
+} t_modulo;
+
+
+void enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido);
+
+#endif

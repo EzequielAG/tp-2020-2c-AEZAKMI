@@ -67,6 +67,14 @@ void handle_crear_pedido(int socket){
 
     respuesta[0] = string_itoa(id_pedido);
 
+    t_modulo modulo_sindicato;
+    modulo_sindicato.ip = restaurante_config->ip_sindicato;
+    modulo_sindicato.puerto = restaurante_config->puerto_sindicato;
+    modulo_sindicato.nombre = "Comanda";
+
+    //TODO: De donde saco el restaurante?
+    enviar_mensaje_guardar_pedido(&modulo_sindicato, "Restaurante1", respuesta[0]);
+
     send_messages_socket(socket, respuesta, 1);
     liberar_conexion(socket);
 }

@@ -8,6 +8,7 @@
 #include "shared_utils.h"
 #include "server.h"
 #include "tests.h"
+#include "api.h"
 
 // VARIABLES Y ESTRUCTURAS
 typedef struct {

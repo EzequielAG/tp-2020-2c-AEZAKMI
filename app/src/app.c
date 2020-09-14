@@ -37,9 +37,17 @@ void handle_client(t_result* result){
 void handle_crear_pedido(int socket){
 
     int id_pedido = obtener_id_pedido();
-    char* respuesta[1];
+    
+    t_modulo modulo_comanda;
+    modulo_comanda.ip = app_config->ip_comanda;
+    modulo_comanda.puerto = app_config->puerto_comanda;
+    modulo_comanda.nombre = "Comanda";
 
+    char* respuesta[1];
     respuesta[0] = string_itoa(id_pedido);
+
+    //TODO: De donde saco el restaurante?
+    enviar_mensaje_guardar_pedido(&modulo_comanda, "Restaurante1", respuesta[0]);
 
     send_messages_socket(socket, respuesta, 1);
     liberar_conexion(socket);

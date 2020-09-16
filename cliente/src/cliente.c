@@ -32,76 +32,37 @@ int main(int argc, char *argv[]){
 
     //TODO: HACER LA INTERFAZ DE USUARIO PARA HACER ESTOsrc/cliente.c:48:14: warning: unused variable ‘modulo_sindicato’ [-Wunused-variable]
 
-    enviar_mensaje_consultar_restaurantes(modulo);
+
+    enviar_mensaje_obtener_restaurante(modulo, "RESTAURANTE1");
+
+//   enviar_mensaje_consultar_restaurantes(modulo);
+
+  //  sleep(3);
     
-    enviar_mensaje_seleccionar_restaurante(modulo, "Restaurante1");
+ //  enviar_mensaje_seleccionar_restaurante(modulo, "Restaurante1");
     
-    enviar_mensaje_crear_pedido(modulo);
+   // sleep(3);
+
+ // enviar_mensaje_crear_pedido(modulo);
+
+    sleep(3);
 
     t_modulo modulo_comanda;
     modulo_comanda.ip = cliente_config->ip_comanda;
     modulo_comanda.puerto = cliente_config->puerto_comanda;
     modulo_comanda.nombre = "Comanda";
 
-    enviar_mensaje_guardar_pedido(&modulo_comanda, "Restaurante1", "532");
+//    enviar_mensaje_guardar_pedido(&modulo_comanda, "Restaurante1", "532");
 
     t_modulo modulo_sindicato;
     modulo_sindicato.ip = cliente_config->ip_sindicato;
     modulo_sindicato.puerto = cliente_config->puerto_sindicato;
     modulo_sindicato.nombre = "Sindicato";
 
-    enviar_mensaje_guardar_pedido(&modulo_sindicato, "Restaurante1", "532");
+//    enviar_mensaje_guardar_pedido(&modulo_sindicato, "Restaurante1", "532");
 
     cliente_finally(cliente_config, logger);
     return 0;
-}
-
-void enviar_mensaje_consultar_restaurantes(t_modulo* modulo){
-    
-    char* tipo_mensaje = string_itoa(consultar_restaurantes);
-    char* get_restaurantes[1] = {tipo_mensaje};
-    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, get_restaurantes, 1);
-
-    t_mensajes* respuesta = receive_simple_messages(socket);
-
-    for (int i= 0; i < *respuesta->size; i++){
-        printf("%s ", respuesta->mensajes[i]);
-    }
-    printf("\n");
-
-    liberar_conexion(socket);
-}
-
-void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* restaurante){
-    
-    char* tipo_mensaje = string_itoa(seleccionar_restaurante);
-
-    //TODO: Definir como se elige el ID del cliente
-    char* seleccionar_restaurantes[3] = {tipo_mensaje, restaurante, "Cliente 1"};
-    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, seleccionar_restaurantes, 3);
-
-    t_mensajes* respuesta = receive_simple_messages(socket);
-
-    for (int i= 0; i < *respuesta->size; i++){
-        printf("%s ", respuesta->mensajes[i]);
-    }
-    printf("\n");
-
-    liberar_conexion(socket);
-}
-
-void enviar_mensaje_crear_pedido(t_modulo* modulo){
-
-    char* tipo_mensaje = string_itoa(crear_pedido);
-    char* crear_pedido_mensajes[1] = {tipo_mensaje};
-    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, crear_pedido_mensajes, 1);
-
-    t_mensajes* respuesta = receive_simple_messages(socket);
-
-    char* id_pedido = respuesta->mensajes[0];
-    printf("%s\n", id_pedido);
-
-    liberar_conexion(socket);
 }
 
 void cliente_init(t_cliente_config** cliente_config, t_log** logger){
@@ -155,9 +116,16 @@ t_modulo* get_modulo_by_name(char* nombre_del_modulo){
     t_modulo* modulo = NULL;
     if (!strcmp(nombre_del_modulo, "app")){
         modulo = crear_modulo(cliente_config->ip_app, cliente_config->puerto_app, "app");
+    } else if (!strcmp(nombre_del_modulo, "sindicato")){
+        modulo = crear_modulo(cliente_config->ip_sindicato, cliente_config->puerto_sindicato, "sindicato");
+    } else if (!strcmp(nombre_del_modulo, "comanda")){
+        modulo = crear_modulo(cliente_config->ip_comanda, cliente_config->puerto_comanda, "comanda");
+    } else if (!strcmp(nombre_del_modulo, "restaurante")){
+        modulo = crear_modulo(cliente_config->ip_restaurante, cliente_config->puerto_restaurante, "restaurante");
     }
     return modulo;
 }
+
 
 t_modulo * crear_modulo(char* ip, char* puerto, char* nombre){
     t_modulo* modulo = malloc(sizeof(t_modulo));
@@ -169,7 +137,7 @@ t_modulo * crear_modulo(char* ip, char* puerto, char* nombre){
 
 int handshake(t_modulo* modulo){
     int socket = send_message_and_return_socket(modulo->ip, modulo->puerto, "HANDSHAKE");
-
+    
     if (socket == -1){
         return -1;
     }

@@ -14,9 +14,11 @@ typedef enum tipo_mensaje{
     guardar_plato = 8,
     confirmar_pedido = 9,
     plato_listo = 10,
-    finalizar_pedido = 11,
-    terminar_pedido = 12,
-    obtener_receta = 13
+    consultar_pedido = 11,
+    obtener_pedido = 12,
+    finalizar_pedido = 13,
+    terminar_pedido = 14,
+    obtener_receta = 15
 } tipo_mensaje_t;
 
 typedef struct {
@@ -26,6 +28,22 @@ typedef struct {
 } t_modulo;
 
 
+
+void enviar_mensaje_consultar_restaurantes(t_modulo* modulo);
+void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* restaurante);
+void enviar_mensaje_obtener_restaurante(t_modulo* modulo, char* restaurante);
+void enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante);
+void enviar_mensaje_crear_pedido(t_modulo* modulo);
 void enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido);
+void enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido);
+void enviar_mensaje_guardar_plato(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida, char* cantidad);
+void enviar_mensaje_confirmar_pedido(t_modulo* modulo,char* id_pedido, char* restaurante);
+void enviar_mensaje_plato_listo(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida);
+void enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido);
+void enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
+void enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
+void enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
+void enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
+
 
 #endif

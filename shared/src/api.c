@@ -1,5 +1,49 @@
 #include "api.h"
 
+
+
+void leer_consola(t_log* logger,t_modulo* modulo) {
+	char* leido = readline(">");
+
+	while(strncmp(leido, "", 1) != 0) {
+		log_info(logger, leido);
+        enviar_mensajes_por_consola(modulo, leido);
+		free(leido);
+		leido = readline(">");
+	}
+
+	free(leido);
+}
+
+void enviar_mensajes_por_consola(t_modulo* modulo, char* mensaje_completo){
+
+    char** string_prueba = NULL;
+    
+
+
+    if(string_starts_with(mensaje_completo, "guardar_pedido")){
+      
+        string_prueba = string_split(mensaje_completo, " ");
+        enviar_mensaje_guardar_pedido(modulo,string_prueba[1],string_prueba[2]);
+        free(string_prueba);
+
+    }else if(string_starts_with(mensaje_completo, "consultar_restaurantes")){
+        
+        enviar_mensaje_consultar_restaurantes(modulo);
+
+   } else if(string_starts_with(mensaje_completo, "seleccionar_restaurante")){
+        
+        string_prueba = string_split(mensaje_completo, " ");
+        enviar_mensaje_seleccionar_restaurante(modulo, string_prueba[1]);
+        free(string_prueba);
+    }
+
+
+}
+
+
+
+
 void enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido){
     char* tipo_mensaje = string_itoa(guardar_pedido);
 

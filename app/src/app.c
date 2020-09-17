@@ -3,8 +3,6 @@ int main(void){
 
     app_init(&app_config, &logger);
 
-    printf("Imprimiendo el path %s", app_config->ruta_log);
-
     iniciar_servidor("127.0.0.1", "5004", handle_client);
 
     app_finally(app_config, logger);

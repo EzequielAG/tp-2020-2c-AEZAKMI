@@ -1,8 +1,11 @@
 #include "cliente.h"
+
 int main(int argc, char *argv[]){
 
     cliente_init(&cliente_config, &logger);
     log_info(logger, "Soy el CLIENTE! %s", mi_funcion_compartida());
+    
+   
 
     for (int i = 0; i < argc; i++){
         printf("%s\n", argv[i]);
@@ -30,38 +33,44 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
+    t_modulo modulo_app;
+    modulo_app.ip = cliente_config->ip_app;
+    modulo_app.puerto = cliente_config->puerto_app;
+    modulo_app.nombre = "App";
+
+
+
+     leer_consola(logger,&modulo_app);
+
     //TODO: HACER LA INTERFAZ DE USUARIO PARA HACER ESTOsrc/cliente.c:48:14: warning: unused variable ‘modulo_sindicato’ [-Wunused-variable]
 
 
-    enviar_mensaje_obtener_restaurante(modulo, "RESTAURANTE1");
 
-//   enviar_mensaje_consultar_restaurantes(modulo);
 
-  //  sleep(3);
-    
- //  enviar_mensaje_seleccionar_restaurante(modulo, "Restaurante1");
-    
-   // sleep(3);
 
- // enviar_mensaje_crear_pedido(modulo);
 
-    sleep(3);
+ 
 
-    t_modulo modulo_comanda;
+
+/*    t_modulo modulo_comanda;
     modulo_comanda.ip = cliente_config->ip_comanda;
     modulo_comanda.puerto = cliente_config->puerto_comanda;
     modulo_comanda.nombre = "Comanda";
-
-//    enviar_mensaje_guardar_pedido(&modulo_comanda, "Restaurante1", "532");
 
     t_modulo modulo_sindicato;
     modulo_sindicato.ip = cliente_config->ip_sindicato;
     modulo_sindicato.puerto = cliente_config->puerto_sindicato;
     modulo_sindicato.nombre = "Sindicato";
 
-//    enviar_mensaje_guardar_pedido(&modulo_sindicato, "Restaurante1", "532");
+    t_modulo modulo_restaurante;
+    modulo_restaurante.ip = cliente_config->ip_restaurante;
+    modulo_restaurante.puerto = cliente_config->puerto_restaurante;
+    modulo_restaurante.nombre = "Restaurante";
+
+*/
 
     cliente_finally(cliente_config, logger);
+
     return 0;
 }
 
@@ -137,7 +146,7 @@ t_modulo * crear_modulo(char* ip, char* puerto, char* nombre){
 
 int handshake(t_modulo* modulo){
     int socket = send_message_and_return_socket(modulo->ip, modulo->puerto, "HANDSHAKE");
-    
+
     if (socket == -1){
         return -1;
     }

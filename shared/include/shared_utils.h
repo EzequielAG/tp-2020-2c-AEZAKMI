@@ -9,6 +9,8 @@
 // VARIABLES Y ESTRUCTURAS
 
 
+
+
 // FUNCIONES
 char* mi_funcion_compartida();
 t_log* init_logger(char* path_logger, char* module_name, t_log_level log_level);

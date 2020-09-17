@@ -21,12 +21,16 @@ typedef enum tipo_mensaje{
     obtener_receta = 15
 } tipo_mensaje_t;
 
+
 typedef struct {
     char* ip;
     char* puerto;
     char* nombre;
 } t_modulo;
 
+
+void leer_consola(t_log* logger,t_modulo* modulo);
+void enviar_mensajes_por_consola(t_modulo* modulo, char* mensaje_completo);
 
 
 void enviar_mensaje_consultar_restaurantes(t_modulo* modulo);

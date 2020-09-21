@@ -1,7 +1,7 @@
 #include "cliente.h"
 
 int main(int argc, char *argv[]){
-
+    
     cliente_init(&cliente_config, &logger);
     log_info(logger, "Soy el CLIENTE! %s", mi_funcion_compartida());
     
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
 
      leer_consola(logger,&modulo_app);
 
-    //TODO: HACER LA INTERFAZ DE USUARIO PARA HACER ESTOsrc/cliente.c:48:14: warning: unused variable ‘modulo_sindicato’ [-Wunused-variable]
+    //TODO: HACER LA INTERFAZ DE USUARIO PARA HACER ESTO
 
 
 
@@ -106,6 +106,8 @@ void cliente_config_parser(t_config* config, t_cliente_config* cliente_config) {
     cliente_config->ruta_log = strdup(config_get_string_value(config, "ARCHIVO_LOG"));
     cliente_config->posicion_x = config_get_int_value(config, "POCISION_X");
     cliente_config->posicion_y = config_get_int_value(config, "POCISION_Y");
+    cliente_config->id_cliente = strdup(config_get_string_value(config, "ID_CLIENTE"));
+    
 }
 
 void cliente_destroy(t_cliente_config* cliente_config) {
@@ -118,6 +120,7 @@ void cliente_destroy(t_cliente_config* cliente_config) {
     free(cliente_config->ip_app);
     free(cliente_config->puerto_app);
     free(cliente_config->ruta_log);
+    free(cliente_config->id_cliente);
     free(cliente_config);
 }
 
@@ -145,7 +148,10 @@ t_modulo * crear_modulo(char* ip, char* puerto, char* nombre){
 }
 
 int handshake(t_modulo* modulo){
-    int socket = send_message_and_return_socket(modulo->ip, modulo->puerto, "HANDSHAKE");
+
+    char* mensajes[2] = {string_itoa(handshake_cliente), cliente_config->id_cliente};
+
+    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, mensajes, 2);
 
     if (socket == -1){
         return -1;
@@ -159,5 +165,33 @@ int handshake(t_modulo* modulo){
 
     printf("El handshake con el modulo %s fue correcto\n", modulo->nombre);
 
+    escuchar_mensajes_socket_desacoplado(socket);
+
     return 0;
+}
+
+void escuchar_mensajes_socket_desacoplado(int socket){
+    
+    pthread_t thread;
+    t_parameter* parametro = malloc(sizeof(t_parameter));
+
+	parametro->socket = socket;
+	parametro->f = handle_client;
+
+	pthread_create(&thread,NULL,(void*)escuchar_mensajes_socket, parametro);
+	pthread_detach(thread);
+
+}
+
+void escuchar_mensajes_socket(t_parameter* parametro){
+    escuchar_socket(&parametro->socket, parametro->f);
+}
+
+void handle_client(t_result* result){
+
+    for(int i = 0; i < *result->mensajes->size; i++){
+        printf("%s", result->mensajes->mensajes[i]);
+    }
+    printf("\n");
+
 }

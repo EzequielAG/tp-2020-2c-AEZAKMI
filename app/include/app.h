@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "shared_utils.h"
 #include "server.h"
+#include "list.h"
 #include "api.h"
 #include "tests.h"
 
@@ -28,8 +29,14 @@ typedef struct {
     int posicion_rest_default_y;
 } t_app_config;
 
+typedef struct {
+    int socket;
+    char* id_cliente;
+} t_cliente;
+
 t_app_config* app_config;
 t_log* logger;
+List lista_clientes;
 
 // FUNCIONES
 void app_init(t_app_config** app_config, t_log** logger);
@@ -42,5 +49,7 @@ int relacionar(char* restaurante, char* cliente);
 void handle_seleccionar_restaurante(int socket, char* restaurante, char* cliente);
 int obtener_id_pedido();
 void handle_crear_pedido(int socket);
+t_cliente* buscar_cliente_lista(char* id_cliente);
+void handle_handshake_cliente(int socket, char* id_cliente);
 
 #endif

@@ -22,6 +22,7 @@ typedef struct {
     char* ruta_log;
     int posicion_x;
     int posicion_y;
+    char* id_cliente;
 } t_cliente_config;
 
 t_cliente_config* cliente_config;
@@ -36,5 +37,8 @@ void cliente_destroy(t_cliente_config* cliente_config);
 t_modulo * crear_modulo(char* ip, char* puerto, char* nombre);
 t_modulo* get_modulo_by_name(char* nombreDelModulo);
 int handshake(t_modulo* modulo);
+void escuchar_mensajes_socket_desacoplado(int socket);
+void escuchar_mensajes_socket(t_parameter* parametro);
+void handle_client(t_result* result);
 
 #endif

@@ -11,25 +11,49 @@ int main(void){
 
 void handle_client(t_result* result){
     
-    if (result->operacion == MENSAJE){
-        if (!strcmp(result->mensaje, "HANDSHAKE")){
-            send_message_socket(result->socket, "OK");
-            liberar_conexion(result->socket);
+    
+    if (result->operacion == MENSAJES){
+        int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
+        if (tipo_mensaje == handshake_cliente){
+            handle_handshake_cliente(result->socket, result->mensajes->mensajes[1]);
+        } else if (tipo_mensaje == consultar_restaurantes){
+            handle_consultar_restaurantes(result->socket);
+        } else if (tipo_mensaje == seleccionar_restaurante){
+            handle_seleccionar_restaurante(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
+        } else if (tipo_mensaje == crear_pedido){
+            handle_crear_pedido(result->socket);
         }
-    } else {
-        if (result->operacion == MENSAJES){
-            int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
-            if (tipo_mensaje == consultar_restaurantes){
-                handle_consultar_restaurantes(result->socket);
-            } else if (tipo_mensaje == seleccionar_restaurante){
-                handle_seleccionar_restaurante(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
-            } else if (tipo_mensaje == crear_pedido){
-                handle_crear_pedido(result->socket);
-            }
-        }
-    }    
+    }
     
     return;
+}
+
+void handle_handshake_cliente(int socket, char* id_cliente){
+    t_cliente* cliente = buscar_cliente_lista(id_cliente);
+            
+    if (cliente == NULL){
+        cliente = malloc(sizeof(t_cliente));
+        pushbacklist(&lista_clientes, cliente);
+    } else {
+        cliente->socket = socket;
+    }
+    
+    send_message_socket(socket, "OK");
+}
+
+t_cliente* buscar_cliente_lista(char* id_cliente){
+
+    for (IteratorList iter = beginlist(lista_clientes); iter != NULL; iter = nextlist(iter)){
+        t_cliente* cliente = (t_cliente*) iter->data;
+
+        if (strcmp(cliente->id_cliente, id_cliente) == 0){
+            return cliente;
+        }
+
+    }
+
+    return NULL;
+
 }
 
 void handle_crear_pedido(int socket){
@@ -87,6 +111,9 @@ void handle_consultar_restaurantes(int socket){
 }
 
 void app_init(t_app_config** app_config, t_log** logger){
+
+    initlist(&lista_clientes);
+
     *app_config = app_config_loader("./cfg/app.config");
     *logger = init_logger((*app_config)->ruta_log, "APP", LOG_LEVEL_INFO);
 }

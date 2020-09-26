@@ -31,7 +31,7 @@ void enviar_mensajes_por_consola(t_modulo* modulo, char* mensaje_completo){
 
         case 1 : enviar_mensaje_consultar_restaurantes(modulo);
         break;
-        case 2 : enviar_mensaje_seleccionar_restaurante(modulo, string_prueba[1]);
+        case 2 : enviar_mensaje_seleccionar_restaurante(modulo, string_prueba[1], string_prueba[2]);
         break;
         case 3 : enviar_mensaje_obtener_restaurante(modulo,string_prueba[1]);
         break;
@@ -225,9 +225,9 @@ void enviar_mensaje_consultar_restaurantes(t_modulo* modulo){
     liberar_conexion(socket);
 }
 
-void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* restaurante){
+void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* id_cliente, char* nombre_restaurante){
 
-    if(restaurante == NULL){
+    if(nombre_restaurante == NULL){
         printf("Faltan parametros \n");
         return;
     }
@@ -235,7 +235,7 @@ void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* restaurante)
     char* tipo_mensaje = string_itoa(seleccionar_restaurante);
 
     //TODO: Definir como se elige el ID del cliente
-    char* seleccionar_restaurantes[3] = {tipo_mensaje, restaurante, "Cliente 1"};
+    char* seleccionar_restaurantes[3] = {tipo_mensaje, id_cliente, nombre_restaurante};
     int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, seleccionar_restaurantes, 3);
 
     t_mensajes* respuesta = receive_simple_messages(socket);

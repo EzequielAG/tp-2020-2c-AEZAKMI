@@ -54,7 +54,7 @@ t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante){
 
 t_restaurante* buscar_restaurante_lista(char* nombre_restaurante){
 
-    for (IteratorList iter = beginlist(lista_clientes); iter != NULL; iter = nextlist(iter)){
+    for (IteratorList iter = beginlist(lista_restaurantes); iter != NULL; iter = nextlist(iter)){
         t_restaurante* restaurante = (t_restaurante*) iter->data;
 
         if (strcmp(restaurante->nombre_restaurante, nombre_restaurante) == 0){
@@ -123,7 +123,7 @@ int obtener_id_pedido(){
     return id_pedido;
 }
 
-void handle_seleccionar_restaurante(int socket, char* restaurante, char* cliente){
+void handle_seleccionar_restaurante(int socket, char* cliente, char* restaurante){
 
     //TODO: Cambiar para leer los restaurantes reales
     char* respuesta[1];

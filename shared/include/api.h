@@ -1,6 +1,7 @@
 #ifndef API_H
 #define API_H
 #include "server.h"
+#include "list.h"
 #include <commons/string.h>
 
 typedef enum tipo_mensaje{
@@ -52,6 +53,7 @@ void enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* resta
 void enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 void enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 void enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
+char ** separar_por_comillas(char** string_separado_por_espacios);
 
 
 #endif

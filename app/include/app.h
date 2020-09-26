@@ -31,13 +31,14 @@ typedef struct {
 
 typedef struct {
     int socket;
-    char* id_cliente;
-} t_cliente;
+    char* nombre_restaurante;
+} t_restaurante;
 
 typedef struct {
     int socket;
-    char* nombre_restaurante;
-} t_restaurante;
+    char* id_cliente;
+    t_restaurante* restaurante;
+} t_cliente;
 
 t_app_config* app_config;
 t_log* logger;

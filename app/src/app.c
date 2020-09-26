@@ -128,7 +128,7 @@ void handle_seleccionar_restaurante(int socket, char* restaurante, char* cliente
     //TODO: Cambiar para leer los restaurantes reales
     char* respuesta[1];
 
-    if (relacionar(restaurante, cliente)){
+    if (relacionar(restaurante, cliente) != -1){
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
@@ -138,9 +138,22 @@ void handle_seleccionar_restaurante(int socket, char* restaurante, char* cliente
     liberar_conexion(socket);
 }
 
-int relacionar(char* restaurante, char* cliente){
-    //TODO hacer que se relacionen el cliente y el restaurante, devolver 0 ante error
-    return 1;
+int relacionar(char* nombre_restaurante, char* id_cliente){
+
+    t_restaurante* restaurante = buscar_restaurante_lista(nombre_restaurante);
+
+    if (restaurante == NULL){
+        return -1;
+    }
+
+    t_cliente* cliente = buscar_cliente_lista(id_cliente);
+    if (cliente == NULL){
+        return -1;
+    }
+
+    cliente->restaurante = restaurante;
+
+    return 0;
 }
 
 void handle_consultar_restaurantes(int socket){

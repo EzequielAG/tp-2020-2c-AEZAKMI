@@ -34,9 +34,15 @@ typedef struct {
     char* id_cliente;
 } t_cliente;
 
+typedef struct {
+    int socket;
+    char* nombre_restaurante;
+} t_restaurante;
+
 t_app_config* app_config;
 t_log* logger;
 List lista_clientes;
+List lista_restaurantes;
 
 // FUNCIONES
 void app_init(t_app_config** app_config, t_log** logger);
@@ -51,5 +57,7 @@ int obtener_id_pedido();
 void handle_crear_pedido(int socket);
 t_cliente* buscar_cliente_lista(char* id_cliente);
 void handle_handshake_cliente(int socket, char* id_cliente);
+t_restaurante* buscar_restaurante_lista(char* nombre_restaurante);
+void handle_handshake_restaurante(int socket, char* nombre_restaurante);
 
 #endif

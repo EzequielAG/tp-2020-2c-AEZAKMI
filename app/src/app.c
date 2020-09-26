@@ -16,6 +16,8 @@ void handle_client(t_result* result){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
         if (tipo_mensaje == handshake_cliente){
             handle_handshake_cliente(result->socket, result->mensajes->mensajes[1]);
+        } else if (tipo_mensaje == handshake_restaurante) {
+            handle_handshake_restaurante(result->socket, result->mensajes->mensajes[1]);
         } else if (tipo_mensaje == consultar_restaurantes){
             handle_consultar_restaurantes(result->socket);
         } else if (tipo_mensaje == seleccionar_restaurante){
@@ -28,11 +30,45 @@ void handle_client(t_result* result){
     return;
 }
 
+void handle_handshake_restaurante(int socket, char* nombre_restaurante){
+    t_restaurante* restaurante = buscar_restaurante_lista(nombre_restaurante);
+            
+    if (restaurante == NULL){
+        restaurante = malloc(sizeof(t_restaurante));
+        restaurante->socket = socket;
+        restaurante->nombre_restaurante = string_new();
+        string_append(&restaurante->nombre_restaurante, nombre_restaurante);
+        pushbacklist(&lista_restaurantes, restaurante);
+    } else {
+        restaurante->socket = socket;
+    }
+    
+    send_message_socket(socket, "OK");
+}
+
+t_restaurante* buscar_restaurante_lista(char* nombre_restaurante){
+
+    for (IteratorList iter = beginlist(lista_clientes); iter != NULL; iter = nextlist(iter)){
+        t_restaurante* restaurante = (t_cliente*) iter->data;
+
+        if (strcmp(restaurante->nombre_restaurante, nombre_restaurante) == 0){
+            return restaurante;
+        }
+
+    }
+
+    return NULL;
+
+}
+
 void handle_handshake_cliente(int socket, char* id_cliente){
     t_cliente* cliente = buscar_cliente_lista(id_cliente);
             
     if (cliente == NULL){
         cliente = malloc(sizeof(t_cliente));
+        cliente->socket = socket;
+        cliente->id_cliente = string_new();
+        string_append(&cliente->id_cliente, id_cliente);
         pushbacklist(&lista_clientes, cliente);
     } else {
         cliente->socket = socket;
@@ -113,6 +149,7 @@ void handle_consultar_restaurantes(int socket){
 void app_init(t_app_config** app_config, t_log** logger){
 
     initlist(&lista_clientes);
+    initlist(&lista_restaurantes);
 
     *app_config = app_config_loader("./cfg/app.config");
     *logger = init_logger((*app_config)->ruta_log, "APP", LOG_LEVEL_INFO);

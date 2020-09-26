@@ -19,7 +19,8 @@ typedef enum tipo_mensaje{
     finalizar_pedido = 13,
     terminar_pedido = 14,
     obtener_receta = 15,
-    handshake_cliente = 16
+    handshake_cliente = 16,
+    handshake_restaurante = 17
 } tipo_mensaje_t;
 
 

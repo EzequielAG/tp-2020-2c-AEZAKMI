@@ -6,6 +6,16 @@ int main(void){
     log_info(logger, "Soy el MODULO RESTAURANTE! %s", mi_funcion_compartida());
     printf("Imprimiendo el path %s", restaurante_config->ruta_log);
 
+
+    t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
+
+    int respuesta = handshake(&modulo_app);
+
+    if (respuesta == -1){
+        printf("No se pudo realizar la conexion inicial con el modulo app\n");
+        return -1;
+    }
+
     restaurante_finally(restaurante_config, logger);
     return 0;
 }
@@ -77,4 +87,53 @@ void handle_crear_pedido(int socket){
 
     send_messages_socket(socket, respuesta, 1);
     liberar_conexion(socket);
+}
+
+int handshake(t_modulo* modulo){
+
+    char* mensajes[2] = {string_itoa(handshake_restaurante), restaurante_config->nombre_restaurante};
+
+    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, mensajes, 2);
+
+    if (socket == -1){
+        return -1;
+    }
+
+    char * mensaje = receive_simple_message(socket);
+
+    if (mensaje == NULL){
+        return -1;
+    }
+
+    printf("El handshake con el modulo %s fue correcto\n", modulo->nombre);
+
+    escuchar_mensajes_socket_desacoplado(socket);
+
+    return 0;
+}
+
+void escuchar_mensajes_socket_desacoplado(int socket){
+    
+    pthread_t thread;
+    t_parameter* parametro = malloc(sizeof(t_parameter));
+
+	parametro->socket = socket;
+	parametro->f = handle_client;
+
+	pthread_create(&thread,NULL,(void*)escuchar_mensajes_socket, parametro);
+	pthread_detach(thread);
+
+}
+
+void escuchar_mensajes_socket(t_parameter* parametro){
+    escuchar_socket(&parametro->socket, parametro->f);
+}
+
+void handle_client(t_result* result){
+
+    for(int i = 0; i < *result->mensajes->size; i++){
+        printf("%s", result->mensajes->mensajes[i]);
+    }
+    printf("\n");
+
 }

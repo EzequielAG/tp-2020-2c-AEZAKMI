@@ -34,5 +34,8 @@ void restaurante_config_parser(t_config* config, t_restaurante_config* restauran
 void restaurante_destroy(t_restaurante_config* restaurante_config);
 int obtener_id_pedido();
 void handle_crear_pedido(int socket);
-
+int handshake(t_modulo* modulo);
+void escuchar_mensajes_socket_desacoplado(int socket);
+void escuchar_mensajes_socket(t_parameter* parametro);
+void handle_client(t_result* result);
 #endif

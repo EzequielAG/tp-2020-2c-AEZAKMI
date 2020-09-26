@@ -49,7 +49,7 @@ void handle_handshake_restaurante(int socket, char* nombre_restaurante){
 t_restaurante* buscar_restaurante_lista(char* nombre_restaurante){
 
     for (IteratorList iter = beginlist(lista_clientes); iter != NULL; iter = nextlist(iter)){
-        t_restaurante* restaurante = (t_cliente*) iter->data;
+        t_restaurante* restaurante = (t_restaurante*) iter->data;
 
         if (strcmp(restaurante->nombre_restaurante, nombre_restaurante) == 0){
             return restaurante;

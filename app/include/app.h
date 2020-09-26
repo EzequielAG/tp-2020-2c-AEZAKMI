@@ -59,5 +59,7 @@ t_cliente* buscar_cliente_lista(char* id_cliente);
 void handle_handshake_cliente(int socket, char* id_cliente);
 t_restaurante* buscar_restaurante_lista(char* nombre_restaurante);
 void handle_handshake_restaurante(int socket, char* nombre_restaurante);
+t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante);
+char* obtener_restaurantes();
 
 #endif

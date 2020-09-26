@@ -34,16 +34,22 @@ void handle_handshake_restaurante(int socket, char* nombre_restaurante){
     t_restaurante* restaurante = buscar_restaurante_lista(nombre_restaurante);
             
     if (restaurante == NULL){
-        restaurante = malloc(sizeof(t_restaurante));
-        restaurante->socket = socket;
-        restaurante->nombre_restaurante = string_new();
-        string_append(&restaurante->nombre_restaurante, nombre_restaurante);
+        restaurante = nuevo_restaurante(socket, nombre_restaurante);
         pushbacklist(&lista_restaurantes, restaurante);
     } else {
         restaurante->socket = socket;
     }
     
     send_message_socket(socket, "OK");
+}
+
+t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante){
+    t_restaurante* restaurante = malloc(sizeof(t_restaurante));
+    restaurante->socket = socket;
+    restaurante->nombre_restaurante = string_new();
+    string_append(&restaurante->nombre_restaurante, nombre_restaurante);
+
+    return restaurante;
 }
 
 t_restaurante* buscar_restaurante_lista(char* nombre_restaurante){
@@ -139,17 +145,45 @@ int relacionar(char* restaurante, char* cliente){
 
 void handle_consultar_restaurantes(int socket){
 
+    char* restaurantes = obtener_restaurantes();
     //TODO: Cambiar para leer los restaurantes reales
-    char* respuesta[1] = {"[Restaurante1, Restaurante2, Restaurante3]"};
+    char* respuesta[1] = {restaurantes};
 
     send_messages_socket(socket, respuesta, 1);
     liberar_conexion(socket);
 }
 
+char* obtener_restaurantes(){
+
+    char * restaurantes = string_new();
+
+    string_append(&restaurantes, "[");
+    int primero = 1;
+    for (IteratorList iter = beginlist(lista_restaurantes); iter != NULL; iter = nextlist(iter)){
+        if (primero == 1){
+            primero = 0;
+        } else {
+            string_append(&restaurantes, ",");
+        }
+        t_restaurante* restaurante = (t_restaurante*) iter->data;
+        string_append(&restaurantes, restaurante->nombre_restaurante);
+
+    }
+
+    string_append(&restaurantes, "]");
+
+    return restaurantes;
+}
+
 void app_init(t_app_config** app_config, t_log** logger){
 
+    //INICIALIZO LISTAS DE RESTAURANTES Y CLIENTES
     initlist(&lista_clientes);
     initlist(&lista_restaurantes);
+
+    //INSERTO RESTAURANTE DEFAULT
+    t_restaurante* restaurante = nuevo_restaurante(0, "Resto Default");
+    pushbacklist(&lista_restaurantes, restaurante);
 
     *app_config = app_config_loader("./cfg/app.config");
     *logger = init_logger((*app_config)->ruta_log, "APP", LOG_LEVEL_INFO);

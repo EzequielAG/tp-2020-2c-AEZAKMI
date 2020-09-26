@@ -10,7 +10,7 @@ int main(void){
 }
 
 void handle_client(t_result* result){
-    
+
     
     if (result->operacion == MENSAJES){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);

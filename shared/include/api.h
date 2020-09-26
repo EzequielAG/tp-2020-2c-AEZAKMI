@@ -34,6 +34,8 @@ void leer_consola(t_log* logger,t_modulo* modulo);
 void enviar_mensajes_por_consola(t_modulo* modulo, char* mensaje_completo);
 
 
+int obtener_numero_mensaje(char* mensaje_tipo);
+
 void enviar_mensaje_consultar_restaurantes(t_modulo* modulo);
 void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* restaurante);
 void enviar_mensaje_obtener_restaurante(t_modulo* modulo, char* restaurante);

@@ -1,8 +1,7 @@
 #include "api.h"
 
-
-
 void leer_consola(t_log* logger,t_modulo* modulo) {
+
 	char* leido = readline(">");
 
 	while(strncmp(leido, "", 1) != 0) {
@@ -18,33 +17,126 @@ void leer_consola(t_log* logger,t_modulo* modulo) {
 void enviar_mensajes_por_consola(t_modulo* modulo, char* mensaje_completo){
 
     char** string_prueba = NULL;
-    
+    string_prueba = string_split(mensaje_completo, " ");
 
+    int numero_mensaje = obtener_numero_mensaje(string_prueba[0]);
 
-    if(string_starts_with(mensaje_completo, "guardar_pedido")){
-      
-        string_prueba = string_split(mensaje_completo, " ");
-        enviar_mensaje_guardar_pedido(modulo,string_prueba[1],string_prueba[2]);
-        free(string_prueba);
+    switch(numero_mensaje){
 
-    }else if(string_starts_with(mensaje_completo, "consultar_restaurantes")){
-        
-        enviar_mensaje_consultar_restaurantes(modulo);
+        case 1 : enviar_mensaje_consultar_restaurantes(modulo);
+        break;
+        case 2 : enviar_mensaje_seleccionar_restaurante(modulo, string_prueba[1]);
+        break;
+        case 3 : enviar_mensaje_obtener_restaurante(modulo,string_prueba[1]);
+        break;
+        case 4 : enviar_mensaje_consultar_platos(modulo,string_prueba[1]);
+        break;
+        case 5 : enviar_mensaje_crear_pedido(modulo);
+        break;
+        case 6 : enviar_mensaje_guardar_pedido(modulo,string_prueba[1], string_prueba[2]);
+        break;
+        case 7 : enviar_mensaje_anadir_plato(modulo,string_prueba[1], string_prueba[2]);
+        break;
+        case 8 : enviar_mensaje_guardar_plato(modulo,string_prueba[1], string_prueba[2],string_prueba[3], string_prueba[4]);
+        break;
+        case 9 : enviar_mensaje_confirmar_pedido(modulo,string_prueba[1], string_prueba[2]);
+        break;
+        case 10 : enviar_mensaje_plato_listo(modulo,string_prueba[1], string_prueba[2],string_prueba[3]);
+        break;
+        case 11 : enviar_mensaje_consultar_pedido(modulo,string_prueba[1]);
+        break;
+        case 12 : enviar_mensaje_obtener_pedido(modulo,string_prueba[1], string_prueba[2]);
+        break;
+        case 13 : enviar_mensaje_finalizar_pedido(modulo,string_prueba[1], string_prueba[2]);
+        break;
+        case 14 : enviar_mensaje_terminar_pedido(modulo,string_prueba[1], string_prueba[2]);
+        break;
+        case 15 : enviar_mensaje_obtener_receta(modulo,string_prueba[1]);
+        break;
+        default : printf("NO ES UN MENSAJE VALIDO \n");
 
-   } else if(string_starts_with(mensaje_completo, "seleccionar_restaurante")){
-        
-        string_prueba = string_split(mensaje_completo, " ");
-        enviar_mensaje_seleccionar_restaurante(modulo, string_prueba[1]);
-        free(string_prueba);
     }
+
 
 
 }
 
 
+int obtener_numero_mensaje(char* mensaje_tipo){
+
+    if(strcmp(mensaje_tipo, "guardar_pedido") == 0){
+        
+        return guardar_pedido;
+
+    } else if(strcmp(mensaje_tipo, "consultar_restaurantes") == 0){
+        
+        return consultar_restaurantes;
+
+    } else if(strcmp(mensaje_tipo, "seleccionar_restaurante") == 0){
+        
+        return seleccionar_restaurante;
+
+    } else if(strcmp(mensaje_tipo, "obtener_restaurante") == 0){
+        
+        return obtener_restaurante;
+
+    } else if(strcmp(mensaje_tipo, "consultar_platos") == 0){
+        
+        return consultar_platos;
+
+    } else if(strcmp(mensaje_tipo, "crear_pedido") == 0){
+        
+        return crear_pedido;
+
+    } else if(strcmp(mensaje_tipo, "anadir_plato") == 0){
+        
+        return anadir_plato;
+
+    } else if(strcmp(mensaje_tipo, "guardar_plato") == 0){
+        
+        return guardar_plato;
+
+    } else if(strcmp(mensaje_tipo, "confirmar_pedido") == 0){
+        
+        return confirmar_pedido;
+
+    } else if(strcmp(mensaje_tipo, "plato_listo") == 0){
+        
+        return plato_listo;
+
+    } else if(strcmp(mensaje_tipo, "consultar_pedido") == 0){
+        
+        return consultar_pedido;
+
+    } else if(strcmp(mensaje_tipo, "obtener_pedido") == 0){
+        
+        return obtener_pedido;
+
+    } else if(strcmp(mensaje_tipo, "finalizar_pedido") == 0){
+        
+        return finalizar_pedido;
+
+    } else if(strcmp(mensaje_tipo, "terminar_pedido") == 0){
+        
+        return terminar_pedido;
+
+    } else if(strcmp(mensaje_tipo, "obtener_receta") == 0){
+        
+        return obtener_receta;
+
+    } 
+    return -1;
+};
+
 
 
 void enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido){
+
+    if(restaurante == NULL || id_pedido == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
+
     char* tipo_mensaje = string_itoa(guardar_pedido);
 
     char* guardad_pedido_mensajes[3] = {tipo_mensaje, restaurante, id_pedido};
@@ -78,6 +170,11 @@ void enviar_mensaje_consultar_restaurantes(t_modulo* modulo){
 }
 
 void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* restaurante){
+
+    if(restaurante == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
     
     char* tipo_mensaje = string_itoa(seleccionar_restaurante);
 
@@ -110,6 +207,11 @@ void enviar_mensaje_crear_pedido(t_modulo* modulo){
 }
 
 void enviar_mensaje_obtener_restaurante(t_modulo* modulo, char* restaurante){
+
+    if(restaurante == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
     
     char* tipo_mensaje = string_itoa(obtener_restaurante);
     char* obtener_restaurante[2] ={tipo_mensaje,restaurante};
@@ -127,6 +229,11 @@ void enviar_mensaje_obtener_restaurante(t_modulo* modulo, char* restaurante){
 }
 
 void enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
+
+    if(restaurante == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
   
     char* tipo_mensaje = string_itoa(consultar_platos);
     int socket ;
@@ -152,6 +259,11 @@ void enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
 
 void enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido){
 
+    if(plato == NULL || id_pedido == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
+
     char* tipo_mensaje = string_itoa(anadir_plato);
     int socket;
 
@@ -170,6 +282,11 @@ void enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido)
 
 void enviar_mensaje_guardar_plato(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida, char* cantidad){
 
+    if(restaurante == NULL || id_pedido == NULL || comida == NULL || cantidad == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
+
     char* tipo_mensaje = string_itoa(guardar_plato);
     int socket;
 
@@ -185,6 +302,11 @@ void enviar_mensaje_guardar_plato(t_modulo* modulo, char* restaurante, char* id_
 };
 
 void enviar_mensaje_confirmar_pedido(t_modulo* modulo,char* id_pedido, char* restaurante){
+   
+    if(restaurante == NULL || id_pedido == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
     
     char* tipo_mensaje = string_itoa(confirmar_pedido);
     int socket;
@@ -201,6 +323,11 @@ void enviar_mensaje_confirmar_pedido(t_modulo* modulo,char* id_pedido, char* res
 };
 
 void enviar_mensaje_plato_listo(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida){
+
+    if(restaurante == NULL || id_pedido == NULL || comida == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
     
     char* tipo_mensaje = string_itoa(plato_listo);
     int socket;
@@ -217,6 +344,11 @@ void enviar_mensaje_plato_listo(t_modulo* modulo, char* restaurante, char* id_pe
 
 void enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido){
 
+    if(id_pedido == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
+
     char* tipo_mensaje = string_itoa(consultar_pedido);
     int socket;
 
@@ -230,6 +362,11 @@ void enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido){
 };
 
 void enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
+
+    if(restaurante == NULL || id_pedido == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
     
     char* tipo_mensaje = string_itoa(obtener_pedido);
     int socket;
@@ -243,6 +380,11 @@ void enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* resta
 
 
 void enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
+
+    if(restaurante == NULL || id_pedido == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
     
     char* tipo_mensaje = string_itoa(finalizar_pedido);
     int socket;
@@ -255,6 +397,11 @@ void enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* res
 }
 
 void enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
+
+    if(restaurante == NULL || id_pedido == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
     
     char* tipo_mensaje = string_itoa(terminar_pedido);
     int socket;
@@ -267,6 +414,11 @@ void enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* rest
 }
 
 void enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
+
+    if(nombre_plato == NULL){
+        printf("Faltan parametros \n");
+        return;
+    }
 
     char* tipo_mensaje = string_itoa(obtener_receta);
     int socket;

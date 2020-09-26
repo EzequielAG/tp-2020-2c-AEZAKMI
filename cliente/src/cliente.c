@@ -6,7 +6,6 @@ int main(int argc, char *argv[]){
     log_info(logger, "Soy el CLIENTE! %s", mi_funcion_compartida());
     
    
-
     for (int i = 0; i < argc; i++){
         printf("%s\n", argv[i]);
     }
@@ -40,7 +39,7 @@ int main(int argc, char *argv[]){
 
 
 
-     leer_consola(logger,&modulo_app);
+    leer_consola(logger,&modulo_app);
 
     //TODO: HACER LA INTERFAZ DE USUARIO PARA HACER ESTO
 

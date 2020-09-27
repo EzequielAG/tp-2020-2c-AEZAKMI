@@ -10,7 +10,6 @@ int main(void){
 }
 
 void handle_client(t_result* result){
-
     
     if (result->operacion == MENSAJES){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
@@ -22,9 +21,18 @@ void handle_client(t_result* result){
             handle_consultar_restaurantes(result->socket);
         } else if (tipo_mensaje == seleccionar_restaurante){
             handle_seleccionar_restaurante(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
+        } else if (tipo_mensaje == consultar_platos){
+            // TODO: FALTA LOGICA DE CONSULTAR_PLATOS
         } else if (tipo_mensaje == crear_pedido){
             handle_crear_pedido(result->socket);
+        } else if (tipo_mensaje == anadir_plato){
+            // TODO: FALTA LOGICA DE ANADIR_PLATO
+        } else if (tipo_mensaje == plato_listo){
+            // TODO: FALTA LOGICA DE PLATO_LISTO
+        } else if (tipo_mensaje == consultar_pedido){
+            // TODO: FALTA LOGICA DE CONSULTAR_PEDIDO
         }
+
     }
     
     return;

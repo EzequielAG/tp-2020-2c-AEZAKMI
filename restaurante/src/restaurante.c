@@ -20,6 +20,9 @@ int main(void){
     return 0;
 }
 
+
+
+
 void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger){
     *restaurante_config = restaurante_config_loader("./cfg/restaurante.config");
     *logger = init_logger((*restaurante_config)->ruta_log, "restaurante", LOG_LEVEL_INFO);
@@ -135,5 +138,21 @@ void handle_client(t_result* result){
         printf("%s", result->mensajes->mensajes[i]);
     }
     printf("\n");
+
+    if (result->operacion == MENSAJES){
+        int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
+        if (tipo_mensaje == consultar_platos){
+            // TODO : FALTA LOGICA CONSULTAR_PLATOS
+        } else if (tipo_mensaje == crear_pedido) {
+            // TODO : FALTA LOGICA CREAR_PEDIDO
+        } else if (tipo_mensaje == anadir_plato) {
+            // TODO : FALTA LOGICA ANADIR_PLATO
+        } else if (tipo_mensaje == confirmar_pedido) {
+            // TODO : FALTA LOGICA CONFIRMAR_PEDIDO
+        } else if (tipo_mensaje == consultar_pedido) {
+            // TODO : FALTA LOGICA CONSULTAR_PEDIDO
+        }
+
+    }
 
 }

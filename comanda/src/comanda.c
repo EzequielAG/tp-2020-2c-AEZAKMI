@@ -61,10 +61,26 @@ void handle_client(t_result* result){
             int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
             if (tipo_mensaje == guardar_pedido){
                 handle_guardar_pedidos(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
-            } 
+            } else if (tipo_mensaje == guardar_plato){
+            // TODO: FALTA LOGICA DE GUARDAR_PLATO
+            } else if (tipo_mensaje == confirmar_pedido){
+            // TODO: FALTA LOGICA DE CONFIRMAR_PEDIDO
+            } else if (tipo_mensaje == plato_listo){
+            // TODO: FALTA LOGICA DE PLATO_LISTO
+            } else if (tipo_mensaje == obtener_pedido){
+            // TODO: FALTA LOGICA DE OBTENER_PEDIDO
+            } else if (tipo_mensaje == finalizar_pedido){
+            // TODO: FALTA LOGICA DE FINALIZAR_PEDIDO
+            }
+ 
         }
     }    
     
+
+
+
+
+
     return;
 }
 

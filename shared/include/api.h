@@ -46,6 +46,24 @@ typedef struct {
     char* cantidad_pedidos;
 } r_obtener_restaurante;
 
+typedef struct{
+    char* comida;
+    char* cantidad_total;
+    char* cantidad_lista;    
+} informacion_comidas;
+
+
+typedef struct {
+    char* restaurante;
+    char* estado;
+    informacion_comidas** info_comidas;
+} r_consultar_pedido;
+
+
+typedef struct {
+    char* estado;
+    informacion_comidas** info_comidas;
+} r_obtener_pedido;
 
 
 
@@ -53,24 +71,25 @@ typedef struct {
 int obtener_numero_mensaje(char* mensaje_tipo);
 
 receta_precio** obtener_receta_precios(char* array_mensajes);
+informacion_comidas** obtener_informacion_comidas(char* mensaje);
 
 char** obtener_array_mensajes(char* array_mensaje);
 
 char** enviar_mensaje_consultar_restaurantes(t_modulo* modulo);
 char* enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* cliente, char* restaurante);
 r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char* restaurante);
-void enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante);
-void enviar_mensaje_crear_pedido(t_modulo* modulo);
-void enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido);
-void enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido);
-void enviar_mensaje_guardar_plato(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida, char* cantidad);
-void enviar_mensaje_confirmar_pedido(t_modulo* modulo,char* id_pedido, char* restaurante);
-void enviar_mensaje_plato_listo(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida);
-void enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido);
-void enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
-void enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
-void enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
-void enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
+char** enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante);
+char* enviar_mensaje_crear_pedido(t_modulo* modulo);
+char* enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido);
+char* enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido);
+char* enviar_mensaje_guardar_plato(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida, char* cantidad);
+char* enviar_mensaje_confirmar_pedido(t_modulo* modulo,char* id_pedido, char* restaurante);
+char* enviar_mensaje_plato_listo(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida);
+r_consultar_pedido* enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido);
+r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
+char* enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
+char* enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
+char* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
 
 
 

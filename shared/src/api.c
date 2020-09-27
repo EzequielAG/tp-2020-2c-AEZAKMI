@@ -69,11 +69,11 @@ int obtener_numero_mensaje(char* mensaje_tipo){
 
 
 
-void enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido){
+char* enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido){
 
     if(restaurante == NULL || id_pedido == NULL){
         printf("Faltan parametros \n");
-        return;
+        return NULL;
     }
 
     char* tipo_mensaje = string_itoa(guardar_pedido);
@@ -89,6 +89,8 @@ void enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id
      printf("\n");
 
     liberar_conexion(socket);
+
+    return respuesta->mensajes[0];
 }
 
 
@@ -141,7 +143,7 @@ char* enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* id_cliente,
     return respuesta_seleccion_restaurante;
 }
 
-void enviar_mensaje_crear_pedido(t_modulo* modulo){
+char* enviar_mensaje_crear_pedido(t_modulo* modulo){
 
     char* tipo_mensaje = string_itoa(crear_pedido);
     char* crear_pedido_mensajes[1] = {tipo_mensaje};
@@ -153,6 +155,8 @@ void enviar_mensaje_crear_pedido(t_modulo* modulo){
     printf("%s\n", id_pedido);
 
     liberar_conexion(socket);
+
+    return id_pedido;
 }
 
 r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char* restaurante){
@@ -215,11 +219,11 @@ receta_precio** obtener_receta_precios(char* array_mensajes){
 }
 
 
-void enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
+char** enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
 
     if(restaurante == NULL){
         printf("Faltan parametros \n");
-        return;
+        return NULL;;
     }
   
     char* tipo_mensaje = string_itoa(consultar_platos);
@@ -228,7 +232,6 @@ void enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
     if(!strcmp((modulo->nombre),"sindicato")){
         char* consulta_platos[2] ={tipo_mensaje,restaurante};
         socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, consulta_platos, 2);
-    
     }else{
         socket = send_message_and_return_socket(modulo->ip, modulo->puerto, tipo_mensaje);
     }
@@ -242,13 +245,14 @@ void enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
     
     liberar_conexion(socket);
 
+    return obtener_array_mensajes(respuesta->mensajes[0]);
 }
 
-void enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido){
+char* enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido){
 
     if(plato == NULL || id_pedido == NULL){
         printf("Faltan parametros \n");
-        return;
+        return NULL;
     }
 
     char* tipo_mensaje = string_itoa(anadir_plato);
@@ -265,13 +269,15 @@ void enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido)
     printf("\n");
     
     liberar_conexion(socket);
+
+    return respuesta->mensajes[0];
 };
 
-void enviar_mensaje_guardar_plato(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida, char* cantidad){
+char* enviar_mensaje_guardar_plato(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida, char* cantidad){
 
     if(restaurante == NULL || id_pedido == NULL || comida == NULL || cantidad == NULL){
         printf("Faltan parametros \n");
-        return;
+        return NULL;
     }
 
     char* tipo_mensaje = string_itoa(guardar_plato);
@@ -286,13 +292,15 @@ void enviar_mensaje_guardar_plato(t_modulo* modulo, char* restaurante, char* id_
 
 
     liberar_conexion(socket);
+
+    return respuesta->mensajes[0];
 };
 
-void enviar_mensaje_confirmar_pedido(t_modulo* modulo,char* id_pedido, char* restaurante){
+char* enviar_mensaje_confirmar_pedido(t_modulo* modulo,char* id_pedido, char* restaurante){
    
     if(restaurante == NULL || id_pedido == NULL){
         printf("Faltan parametros \n");
-        return;
+        return NULL;
     }
     
     char* tipo_mensaje = string_itoa(confirmar_pedido);
@@ -307,13 +315,15 @@ void enviar_mensaje_confirmar_pedido(t_modulo* modulo,char* id_pedido, char* res
 
     liberar_conexion(socket);
 
+    return respuesta->mensajes[0];
+
 };
 
-void enviar_mensaje_plato_listo(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida){
+char* enviar_mensaje_plato_listo(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida){
 
     if(restaurante == NULL || id_pedido == NULL || comida == NULL){
         printf("Faltan parametros \n");
-        return;
+        return NULL;
     }
     
     char* tipo_mensaje = string_itoa(plato_listo);
@@ -327,13 +337,15 @@ void enviar_mensaje_plato_listo(t_modulo* modulo, char* restaurante, char* id_pe
     printf("%s \n", respuesta->mensajes[0]);
 
     liberar_conexion(socket);
+
+    return respuesta->mensajes[0];
 };
 
-void enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido){
+r_consultar_pedido* enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido){
 
     if(id_pedido == NULL){
         printf("Faltan parametros \n");
-        return;
+        return NULL;
     }
 
     char* tipo_mensaje = string_itoa(consultar_pedido);
@@ -342,17 +354,50 @@ void enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido){
     char* consultar_pedido[2] ={tipo_mensaje, id_pedido};
     socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, consultar_pedido, 2);
     
-//  t_mensajes* respuesta = receive_simple_messages(socket);
+    t_mensajes* respuesta = receive_simple_messages(socket);
+
+    r_consultar_pedido* respuesta_consulta_pedido = malloc(sizeof(r_consultar_pedido));
+
+    respuesta_consulta_pedido->restaurante = respuesta->mensajes[0];
+    respuesta_consulta_pedido->estado = respuesta->mensajes[1];
+    respuesta_consulta_pedido->info_comidas = obtener_informacion_comidas(respuesta->mensajes[2]);
+
+
+    for (int i= 0; i < *respuesta->size; i++){
+       printf("%s ", respuesta->mensajes[i]);
+    } printf("\n");
 
     liberar_conexion(socket);
 
+    return NULL;
+
 };
 
-void enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
+
+informacion_comidas** obtener_informacion_comidas(char* array_mensajes){
+
+    char** array_string = string_split(array_mensajes, "|");
+
+    informacion_comidas** informacion_comidas_final = malloc ( sizeof(informacion_comidas) * sizeof(informacion_comidas) );
+
+    for(int i = 0; array_string[i]!=NULL; i++){
+        char** info_comidas_individual = string_split(array_string[i], ",");
+
+        informacion_comidas_final[i]->comida = info_comidas_individual[0];
+        informacion_comidas_final[i]->cantidad_total = info_comidas_individual[1];
+        informacion_comidas_final[i]->cantidad_lista = info_comidas_individual[2];
+
+    }
+
+    return informacion_comidas_final;
+
+};
+
+r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
 
     if(restaurante == NULL || id_pedido == NULL){
         printf("Faltan parametros \n");
-        return;
+        return NULL;
     }
     
     char* tipo_mensaje = string_itoa(obtener_pedido);
@@ -361,16 +406,28 @@ void enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* resta
     char* obtener_pedido[3] ={tipo_mensaje, id_pedido, restaurante};
     socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, obtener_pedido, 3);
 
+    t_mensajes* respuesta = receive_simple_messages(socket);
+
+    for (int i= 0; i < *respuesta->size; i++){
+       printf("%s ", respuesta->mensajes[i]);
+    } printf("\n");
+
+    r_obtener_pedido* respuesta_obtener_pedido = malloc(sizeof(r_obtener_pedido));
+
+    respuesta_obtener_pedido->estado = respuesta->mensajes[0];
+    respuesta_obtener_pedido->info_comidas = obtener_informacion_comidas(respuesta->mensajes[1]);
+
     liberar_conexion(socket);
-    
+
+    return respuesta_obtener_pedido;
 }
 
 
-void enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
+char* enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
 
     if(restaurante == NULL || id_pedido == NULL){
         printf("Faltan parametros \n");
-        return;
+        return NULL;
     }
     
     char* tipo_mensaje = string_itoa(finalizar_pedido);
@@ -379,15 +436,20 @@ void enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* res
     char* finalizar_pedido[3] ={tipo_mensaje, id_pedido, restaurante};
     socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, finalizar_pedido, 3);
 
+    t_mensajes* respuesta = receive_simple_messages(socket);
+
+    printf("%s \n" ,respuesta->mensajes[0]);
+
     liberar_conexion(socket);
     
+    return respuesta->mensajes[0];
 }
 
-void enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
+char* enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
 
     if(restaurante == NULL || id_pedido == NULL){
         printf("Faltan parametros \n");
-        return;
+        return NULL;
     }
     
     char* tipo_mensaje = string_itoa(terminar_pedido);
@@ -395,16 +457,22 @@ void enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* rest
 
     char* terminar_pedido[3] ={tipo_mensaje, id_pedido, restaurante};
     socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, terminar_pedido, 3);
+    
+    t_mensajes* respuesta = receive_simple_messages(socket);
+
+    printf("%s \n" , respuesta->mensajes[0]);
 
     liberar_conexion(socket);
     
+    return respuesta->mensajes[0];
+    
 }
 
-void enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
+char* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
 
     if(nombre_plato == NULL){
         printf("Faltan parametros \n");
-        return;
+        return NULL;
     }
 
     char* tipo_mensaje = string_itoa(obtener_receta);
@@ -412,8 +480,14 @@ void enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
 
     char* obtener_receta[2] ={tipo_mensaje, nombre_plato};
     socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, obtener_receta, 2);
+    
+    t_mensajes* respuesta = receive_simple_messages(socket);
+
+    printf("%s \n" , respuesta->mensajes[0]);
 
     liberar_conexion(socket);
+    
+    return respuesta->mensajes[0];
 }
 
 

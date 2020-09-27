@@ -2,11 +2,18 @@
 
 void leer_consola(t_log* logger,t_modulo* modulo) {
 
+    pthread_t thread_mensaje;
+    t_struct_mensajes* t_parametro_mensajes = malloc(sizeof(t_struct_mensajes));
+
+	t_parametro_mensajes->modulo = modulo;
+	
 	char* leido = readline(">");
 
 	while(strncmp(leido, "", 1) != 0) {
 		log_info(logger, leido);
-        enviar_mensajes_por_consola(modulo, leido);
+        t_parametro_mensajes->mensaje_completo = leido;
+        pthread_create(&thread_mensaje,NULL,(void*)enviar_mensajes_por_consola, t_parametro_mensajes);
+	    pthread_join(thread_mensaje,NULL);
 		free(leido);
 		leido = readline(">");
 	}
@@ -14,10 +21,10 @@ void leer_consola(t_log* logger,t_modulo* modulo) {
 	free(leido);
 }
 
-void enviar_mensajes_por_consola(t_modulo* modulo, char* mensaje_completo){
+void enviar_mensajes_por_consola(t_struct_mensajes* mensaje){
 
     char** string_prueba = NULL;
-    string_prueba = string_split(mensaje_completo, " ");
+    string_prueba = string_split(mensaje->mensaje_completo, " ");
 
     string_prueba = separar_por_comillas(string_prueba);
 
@@ -29,35 +36,35 @@ void enviar_mensajes_por_consola(t_modulo* modulo, char* mensaje_completo){
 
     switch(numero_mensaje){
 
-        case 1 : enviar_mensaje_consultar_restaurantes(modulo);
+        case 1 : enviar_mensaje_consultar_restaurantes(mensaje->modulo);
         break;
-        case 2 : enviar_mensaje_seleccionar_restaurante(modulo, string_prueba[1], string_prueba[2]);
+        case 2 : enviar_mensaje_seleccionar_restaurante(mensaje->modulo, string_prueba[1], string_prueba[2]);
         break;
-        case 3 : enviar_mensaje_obtener_restaurante(modulo,string_prueba[1]);
+        case 3 : enviar_mensaje_obtener_restaurante(mensaje->modulo,string_prueba[1]);
         break;
-        case 4 : enviar_mensaje_consultar_platos(modulo,string_prueba[1]);
+        case 4 : enviar_mensaje_consultar_platos(mensaje->modulo,string_prueba[1]);
         break;
-        case 5 : enviar_mensaje_crear_pedido(modulo);
+        case 5 : enviar_mensaje_crear_pedido(mensaje->modulo);
         break;
-        case 6 : enviar_mensaje_guardar_pedido(modulo,string_prueba[1], string_prueba[2]);
+        case 6 : enviar_mensaje_guardar_pedido(mensaje->modulo,string_prueba[1], string_prueba[2]);
         break;
-        case 7 : enviar_mensaje_anadir_plato(modulo,string_prueba[1], string_prueba[2]);
+        case 7 : enviar_mensaje_anadir_plato(mensaje->modulo,string_prueba[1], string_prueba[2]);
         break;
-        case 8 : enviar_mensaje_guardar_plato(modulo,string_prueba[1], string_prueba[2],string_prueba[3], string_prueba[4]);
+        case 8 : enviar_mensaje_guardar_plato(mensaje->modulo,string_prueba[1], string_prueba[2],string_prueba[3], string_prueba[4]);
         break;
-        case 9 : enviar_mensaje_confirmar_pedido(modulo,string_prueba[1], string_prueba[2]);
+        case 9 : enviar_mensaje_confirmar_pedido(mensaje->modulo,string_prueba[1], string_prueba[2]);
         break;
-        case 10 : enviar_mensaje_plato_listo(modulo,string_prueba[1], string_prueba[2],string_prueba[3]);
+        case 10 : enviar_mensaje_plato_listo(mensaje->modulo,string_prueba[1], string_prueba[2],string_prueba[3]);
         break;
-        case 11 : enviar_mensaje_consultar_pedido(modulo,string_prueba[1]);
+        case 11 : enviar_mensaje_consultar_pedido(mensaje->modulo,string_prueba[1]);
         break;
-        case 12 : enviar_mensaje_obtener_pedido(modulo,string_prueba[1], string_prueba[2]);
+        case 12 : enviar_mensaje_obtener_pedido(mensaje->modulo,string_prueba[1], string_prueba[2]);
         break;
-        case 13 : enviar_mensaje_finalizar_pedido(modulo,string_prueba[1], string_prueba[2]);
+        case 13 : enviar_mensaje_finalizar_pedido(mensaje->modulo,string_prueba[1], string_prueba[2]);
         break;
-        case 14 : enviar_mensaje_terminar_pedido(modulo,string_prueba[1], string_prueba[2]);
+        case 14 : enviar_mensaje_terminar_pedido(mensaje->modulo,string_prueba[1], string_prueba[2]);
         break;
-        case 15 : enviar_mensaje_obtener_receta(modulo,string_prueba[1]);
+        case 15 : enviar_mensaje_obtener_receta(mensaje->modulo,string_prueba[1]);
         break;
         default : printf("NO ES UN MENSAJE VALIDO \n");
 

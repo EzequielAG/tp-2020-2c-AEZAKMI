@@ -31,16 +31,34 @@ typedef struct {
     char* nombre;
 } t_modulo;
 
+typedef struct{
+    char* receta;
+    char* precio;
+} receta_precio;
 
-void leer_consola(t_log* logger,t_modulo* modulo);
-void enviar_mensajes_por_consola(t_modulo* modulo, char* mensaje_completo);
+
+typedef struct {
+    char** afinidades;
+    char* pos_x;
+    char* pos_y;
+    receta_precio** recetas;
+    char* cantidad_hornos;
+    char* cantidad_pedidos;
+} r_obtener_restaurante;
+
+
+
 
 
 int obtener_numero_mensaje(char* mensaje_tipo);
 
-void enviar_mensaje_consultar_restaurantes(t_modulo* modulo);
-void enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* cliente, char* restaurante);
-void enviar_mensaje_obtener_restaurante(t_modulo* modulo, char* restaurante);
+receta_precio** obtener_receta_precios(char* array_mensajes);
+
+char** obtener_array_mensajes(char* array_mensaje);
+
+char** enviar_mensaje_consultar_restaurantes(t_modulo* modulo);
+char* enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* cliente, char* restaurante);
+r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char* restaurante);
 void enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante);
 void enviar_mensaje_crear_pedido(t_modulo* modulo);
 void enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido);
@@ -53,7 +71,7 @@ void enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* resta
 void enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 void enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 void enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
-char ** separar_por_comillas(char** string_separado_por_espacios);
+
 
 
 #endif

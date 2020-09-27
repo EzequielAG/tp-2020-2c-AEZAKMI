@@ -4,10 +4,7 @@
 #include <commons/config.h>
 #include <commons/string.h>
 #include <stdbool.h>
-#include "shared_utils.h"
-#include "server.h"
-#include "api.h"
-#include "tests.h"
+#include "mensajes_consola.h"
 
 // VARIABLES Y ESTRUCTURAS
 typedef struct {

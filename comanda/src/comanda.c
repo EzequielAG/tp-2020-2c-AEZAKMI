@@ -50,7 +50,7 @@ void comanda_destroy(t_comanda_config* comanda_config) {
 }
 
 void handle_client(t_result* result){
-    
+
     if (result->operacion == MENSAJE){
         if (!strcmp(result->mensaje, "HANDSHAKE")){
             send_message_socket(result->socket, "OK");

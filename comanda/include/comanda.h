@@ -10,6 +10,7 @@
 #include "tests.h"
 #include "api.h"
 
+
 // VARIABLES Y ESTRUCTURAS
 typedef struct {
     char* puerto_escucha;
@@ -23,6 +24,7 @@ typedef struct {
 
 t_comanda_config* comanda_config;
 t_log* logger;
+void* puntero_memoria_principal;
 
 // FUNCIONES
 void comanda_init(t_comanda_config** comanda_config, t_log** logger);

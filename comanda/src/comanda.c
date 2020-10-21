@@ -1,11 +1,14 @@
 #include "comanda.h"
 int main(int argc, char *argv[]){
+
     comanda_init(&comanda_config, &logger);
 
     printf("Imprimiendo el path %s", comanda_config->ruta_log);
-
-    //HACER QUE ESTO SEA configurable desde archivo
     iniciar_servidor("127.0.0.1", "5001", handle_client);
+
+    //ASIGNAR SEGUN LA CONFIG
+
+    puntero_memoria_principal = malloc(comanda_config->tamanio_memoria);
 
     comanda_finally(comanda_config, logger);
     return 0;
@@ -14,6 +17,7 @@ int main(int argc, char *argv[]){
 void comanda_init(t_comanda_config** comanda_config, t_log** logger){
     *comanda_config = comanda_config_loader("./cfg/comanda.config");
     *logger = init_logger((*comanda_config)->ruta_log, "comanda", LOG_LEVEL_INFO);
+  
 }
 
 void comanda_finally(t_comanda_config* comanda_config, t_log* logger) {

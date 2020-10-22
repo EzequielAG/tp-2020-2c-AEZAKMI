@@ -9,6 +9,7 @@
 #include "server.h"
 #include "tests.h"
 #include "api.h"
+#include "pedidos_mensajes.h"
 
 
 // VARIABLES Y ESTRUCTURAS
@@ -24,7 +25,6 @@ typedef struct {
 
 t_comanda_config* comanda_config;
 t_log* logger;
-void* puntero_memoria_principal;
 
 // FUNCIONES
 void comanda_init(t_comanda_config** comanda_config, t_log** logger);
@@ -32,8 +32,7 @@ void comanda_finally(t_comanda_config* comanda_config, t_log* logger);
 t_comanda_config* comanda_config_loader(char* path_config_file);
 void comanda_config_parser(t_config* config, t_comanda_config* comanda_config);
 void comanda_destroy(t_comanda_config* comanda_config);
-void handle_client(t_result* result);
-int guardar_pedido_en_memoria(char* restaurante, char* id_pedido);
-void handle_guardar_pedidos(int socket, char* restaurante, char* id_pedido);
+
+List tablaRestaurantes;
 
 #endif

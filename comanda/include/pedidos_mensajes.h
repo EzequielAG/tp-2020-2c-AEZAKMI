@@ -8,23 +8,12 @@
 #include "tests.h"
 #include "api.h"
 
-typedef struct pedidoRecibido{
-
-    int socket;
-    char* nombreResto;
-    char* idPedido;
-    char* plato;
-    int cantidadPlato;
-
-} l_pedidoRecibido;
-
-
 
 void handle_client(t_result* result);
 int guardar_pedido_en_memoria(char* restaurante, char* id_pedido);
-void handle_guardar_pedidos(l_pedidoRecibido*);
-void handle_guardar_plato(l_pedidoRecibido *pedidos);
-void handle_confirmar_pedido(l_pedidoRecibido *pedidos);
-void handle_plato_listo(l_pedidoRecibido *pedidos);
-void handle_obtener_pedido(l_pedidoRecibido *pedidos);
-void handle_finalizar_pedido(l_pedidoRecibido *pedidos);
+void handle_guardar_pedidos(t_result*);
+void handle_guardar_plato(t_result *);
+void handle_confirmar_pedido(t_result *);
+void handle_plato_listo(t_result*);
+void handle_obtener_pedido(t_result *);
+void handle_finalizar_pedido(t_result *);

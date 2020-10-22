@@ -36,6 +36,25 @@
             ]
         },
         {
+            "name": "Cliente TO COMANDA",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/cliente",
+            "args": ["comanda"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "Cliente TO APP",
             "type": "cppdbg",
             "request": "launch",

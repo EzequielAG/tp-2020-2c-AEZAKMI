@@ -66,7 +66,7 @@ void enviar_mensajes_por_consola(t_struct_mensajes* mensaje){
         break;
         case 15 : enviar_mensaje_obtener_receta(mensaje->modulo,string_prueba[1]);
         break;
-        default : printf("NO ES UN MENSAJE VALIDO \n");
+        default : printf("No es un mensaje valido \n");
 
     }
 

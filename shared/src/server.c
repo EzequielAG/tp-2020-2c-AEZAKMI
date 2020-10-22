@@ -1,10 +1,6 @@
 #include "server.h"
 
 
-
-
-
-
 void iniciar_servidor(char* IP, char* PUERTO, void (*f)(t_result*))
 {
 	int socket_servidor = abrir_socket_servidor(IP, PUERTO);

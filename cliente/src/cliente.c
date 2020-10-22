@@ -32,41 +32,10 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
-    t_modulo modulo_app;
-    modulo_app.ip = cliente_config->ip_app;
-    modulo_app.puerto = cliente_config->puerto_app;
-    modulo_app.nombre = "App";
+
+    leer_consola(logger,modulo);
 
 
-
-    leer_consola(logger,&modulo_app);
-
-    //TODO: HACER LA INTERFAZ DE USUARIO PARA HACER ESTO
-
-
-
-
-
-
- 
-
-
-/*    t_modulo modulo_comanda;
-    modulo_comanda.ip = cliente_config->ip_comanda;
-    modulo_comanda.puerto = cliente_config->puerto_comanda;
-    modulo_comanda.nombre = "Comanda";
-
-    t_modulo modulo_sindicato;
-    modulo_sindicato.ip = cliente_config->ip_sindicato;
-    modulo_sindicato.puerto = cliente_config->puerto_sindicato;
-    modulo_sindicato.nombre = "Sindicato";
-
-    t_modulo modulo_restaurante;
-    modulo_restaurante.ip = cliente_config->ip_restaurante;
-    modulo_restaurante.puerto = cliente_config->puerto_restaurante;
-    modulo_restaurante.nombre = "Restaurante";
-
-*/
 
     cliente_finally(cliente_config, logger);
 

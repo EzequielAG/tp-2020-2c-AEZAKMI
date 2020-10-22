@@ -78,7 +78,7 @@ void enviar_mensaje(char* mensaje, int socket_cliente);
 void send_messages_socket(int socket, char* mensajes[], int cantidadDeMensajes);
 char* recibir_mensaje(int socket_cliente);
 int send_message_and_return_socket(char* ip, char* puerto, char* mensaje);
-void handle_client(t_result* result);
+//void handle_client(t_result* result);
 char* receive_simple_message(int socket_cliente);
 
 t_mensajes* receive_simple_messages(int socket_cliente);

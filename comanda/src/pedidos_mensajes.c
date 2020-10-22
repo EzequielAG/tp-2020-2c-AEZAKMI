@@ -4,36 +4,26 @@ void handle_client(t_result* result){
 
     //CADA UNO DE LOS MENSAJES CON UN HILO DISTINTO; PASAR POR PARAMETRO SOLAMENTE EL T_RESULT
 
-  
-
-
-    if (result->operacion == MENSAJE){
-        if (!strcmp(result->mensaje, "HANDSHAKE")){
-            send_message_socket(result->socket, "OK");
-            liberar_conexion(result->socket);
-        }
-    } else {
-        if (result->operacion == MENSAJES){
-            int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
-            if (tipo_mensaje == guardar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
-                handle_guardar_pedidos(result);
-            } else if (tipo_mensaje == guardar_plato){ // NOMBRE_RESTAURANTE ID_PEDIDO PLATO CANTIDAD_PLATO
-                handle_guardar_plato(result);
-            } else if (tipo_mensaje == confirmar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO 
-                handle_confirmar_pedido(result);
-            } else if (tipo_mensaje == plato_listo){ //  NOMBRE_RESTAURANTE ID_PEDIDO PLATO
-                handle_plato_listo(result);
-            } else if (tipo_mensaje == obtener_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
-                handle_obtener_pedido(result);
-            } else if (tipo_mensaje == finalizar_pedido){ //  NOMBRE_RESTAURANTE ID_PEDIDO
-                handle_finalizar_pedido(result);
-            }else if (tipo_mensaje == handshake_cliente){
-
-                printf("Se conecto el cliente con el id: %s", result->mensajes->mensajes[1]);
-            }
+    int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
+    if (tipo_mensaje == guardar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
+        handle_guardar_pedidos(result);
+    } else if (tipo_mensaje == guardar_plato){ // NOMBRE_RESTAURANTE ID_PEDIDO PLATO CANTIDAD_PLATO
+        handle_guardar_plato(result);
+    } else if (tipo_mensaje == confirmar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO 
+        handle_confirmar_pedido(result);
+    } else if (tipo_mensaje == plato_listo){ //  NOMBRE_RESTAURANTE ID_PEDIDO PLATO
+        handle_plato_listo(result);
+    } else if (tipo_mensaje == obtener_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
+        handle_obtener_pedido(result);
+    } else if (tipo_mensaje == finalizar_pedido){ //  NOMBRE_RESTAURANTE ID_PEDIDO
+        handle_finalizar_pedido(result);
+    }else if (tipo_mensaje == handshake_cliente){
+        send_message_socket(result->socket, "OK");
+        liberar_conexion(result->socket);
+        printf("Se conecto el cliente con el id: %s \n", result->mensajes->mensajes[1]);
+    }
  
-        }
-    }    
+
 
     return;
 }

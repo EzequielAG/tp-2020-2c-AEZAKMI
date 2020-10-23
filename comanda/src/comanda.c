@@ -9,19 +9,19 @@ int main(int argc, char *argv[]){
     puntero_memoria_principal = malloc(comanda_config->tamanio_memoria);
     
     printf("Imprimiendo el path %s", comanda_config->ruta_log);
-    //iniciar_servidor("127.0.0.1", "5001", handle_client);
+    iniciar_servidor("127.0.0.1", "5001", handle_client);
 
     //ASIGNAR SEGUN LA CONFIG
 
 
 
-    guardar_pedido_en_memoria("Lo de tito", "5");
-    guardar_pedido_en_memoria("Lo de tito", "7");
-    guardar_pedido_en_memoria("Lo de nacho", "6");
+    // guardar_pedido_en_memoria("Lo de tito", "5");
+    // guardar_pedido_en_memoria("Lo de tito", "7");
+    // guardar_pedido_en_memoria("Lo de nacho", "6");
 
-    handle_guardar_plato("Lo de tito", "5", "4", "Arroz");
-    handle_guardar_plato("Lo de tito", "7", "4", "Arroz con pollo");
-    handle_guardar_plato("Lo de nacho", "6", "3", "Pollito bien fresco");
+    // guardar_plato_en_memoria("Lo de tito", "5", "4", "Arroz");
+    // guardar_plato_en_memoria("Lo de tito", "7", "4", "Arroz con pollo");
+    // guardar_plato_en_memoria("Lo de nacho", "6", "3", "Pollito bien fresco");
 
 
     imprimirMemoria();

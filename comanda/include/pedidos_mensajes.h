@@ -3,6 +3,7 @@
 #include <commons/config.h>
 #include <commons/string.h>
 #include <stdbool.h>
+#include <pthread.h>
 #include "shared_utils.h"
 #include "server.h"
 #include "tests.h"
@@ -11,10 +12,14 @@
 
 
 void handle_client(t_result* result);
-int guardar_pedido_en_memoria(char* restaurante, char* id_pedido);
 void handle_guardar_pedidos(t_result*);
-void handle_guardar_plato(char* nombreResto, char*, char* cantidadPlato, char* plato);
+void handle_guardar_plato(t_result*);
 void handle_confirmar_pedido(t_result *);
 void handle_plato_listo(t_result*);
 void handle_obtener_pedido(t_result *);
 void handle_finalizar_pedido(t_result *);
+
+int existe_restaurante(char* restaurante);
+
+int guardar_plato_en_memoria(char* nombreResto, char* idPedido, char* cantidadPlato, char* plato);
+int guardar_pedido_en_memoria(char* restaurante, char* id_pedido);

@@ -11,11 +11,8 @@ void handle_client(t_result* result){
     pthread_t obtener_pedido_thread;
     pthread_t finalizar_pedido_thread;
     
-
     
-    if(!existe_restaurante(result->mensajes->mensajes[1])){
-        send_message_socket(result->socket, "Nuevo restaurante");
-    }
+
     
 
     int tipo_mensaje = atoi(result->mensajes->mensajes[0]);

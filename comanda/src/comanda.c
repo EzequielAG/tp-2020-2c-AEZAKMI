@@ -9,6 +9,7 @@ int main(int argc, char *argv[]){
     puntero_memoria_principal = malloc(comanda_config->tamanio_memoria);
     
     printf("Imprimiendo el path %s", comanda_config->ruta_log);
+    
     iniciar_servidor("127.0.0.1", "5001", handle_client);
 
     //ASIGNAR SEGUN LA CONFIG

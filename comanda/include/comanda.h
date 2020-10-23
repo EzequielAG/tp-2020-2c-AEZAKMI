@@ -9,7 +9,7 @@
 #include "server.h"
 #include "tests.h"
 #include "api.h"
-#include "pedidos_mensajes.h"
+#include "pedidos_mensajes.h" //Por handle_client
 
 
 // VARIABLES Y ESTRUCTURAS
@@ -32,7 +32,5 @@ void comanda_finally(t_comanda_config* comanda_config, t_log* logger);
 t_comanda_config* comanda_config_loader(char* path_config_file);
 void comanda_config_parser(t_config* config, t_comanda_config* comanda_config);
 void comanda_destroy(t_comanda_config* comanda_config);
-
-List tablaRestaurantes;
 
 #endif

@@ -8,7 +8,7 @@ void handle_client(t_result* result){
     if (tipo_mensaje == guardar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
         handle_guardar_pedidos(result);
     } else if (tipo_mensaje == guardar_plato){ // NOMBRE_RESTAURANTE ID_PEDIDO PLATO CANTIDAD_PLATO
-        handle_guardar_plato(result);
+       // handle_guardar_plato(result);
     } else if (tipo_mensaje == confirmar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO 
         handle_confirmar_pedido(result);
     } else if (tipo_mensaje == plato_listo){ //  NOMBRE_RESTAURANTE ID_PEDIDO PLATO
@@ -45,11 +45,27 @@ void handle_guardar_pedidos(t_result* result){
 
 int guardar_pedido_en_memoria(char* restaurante, char* id_pedido){
     //TODO: Guardar pedido en memoria, 1 OK 0 FAIL
-    
+
+    l_proceso *restoEnTabla = find_resto_lista(restaurante);
+
+    if(restoEnTabla == NULL){
+        pushbacklist(&tablaRestaurantes, crearProceso(restaurante));
+
+        restoEnTabla = backlist(tablaRestaurantes);
+    }
+
+    crearSegmento(restoEnTabla, id_pedido);
+
     return 1;
 }
 
-void handle_guardar_plato(t_result* result){
+void handle_guardar_plato(char* nombreResto, char* idPedido, char* cantidadPlato, char* plato){
+
+    l_proceso *restoEnTabla = find_resto_lista(nombreResto);
+
+    l_segmento *segmento = find_segmento_lista(idPedido, restoEnTabla->punteroTablaSegmentos);
+
+    crear_pagina(segmento, atoi(cantidadPlato), plato);
 
 }
 

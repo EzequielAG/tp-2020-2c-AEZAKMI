@@ -10,7 +10,6 @@
 #include "tests.h"
 #include "api.h"
 #include "list.h"
-#include "comanda.h"
 
 
 
@@ -45,6 +44,13 @@ typedef struct proceso{
 
 } l_proceso;
 
-void* puntero_memoria_principal;
-l_segmento *crearSegmento();
-void crear_pagina(l_segmento*, void*);
+void *puntero_memoria_principal;
+void crearSegmento(l_proceso*, char* idPedido);
+void crear_pagina(l_segmento*, int cantidad, char plato[24]);
+l_proceso *find_resto_lista(char*);
+l_proceso *crearProceso(char *);
+void imprimirMemoria();
+l_segmento *find_segmento_lista(char* idSegmento, List *segmentos);
+l_frame *inicializarFrame(int cantidad, char* plato);
+void limpiarMemoria();
+List tablaRestaurantes;

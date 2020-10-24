@@ -11,9 +11,6 @@ void handle_client(t_result* result){
     pthread_t obtener_pedido_thread;
     pthread_t finalizar_pedido_thread;
     
-    
-
-    
 
     int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
     if (tipo_mensaje == guardar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO

@@ -2,6 +2,21 @@
 
 void iniciarMemoria(){
 
+	char* bitMapFrames = "bitMapFrames";
+
+	bitMap = bitarray_create(bitMapFrames, 1024/256);
+
+	void* puntero = NULL;
+
+	puntero = puntero_memoria_principal;
+
+    while(puntero + 1024 > puntero_memoria_principal){
+		
+		puntero_memoria_principal += 32;
+		
+		pushbacklist(&tablaFrames, puntero_memoria_principal);
+
+	}
 }
 
 l_proceso *crearProceso(char *nombreResto){
@@ -34,27 +49,24 @@ void crearSegmento(l_proceso *resto, char *idPedido){
 
 void crear_pagina(l_segmento *segmento, int cantidad, char *plato){
     l_pagina *pagina = malloc(sizeof(l_pagina));
+
+	pagina->bitUso = 0;
     pagina->bitPresencia = 1;
 
-	pagina->frame = inicializarFrame(cantidad, plato);
+	pagina->frame = frameLibre();
+
+
 
     pushbacklist(segmento->punteroTablaPaginas, pagina);
 }
 
-l_frame *inicializarFrame(int cantidad, char* plato){
-
-	l_frame *frame = malloc(32);
-
-	strncpy(frame->plato, plato, 24);
-    frame->cantidadPlato = cantidad;
-	frame->cantidadLista = 0;
-
-	return frame;
-}
-
 void terminarPlatoPagina(l_pagina *pagina){
 
-	pagina->frame->cantidadLista += 1; //FALTA CONDICION POR SI NO QUEDAN PLATOS EN COLA
+	l_frame *frame = pagina->frame;
+
+	frame->cantidadLista += 1;
+
+	//pagina->frame->cantidadLista += 1; //FALTA CONDICION POR SI NO QUEDAN PLATOS EN COLA
 
 }
 
@@ -92,51 +104,12 @@ l_segmento *find_segmento_lista(char* idSegmento, List *segmentos){
 
 }
 
-void limpiarMemoria(){
-
-	l_proceso *resto = NULL;
-	l_segmento *segmento = NULL;
-	l_pagina *pagina = NULL;
-
-	//List *listaSegmentos = tablaRestaurantes->punteroTablaSegmentos;
-	//List *listaPaginas = tablaRestaurantes->punteroTablaSegmentos->punteroTablaPaginas;
-
-	IteratorList iterador = NULL;
-	IteratorList jterador = NULL;
-	IteratorList kterador = NULL;
-
-    for(iterador = beginlist(tablaRestaurantes);iterador!=NULL;iterador = nextlist(iterador)){
-        resto = dataiterlist(iterador);
-
-
-		for(jterador = beginlist(*resto->punteroTablaSegmentos);jterador!=NULL;jterador = nextlist(jterador)){
-        	segmento = dataiterlist(jterador);
-
-
-			for(kterador = beginlist(*segmento->punteroTablaPaginas);kterador!=NULL;kterador = nextlist(kterador)){
-        		pagina = dataiterlist(kterador);
-
-				free(pagina->frame);
-
-    		}
-
-			emptylist(segmento->punteroTablaPaginas);
-    	
-		}
-
-		emptylist(resto->punteroTablaSegmentos);
-
-    }
-
-
-}
-
-
 void imprimirMemoria(){
 
 	l_proceso *resto = NULL;
 	l_segmento *segmento = NULL;
 	l_pagina *pagina = NULL;
+	l_frame *frame = NULL;
 
 	//List *listaSegmentos = tablaRestaurantes->punteroTablaSegmentos;
 	//List *listaPaginas = tablaRestaurantes->punteroTablaSegmentos->punteroTablaPaginas;
@@ -160,7 +133,9 @@ void imprimirMemoria(){
 			for(kterador = beginlist(*segmento->punteroTablaPaginas);kterador!=NULL;kterador = nextlist(kterador)){
         		pagina = dataiterlist(kterador);
 
-				printf("\t\tPlato: %s | Cantidad: %i | CantLista: %i\n", pagina->frame->plato, pagina->frame->cantidadPlato, pagina->frame->cantidadLista);
+				frame = pagina->frame;
+
+				printf("\t\tPlato: %s | Cantidad: %i | CantLista: %i\n", frame->plato, frame->cantidadPlato, frame->cantidadLista);
 
     		}
     	
@@ -169,5 +144,34 @@ void imprimirMemoria(){
     }
 
 	printf("---------------------------------------------------\n");
+
+}
+
+void *frameLibre(){
+
+    for(int i=0; bitarray_get_max_bit(bitMap) > i; i++){
+
+		int bitOcupado = bitarray_test_bit(bitMap, i);
+		void *punteroFrame = atlist(tablaFrames, i);
+
+		if(!bitOcupado){
+			bitarray_set_bit(bitMap, i);
+			return punteroFrame;
+		}
+
+	}
+
+	return NULL;
+
+}
+
+void imprimirBitMap(){
+
+	for(int i=0; bitarray_get_max_bit(bitMap) > i; i++){
+
+		int bitOcupado = bitarray_test_bit(bitMap, i);
+		
+		printf("Bit: %d | Posicion: %d\n", bitOcupado, i);
+	}
 
 }

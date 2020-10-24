@@ -5,27 +5,29 @@ int main(int argc, char *argv[]){
     comanda_init(&comanda_config, &logger);
 	
     initlist(&tablaRestaurantes);
+    initlist(&tablaFrames);
 
     puntero_memoria_principal = malloc(comanda_config->tamanio_memoria);
     
     printf("Imprimiendo el path %s", comanda_config->ruta_log);
     
-    iniciar_servidor("127.0.0.1", "5001", handle_client);
+    //iniciar_servidor("127.0.0.1", "5001", handle_client);
 
     //ASIGNAR SEGUN LA CONFIG
 
+    //guardar_pedido_en_memoria("Lo de tito", "5");
+    //guardar_pedido_en_memoria("Lo de tito", "7");
+    //guardar_pedido_en_memoria("Lo de nacho", "6");
 
+    //guardar_plato_en_memoria("Lo de tito", "5", "4", "Arroz");
+    //guardar_plato_en_memoria("Lo de tito", "7", "4", "Arroz con pollo");
+    //guardar_plato_en_memoria("Lo de nacho", "6", "3", "Pollito bien fresco");
 
-    // guardar_pedido_en_memoria("Lo de tito", "5");
-    // guardar_pedido_en_memoria("Lo de tito", "7");
-    // guardar_pedido_en_memoria("Lo de nacho", "6");
+    iniciarMemoria();
 
-    // guardar_plato_en_memoria("Lo de tito", "5", "4", "Arroz");
-    // guardar_plato_en_memoria("Lo de tito", "7", "4", "Arroz con pollo");
-    // guardar_plato_en_memoria("Lo de nacho", "6", "3", "Pollito bien fresco");
+    imprimirBitMap();
 
-
-    imprimirMemoria();
+    //imprimirMemoria();
 
     comanda_finally(comanda_config, logger);
     return 0;
@@ -39,8 +41,6 @@ void comanda_init(t_comanda_config** comanda_config, t_log** logger){
 
 void comanda_finally(t_comanda_config* comanda_config, t_log* logger) {
     
-    
-
     comanda_destroy(comanda_config);
     log_destroy(logger);
 }

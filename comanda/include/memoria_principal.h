@@ -6,6 +6,7 @@
 #include <commons/string.h>
 #include <stdbool.h>
 #include "shared_utils.h"
+#include <commons/bitarray.h>
 #include "server.h"
 #include "tests.h"
 #include "api.h"
@@ -29,11 +30,18 @@ typedef struct frame{
 
 } l_frame;
 
+typedef struct puntero{
+
+    int bitOcupado;
+    void *punteroFrame;
+
+} l_punteroFrame;
+
 typedef struct pagina{
 
-    int numeroPagina;
+    int bitUso;
     int bitPresencia;
-    l_frame *frame;
+    void *frame;
 
 } l_pagina;
 
@@ -53,4 +61,9 @@ void imprimirMemoria();
 l_segmento *find_segmento_lista(char* idSegmento, List *segmentos);
 l_frame *inicializarFrame(int cantidad, char* plato);
 void limpiarMemoria();
+void iniciarMemoria();
+void *frameLibre();
+void imprimirBitMap();
 List tablaRestaurantes;
+List tablaFrames;
+t_bitarray *bitMap;

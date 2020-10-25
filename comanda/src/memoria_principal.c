@@ -2,13 +2,15 @@
 
 void iniciarMemoria(){
 
-	char* bitMapFrames = "bitMapFrames";
-
-	bitMap = bitarray_create(bitMapFrames, 1024/256);
-
 	void* puntero = NULL;
 
 	puntero = puntero_memoria_principal;
+
+	for(int i=0; bitarray_get_max_bit(bitMap) > i; i++){
+
+			bitarray_clean_bit(bitMap, i);
+
+	}
 
     while(puntero + 1024 > puntero_memoria_principal){
 		
@@ -50,11 +52,17 @@ void crearSegmento(l_proceso *resto, char *idPedido){
 void crear_pagina(l_segmento *segmento, int cantidad, char *plato){
     l_pagina *pagina = malloc(sizeof(l_pagina));
 
+	l_frame *frame;
+
 	pagina->bitUso = 0;
     pagina->bitPresencia = 1;
 
 	pagina->frame = frameLibre();
 
+	frame = pagina->frame;
+	frame->cantidadPlato = cantidad;
+	frame->cantidadLista = 0;
+	strncpy(frame->plato, plato, 24);
 
 
     pushbacklist(segmento->punteroTablaPaginas, pagina);
@@ -83,7 +91,7 @@ l_proceso *find_resto_lista(char* nombreRestaurante){
             return resto;
         }
     }
-    return NULL;
+     return NULL;
 
 }
 
@@ -169,9 +177,11 @@ void imprimirBitMap(){
 
 	for(int i=0; bitarray_get_max_bit(bitMap) > i; i++){
 
+		void* puntero = atlist(tablaFrames, i);
+
 		int bitOcupado = bitarray_test_bit(bitMap, i);
 		
-		printf("Bit: %d | Posicion: %d\n", bitOcupado, i);
+		printf("\nBit: %d | Posicion: %d | Direccion de memoria: %p\n", bitOcupado, i, puntero);
 	}
 
 }

@@ -10,6 +10,15 @@
 #include "api.h"
 #include "memoria_principal.h" //Por handle de memoria
 
+typedef struct mensaje{
+    int socket;
+    char* restaurant;
+    char* idPedido;
+    char* plato;
+    char* cantidadPlato;
+
+} l_mensaje;
+
 
 void handle_client(t_result* result);
 void handle_guardar_pedidos(t_result*);
@@ -23,3 +32,7 @@ int existe_restaurante(char* restaurante);
 
 int guardar_plato_en_memoria(char* nombreResto, char* idPedido, char* cantidadPlato, char* plato);
 int guardar_pedido_en_memoria(char* restaurante, char* id_pedido);
+int confirmar_pedido_en_memoria(char* restaurante, char* id_pedido);
+int obtener_pedido_en_memoria(char* restaurante, char* id_pedido);
+int plato_listo_en_memoria(char* restaurante, char* id_pedido, char* plato);
+int finalizar_pedido_en_memoria(char* restaurante, char* id_pedido);

@@ -5,6 +5,7 @@
 #include <commons/config.h>
 #include <commons/string.h>
 #include <stdbool.h>
+#include <signal.h>
 #include "shared_utils.h"
 #include "server.h"
 #include "tests.h"

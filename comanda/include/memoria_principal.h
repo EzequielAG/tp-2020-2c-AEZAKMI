@@ -53,6 +53,7 @@ typedef struct proceso{
 } l_proceso;
 
 void *puntero_memoria_principal;
+void *puntero_memoria_swap;
 void crearSegmento(l_proceso*, char* idPedido);
 void crear_pagina(l_segmento*, int cantidad, char plato[24]);
 l_proceso *find_resto_lista(char*);
@@ -66,4 +67,5 @@ void *frameLibre();
 void imprimirBitMap();
 List tablaRestaurantes;
 List tablaFrames;
+char* punteroBitMap;
 t_bitarray *bitMap;

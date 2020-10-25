@@ -10,7 +10,10 @@ void handle_client(t_result* result){
     pthread_t plato_listo_thread;
     pthread_t obtener_pedido_thread;
     pthread_t finalizar_pedido_thread;
-    
+
+    //t_result *mensaje = malloc(sizeof(t_result));
+    //memcpy(mensaje, result, sizeof(t_result));
+
 
     int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
     if (tipo_mensaje == guardar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
@@ -75,7 +78,16 @@ int existe_restaurante(char* restaurante){
 
 void handle_guardar_plato(t_result* result){
 
-    guardar_plato_en_memoria(result->mensajes->mensajes[1],result->mensajes->mensajes[2],result->mensajes->mensajes[4],result->mensajes->mensajes[3]);
+    char* respuesta[1];
+
+    if (guardar_plato_en_memoria(result->mensajes->mensajes[1],result->mensajes->mensajes[2],result->mensajes->mensajes[4],result->mensajes->mensajes[3])){
+        respuesta[0] = "Ok";
+    } else {
+        respuesta[0] = "Fail";
+    }
+
+    send_messages_socket(result->socket, respuesta, 1);
+    liberar_conexion(result->socket);
 
 }
 
@@ -99,17 +111,62 @@ void handle_guardar_pedidos(t_result* result){
 
 void handle_confirmar_pedido(t_result* result){
 
+    char* respuesta[1];
+
+    if (confirmar_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
+        respuesta[0] = "Ok";
+    } else {
+        respuesta[0] = "Fail";
+    }
+
+    send_messages_socket(result->socket, respuesta, 1);
+    liberar_conexion(result->socket);
+
 }
 
 void handle_plato_listo(t_result* result){
 
+    char* respuesta[1];
+
+    if (plato_listo_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3])){
+        respuesta[0] = "Ok";
+    } else {
+        respuesta[0] = "Fail";
+    }
+
+    send_messages_socket(result->socket, respuesta, 1);
+    liberar_conexion(result->socket);
+
 }
 
+//COORDINAR CON APP PARA EL FORMATE DE RESPUESTA
 void handle_obtener_pedido(t_result* result){
+
+    char* respuesta[1];
+
+    if (obtener_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
+        respuesta[0] = "Ok";
+    } else {
+        respuesta[0] = "Fail";
+    }
+
+    send_messages_socket(result->socket, respuesta, 1);
+    liberar_conexion(result->socket);
 
 }
 
 void handle_finalizar_pedido(t_result* result){
+
+    char* respuesta[1];
+
+    if (finalizar_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
+        respuesta[0] = "Ok";
+    } else {
+        respuesta[0] = "Fail";
+    }
+
+    send_messages_socket(result->socket, respuesta, 1);
+    liberar_conexion(result->socket);
 
 }
 
@@ -122,22 +179,47 @@ int guardar_plato_en_memoria(char* nombreResto, char* idPedido, char* cantidadPl
 
     crear_pagina(segmento, atoi(cantidadPlato), plato);
 
-    return 0;
+    return 1;
 };
 
 
 int guardar_pedido_en_memoria(char* restaurante, char* id_pedido){
-    //TODO: Guardar pedido en memoria, 1 OK 0 FAIL
 
-    l_proceso *restoEnTabla = find_resto_lista(restaurante);
+    char* asd;
+
+    strcpy(asd, restaurante);
+
+    l_proceso *restoEnTabla = find_resto_lista(asd);
 
     if(restoEnTabla == NULL){
-        pushbacklist(&tablaRestaurantes, crearProceso(restaurante));
+        pushbacklist(&tablaRestaurantes, crearProceso(asd));
 
         restoEnTabla = backlist(tablaRestaurantes);
     }
 
     crearSegmento(restoEnTabla, id_pedido);
 
+    return 1;
+}
+
+int confirmar_pedido_en_memoria(char* restaurante, char* id_pedido){
+
+
+
+    return 1;
+}
+
+int obtener_pedido_en_memoria(char* restaurante, char* id_pedido){
+    return 1;
+}
+
+int plato_listo_en_memoria(char* restaurante, char* id_pedido, char* plato){
+
+
+
+    return 1;
+}
+
+int finalizar_pedido_en_memoria(char* restaurante, char* id_pedido){
     return 1;
 }

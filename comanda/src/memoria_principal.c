@@ -52,6 +52,7 @@ int crearSegmento(l_proceso *resto, char *idPedido){
 
 	strcpy(segmento->idPedido,idPedido);
     segmento->punteroTablaPaginas = tablaPaginas;
+	segmento->estadoPedido = 0;
 
     return pushbacklist(resto->punteroTablaSegmentos, segmento);
 }
@@ -86,6 +87,39 @@ void terminarPlatoPagina(l_pagina *pagina){
 
 }
 
+
+int platos_listos(l_segmento* segmento){
+
+	l_frame* frame = NULL;
+	l_pagina* pagina = NULL;
+	IteratorList iterador = NULL;
+
+    for(iterador = beginlist(*(segmento->punteroTablaPaginas));iterador!=NULL;iterador = nextlist(iterador)){
+        pagina = dataiterlist(iterador);
+		frame = pagina->frame;
+
+		if(frame->cantidadLista != frame->cantidadPlato){
+			return 0;
+		}
+
+       
+	}
+	
+
+    return 1;
+
+}
+
+void agregar_plato_pedido(l_pagina* pagina, int cantidad){
+	l_frame* frame = pagina->frame;
+	frame->cantidadPlato += cantidad;
+
+}
+
+void confirmar_pedido_segmento(l_segmento *segmento){
+    segmento->estadoPedido = 1;
+}
+
 l_proceso *find_resto_lista(char* nombreRestaurante){
 
     l_proceso *resto = NULL;
@@ -118,6 +152,24 @@ l_segmento *find_segmento_lista(char* idSegmento, List *segmentos){
     }
     return NULL;
 
+}
+
+l_pagina* plato_en_pagina(char* plato, List* lista){
+
+	l_pagina *pagina = NULL;
+	l_frame* frame = NULL;
+
+    IteratorList iterador = NULL;
+
+    for(iterador = beginlist(*lista);iterador!=NULL;iterador = nextlist(iterador)){
+        pagina = dataiterlist(iterador);
+		frame = pagina->frame;
+
+        if(!strcmp(plato,frame->plato)){
+            return pagina;
+        }
+    }
+    return NULL;
 }
 
 void imprimirMemoria(){

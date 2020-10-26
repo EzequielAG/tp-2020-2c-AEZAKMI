@@ -152,16 +152,16 @@ void handle_plato_listo(t_result* result){
 //COORDINAR CON APP PARA EL FORMATE DE RESPUESTA
 void handle_obtener_pedido(t_result* result){
 
-    char* respuesta[1];
+    l_segmento* segmento = obtener_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 
-    if (obtener_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
-        respuesta[0] = "Ok";
-    } else {
-        respuesta[0] = "Fail";
+    if(segmento != NULL){
+        send_message_socket(result->socket, segmento->idPedido);
+    }else{
+        send_message_socket(result->socket, "No se encuentra el pedido");
     }
 
-    send_messages_socket(result->socket, respuesta, 1);
     liberar_conexion(result->socket);
+   
 
 }
 
@@ -192,11 +192,28 @@ int guardar_plato_en_memoria(char* nombreResto, char* idPedido, char* cantidadPl
         return 0;
     }
 
-    //DEVUELVE NULL Y PRODUCE EL SEGMENTATION FAULT
-
     l_segmento *segmento = find_segmento_lista(idPedido, restoEnTabla->punteroTablaSegmentos);
 
-    crear_pagina(segmento, atoi(cantidadPlato), plato);
+    if(segmento == NULL){
+
+        printf("El segmento no esta en la tabla de segmentos \n");
+        
+        return 0;
+
+    }
+
+    l_pagina* pagina_plato = plato_en_pagina(plato, segmento->punteroTablaPaginas);
+
+    if(pagina_plato == NULL){
+        crear_pagina(segmento, atoi(cantidadPlato), plato); 
+        return 1;  
+    }
+
+    agregar_plato_pedido(pagina_plato,atoi(cantidadPlato));
+
+    //FALTA AGREGAR LO DE SWAPP
+
+    
 
     return 1;
 };
@@ -218,17 +235,74 @@ int guardar_pedido_en_memoria(char* restaurante, char* id_pedido){
 
 int confirmar_pedido_en_memoria(char* restaurante, char* id_pedido){
 
+    l_segmento* segmento = obtener_pedido_en_memoria(restaurante, id_pedido);
 
+    if(segmento == NULL){
+        return 0;
+    }
+
+    confirmar_pedido_segmento(segmento);
 
     return 1;
 }
 
-int obtener_pedido_en_memoria(char* restaurante, char* id_pedido){
-    return 1;
+
+
+l_segmento* obtener_pedido_en_memoria(char* nombreResto, char* id_pedido){
+
+    l_proceso *restoEnTabla = find_resto_lista(nombreResto);
+
+    if(restoEnTabla == NULL){
+        
+        printf("El restaurante no esta en la tabla de restaurantes \n");
+        
+        return NULL;
+    }
+
+    l_segmento *segmento = find_segmento_lista(id_pedido, restoEnTabla->punteroTablaSegmentos);
+
+    return segmento;
 }
 
-int plato_listo_en_memoria(char* restaurante, char* id_pedido, char* plato){
+int plato_listo_en_memoria(char* nombreResto, char* idPedido, char* plato){
+ 
+    l_proceso *restoEnTabla = find_resto_lista(nombreResto);
 
+    if(restoEnTabla == NULL){
+        
+        printf("El restaurante no esta en la tabla de restaurantes \n");
+        
+        return 0;
+    }
+
+    l_segmento *segmento = find_segmento_lista(idPedido, restoEnTabla->punteroTablaSegmentos);
+
+    if(segmento == NULL){
+
+        printf("El segmento no esta en la tabla de segmentos \n");
+        
+        return 0;
+
+    }
+
+    if(segmento->idPedido == 0){
+
+        printf("El plato no esta confirmado \n");
+        
+        return 0;
+
+    }
+
+    l_pagina* pagina_plato = plato_en_pagina(plato, segmento->punteroTablaPaginas);
+
+    terminarPlatoPagina(pagina_plato);
+
+    if(platos_listos(segmento)){
+        segmento->estadoPedido = 2;   
+    };
+
+
+    //FALTA AGREGAR LO DE SWAPP    
 
 
     return 1;

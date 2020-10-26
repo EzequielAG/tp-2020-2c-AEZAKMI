@@ -18,6 +18,7 @@ typedef struct segmento{
 
     //int numeroSegmento;
     char* idPedido;
+    int estadoPedido; // 0 EN PROCESO ; 1 LISTO ; 2 TERMINADO
     List* punteroTablaPaginas;
     
 } l_segmento;
@@ -69,3 +70,8 @@ List tablaRestaurantes;
 List tablaFrames;
 char* punteroBitMap;
 t_bitarray *bitMap;
+
+l_pagina* plato_en_pagina(char* plato, List* lista);
+
+void agregar_plato_pedido(l_pagina* pagina, int cantidad);
+void confirmar_pedido_segmento(l_segmento *segmento);

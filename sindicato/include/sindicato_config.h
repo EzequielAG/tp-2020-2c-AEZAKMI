@@ -8,6 +8,9 @@ typedef struct {
     char* puerto_escucha;
     char* punto_montaje;
     char* ruta_log;
+    char* block_size;
+    char* blocks;
+    char* magic_number;
 } t_sindicato_config;
 
 t_sindicato_config* sindicato_config;

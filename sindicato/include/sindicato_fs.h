@@ -16,10 +16,11 @@ t_sindicato_metadata* sindicato_metadata;
 
 // FUNCIONES
 void get_or_create_fs();
-int get_or_create_metadata();
-int get_or_create_montaje_point();
 void crear_metadata_default();
-void leer_metadata_afip();
+int leer_metadata_afip();
 void crear_bitmap();
+int get_or_create_folder();
+int existe_archivo(char* archivo_path);
+int necesita_recrearse(char * block_size, char * blocks, char * magic_number);
 
 #endif

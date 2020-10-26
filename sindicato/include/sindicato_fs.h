@@ -22,5 +22,6 @@ void crear_bitmap();
 int get_or_create_folder();
 int existe_archivo(char* archivo_path);
 int necesita_recrearse(char * block_size, char * blocks, char * magic_number);
+void crear_files();
 
 #endif

@@ -27,6 +27,7 @@ void get_or_create_fs() {
 		/* Crear solo con write, para que se pise lo anterior */
 		crear_metadata_default(metadata_afip_adress);
 		crear_bitmap();
+		crear_files();
 	}	
 	
 
@@ -122,4 +123,28 @@ int existe_archivo(char* ruta_archivo){
 	} else {
 		return 0;
 	}
+}
+
+
+void crear_files(){
+	char * files_adress = string_new();
+	string_append(&files_adress, sindicato_config->punto_montaje);
+	string_append(&files_adress, "/Files");
+
+	char * restaurantes_adress = string_new();
+	string_append(&restaurantes_adress, files_adress);
+	string_append(&restaurantes_adress, "/Restaurantes");
+
+	char * recetas_adress = string_new();
+	string_append(&recetas_adress, files_adress);
+	string_append(&recetas_adress, "/Recetas");
+
+	char * bloques_adress = string_new();
+	string_append(&bloques_adress, sindicato_config->punto_montaje);
+	string_append(&bloques_adress, "/Blocks");
+
+	get_or_create_folder(files_adress);
+	get_or_create_folder(restaurantes_adress);
+	get_or_create_folder(recetas_adress);
+	get_or_create_folder(bloques_adress);
 }

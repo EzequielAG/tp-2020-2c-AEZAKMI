@@ -24,11 +24,14 @@ void iniciarMemoria(){
 l_proceso *crearProceso(char *nombreResto){
 
     l_proceso *resto = malloc(sizeof(l_proceso));
+	resto->nombreResto = malloc(sizeof(char*));
 
     List *tablaSegmentos = malloc(sizeof(List));
     initlist(tablaSegmentos);
 
-    resto->nombreResto = nombreResto;
+ //   resto->nombreResto = nombreResto;
+	strcpy(resto->nombreResto,nombreResto);
+
     resto->punteroTablaSegmentos = tablaSegmentos;
 
     return resto;
@@ -38,11 +41,16 @@ l_proceso *crearProceso(char *nombreResto){
 void crearSegmento(l_proceso *resto, char *idPedido){
 
     l_segmento *segmento = malloc(sizeof(l_segmento));
+	segmento->idPedido = malloc(sizeof(char*));
+
 
     List *tablaPaginas = malloc(sizeof(List));
+
     initlist(tablaPaginas);
 
-    segmento->idPedido = idPedido;
+  //  segmento->idPedido = idPedido;
+
+	strcpy(segmento->idPedido,idPedido);
     segmento->punteroTablaPaginas = tablaPaginas;
 
     pushbacklist(resto->punteroTablaSegmentos, segmento);
@@ -87,7 +95,7 @@ l_proceso *find_resto_lista(char* nombreRestaurante){
     for(iterador = beginlist(tablaRestaurantes);iterador!=NULL;iterador = nextlist(iterador)){
         resto = dataiterlist(iterador);
 
-        if(!strcmp(nombreRestaurante, resto->nombreResto)){
+        if(strcmp(nombreRestaurante, resto->nombreResto) == 0){
             return resto;
         }
     }

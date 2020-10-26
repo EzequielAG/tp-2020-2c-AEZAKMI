@@ -10,41 +10,51 @@ void handle_client(t_result* result){
     pthread_t plato_listo_thread;
     pthread_t obtener_pedido_thread;
     pthread_t finalizar_pedido_thread;
+   
+    IteratorList iterador = NULL;
 
-    //t_result *mensaje = malloc(sizeof(t_result));
-    //memcpy(mensaje, result, sizeof(t_result));
+    l_proceso *resto = NULL;
+
+
+    printf("La tabla de restaurante contiene los siguientes datos \n");
+    for(iterador = beginlist(tablaRestaurantes);iterador!=NULL;iterador = nextlist(iterador)){
+        resto = dataiterlist(iterador);
+
+        printf("Restaurante: %s | Direccion %p \n", resto->nombreResto,resto->punteroTablaSegmentos);
+    }printf("------------- \n");
+
 
 
     int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
     if (tipo_mensaje == guardar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
 
-        pthread_create(&guardar_pedido_thread, NULL, (void*)handle_guardar_pedidos, result);
-	    pthread_detach(guardar_pedido_thread);
+        pthread_create(&guardar_pedido_thread, NULL, (void*)handle_guardar_pedidos, (void*)result);
+	    pthread_join(guardar_pedido_thread, NULL);
 
     } else if (tipo_mensaje == guardar_plato){ // NOMBRE_RESTAURANTE ID_PEDIDO PLATO CANTIDAD_PLATO
 
         pthread_create(&guardar_plato_thread, NULL, (void*)handle_guardar_plato, result);
-	    pthread_detach(guardar_plato_thread);
+	    pthread_join(guardar_plato_thread, NULL);
 
     } else if (tipo_mensaje == confirmar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO 
 
         pthread_create(&confirmar_pedido_thread, NULL, (void*)handle_confirmar_pedido, result);
-	    pthread_detach(confirmar_pedido_thread);
+	    pthread_join(confirmar_pedido_thread, NULL);
 
     } else if (tipo_mensaje == plato_listo){ //  NOMBRE_RESTAURANTE ID_PEDIDO PLATO
 
         pthread_create(&plato_listo_thread, NULL, (void*)handle_plato_listo, result);
-	    pthread_detach(plato_listo_thread);
+	    pthread_join(plato_listo_thread, NULL);
 
     } else if (tipo_mensaje == obtener_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
 
         pthread_create(&obtener_pedido_thread, NULL, (void*)handle_obtener_pedido, result);
-	    pthread_detach(obtener_pedido_thread);
+	    pthread_join(obtener_pedido_thread, NULL);
 
     } else if (tipo_mensaje == finalizar_pedido){ //  NOMBRE_RESTAURANTE ID_PEDIDO
 
         pthread_create(&finalizar_pedido_thread, NULL, (void*)handle_finalizar_pedido, result);
-	    pthread_detach(finalizar_pedido_thread);
+	    pthread_join(finalizar_pedido_thread, NULL);
 
 
     }else if (tipo_mensaje == handshake_cliente){
@@ -175,6 +185,15 @@ int guardar_plato_en_memoria(char* nombreResto, char* idPedido, char* cantidadPl
     
     l_proceso *restoEnTabla = find_resto_lista(nombreResto);
 
+    if(restoEnTabla == NULL){
+        
+        printf("El restaurante no esta en la tabla \n");
+        
+        return 0;
+    }
+
+    //DEVUELVE NULL Y PRODUCE EL SEGMENTATION FAULT
+
     l_segmento *segmento = find_segmento_lista(idPedido, restoEnTabla->punteroTablaSegmentos);
 
     crear_pagina(segmento, atoi(cantidadPlato), plato);
@@ -185,15 +204,11 @@ int guardar_plato_en_memoria(char* nombreResto, char* idPedido, char* cantidadPl
 
 int guardar_pedido_en_memoria(char* restaurante, char* id_pedido){
 
-    char* asd;
 
-    strcpy(asd, restaurante);
-
-    l_proceso *restoEnTabla = find_resto_lista(asd);
+    l_proceso *restoEnTabla = find_resto_lista(restaurante);
 
     if(restoEnTabla == NULL){
-        pushbacklist(&tablaRestaurantes, crearProceso(asd));
-
+        pushbacklist(&tablaRestaurantes, (void *) crearProceso(restaurante));
         restoEnTabla = backlist(tablaRestaurantes);
     }
 

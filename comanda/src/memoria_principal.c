@@ -8,7 +8,7 @@ void iniciarMemoria(){
 
 	for(int i=0; bitarray_get_max_bit(bitMap) > i; i++){
 
-			bitarray_clean_bit(bitMap, i);
+		bitarray_clean_bit(bitMap, i);
 
 	}
 
@@ -38,7 +38,7 @@ l_proceso *crearProceso(char *nombreResto){
 }
 
 
-void crearSegmento(l_proceso *resto, char *idPedido){
+int crearSegmento(l_proceso *resto, char *idPedido){
 
     l_segmento *segmento = malloc(sizeof(l_segmento));
 	segmento->idPedido = malloc(sizeof(char*));
@@ -53,7 +53,7 @@ void crearSegmento(l_proceso *resto, char *idPedido){
 	strcpy(segmento->idPedido,idPedido);
     segmento->punteroTablaPaginas = tablaPaginas;
 
-    pushbacklist(resto->punteroTablaSegmentos, segmento);
+    return pushbacklist(resto->punteroTablaSegmentos, segmento);
 }
 
 

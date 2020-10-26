@@ -29,7 +29,7 @@ void handle_client(t_result* result){
     if (tipo_mensaje == guardar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
 
         pthread_create(&guardar_pedido_thread, NULL, (void*)handle_guardar_pedidos, (void*)result);
-	    pthread_join(guardar_pedido_thread, NULL);
+	    pthread_join(guardar_pedido_thread, NULL); //MENSAJE LISTO EN TEORIA XD
 
     } else if (tipo_mensaje == guardar_plato){ // NOMBRE_RESTAURANTE ID_PEDIDO PLATO CANTIDAD_PLATO
 
@@ -187,7 +187,7 @@ int guardar_plato_en_memoria(char* nombreResto, char* idPedido, char* cantidadPl
 
     if(restoEnTabla == NULL){
         
-        printf("El restaurante no esta en la tabla \n");
+        printf("El restaurante no esta en la tabla de restaurantes \n");
         
         return 0;
     }
@@ -212,9 +212,8 @@ int guardar_pedido_en_memoria(char* restaurante, char* id_pedido){
         restoEnTabla = backlist(tablaRestaurantes);
     }
 
-    crearSegmento(restoEnTabla, id_pedido);
+    return crearSegmento(restoEnTabla, id_pedido);      
 
-    return 1;
 }
 
 int confirmar_pedido_en_memoria(char* restaurante, char* id_pedido){

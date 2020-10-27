@@ -24,9 +24,15 @@ void sindicato_config_parser(t_config* config, t_sindicato_config* sindicato_con
     sindicato_config->puerto_escucha = strdup(config_get_string_value(config, "PUERTO_ESCUCHA"));
     sindicato_config->punto_montaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));
     sindicato_config->ruta_log = strdup(config_get_string_value(config, "ARCHIVO_LOG"));
+    sindicato_config->block_size = strdup(config_get_string_value(config, "BLOCK_SIZE"));
+    sindicato_config->blocks = strdup(config_get_string_value(config, "BLOCKS"));
+    sindicato_config->magic_number = strdup(config_get_string_value(config, "MAGIC_NUMBER"));
 }
 
 void sindicato_destroy(t_sindicato_config* sindicato_config) {
+    free(sindicato_config->block_size);
+    free(sindicato_config->blocks);
+    free(sindicato_config->magic_number);
     free(sindicato_config->puerto_escucha);
     free(sindicato_config->punto_montaje);
     free(sindicato_config->ruta_log);

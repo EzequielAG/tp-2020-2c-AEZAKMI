@@ -3,7 +3,11 @@
 
 #include <sys/stat.h>
 #include <dirent.h>
+#include <limits.h>
+#include <commons/bitarray.h>
 #include "sindicato_config.h"
+
+#define BIT_SIZE(x,y) ((x - 1) / y + 1);
 
 // VARIABLES Y ESTRUCTURAS
 typedef struct {
@@ -13,6 +17,8 @@ typedef struct {
 } t_sindicato_metadata;
 
 t_sindicato_metadata* sindicato_metadata;
+
+pthread_mutex_t mutex_bitmap;
 
 // FUNCIONES
 void get_or_create_fs();

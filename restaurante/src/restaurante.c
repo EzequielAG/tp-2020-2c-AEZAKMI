@@ -7,7 +7,7 @@ int main(void){
     log_info(logger, "Soy el MODULO RESTAURANTE! %s", mi_funcion_compartida());
     
     //MALLOC VARIABLES GLOBALES
-    afinidades = malloc(sizeof(char**));
+    afinidades = malloc(sizeof(List));
     pos_x = malloc(sizeof(char*));
     pos_y = malloc(sizeof(char*));
     recetas = malloc(sizeof(receta_precio**));
@@ -43,11 +43,9 @@ int main(void){
 
     //PRINTF AFINIDIDADES Y ESO
 
-    int cant_afinidades = len_array(afinidades);
-    printf("CANTIDAD AFINIDADES %i \n",cant_afinidades);
-
-    for(int i = 0;i < cant_afinidades;i++) {
-        printf("<< RESTAURANTE >> Iniciado con afinidades = %s \n", afinidades[i]);
+    for(IteratorList iterator_afinidades = beginlist(*afinidades); iterator_afinidades != NULL; iterator_afinidades = nextlist(iterator_afinidades))
+    {
+        printf("<< RESTAURANTE >> Iniciado con afinidades = %s \n", (char*)iterator_afinidades->data);
     }
 
     printf("<< RESTAURANTE >> Iniciado con posiciones x = %s ; y = %s\n", pos_x,pos_y);
@@ -259,20 +257,21 @@ recetas[0] = receta1;
 recetas[1] = receta2;
 recetas[2] = receta3;
 
-char* af[2];
-af[0] = "Milanesas";
-af[1] = "Empanadas";
+List* afinidades_default = malloc(sizeof(List));
+initlist(afinidades_default);
+pushbacklist(afinidades_default, "Milanesas");
+pushbacklist(afinidades_default, "Empanadas");
 
-inicializar(af,"4","5",recetas,"2","6");
+inicializar(afinidades_default,"4","5",recetas,"2","6");
 
 }
 
-void inicializar(char** afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,char* cantidad_pedidos_f){
-// for(int i = 0; i < 1; i++)
-// {
-//     strcpy(afinidades[i],afinidades_f[i]);
-// }
-printf("Cantidad afin = %i \n", len_array_v2(afinidades_f));
+void inicializar(List* afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,char* cantidad_pedidos_f){
+
+for(IteratorList iterator_afinidades = beginlist(*afinidades_f); iterator_afinidades != NULL; iterator_afinidades = nextlist(iterator_afinidades))
+{
+    pushbacklist(afinidades, iterator_afinidades->data);
+}
 
 strcpy(pos_x,pos_x_f);
 strcpy(pos_y,pos_y_f);
@@ -297,15 +296,3 @@ int len_array(char** arrayInput)
         
     return cont;
 }
-
-int len_array_v2(char** p)
-{
-    int r = 0;
-    while (strcmp(*p,'\0')) {
-		r++;
-		// printf( "%c\n", *p );	/* Mostramos la letra actual */
-		p++;			/* Vamos a la siguiente letra */
-	}
-    return r;
-}
-

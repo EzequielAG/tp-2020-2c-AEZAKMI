@@ -32,7 +32,7 @@ t_log* logger;
 // } receta_precio;
 
 //VARIABLES GLOBALES
-char** afinidades;
+List* afinidades;
 char* pos_x;
 char* pos_y;
 receta_precio** recetas;
@@ -56,7 +56,7 @@ void escuchar_mensajes_socket(t_parameter* parametro);
 void handle_client(t_result* result);
 void inicializacion_default();
 void handle_obtener_restaurante(r_obtener_restaurante* resultado);
-void inicializar(char**,char*,char*,receta_precio**,char*,char*);
+void inicializar(List*,char*,char*,receta_precio**,char*,char*);
 int len_array(char** arrayInput);
 void consultar_platos_f();
 

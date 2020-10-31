@@ -26,6 +26,20 @@ typedef struct {
 t_restaurante_config* restaurante_config;
 t_log* logger;
 
+// typedef struct{
+//     char* receta;
+//     char* precio;
+// } receta_precio;
+
+//VARIABLES GLOBALES
+char** afinidades;
+char* pos_x;
+char* pos_y;
+receta_precio** recetas;
+char* cantidad_hornos;
+char* cantidad_pedidos;
+int socket_sindicato;
+    
 // FUNCIONES
 void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger);
 void restaurante_finally(t_restaurante_config* restaurante_config, t_log* logger);
@@ -35,7 +49,12 @@ void restaurante_destroy(t_restaurante_config* restaurante_config);
 int obtener_id_pedido();
 void handle_crear_pedido(int socket);
 int handshake(t_modulo* modulo);
+int handshake_app(t_modulo modulo_app);
 void escuchar_mensajes_socket_desacoplado(int socket);
 void escuchar_mensajes_socket(t_parameter* parametro);
 void handle_client(t_result* result);
+void inicializacion_default();
+void handle_obtener_restaurante(r_obtener_restaurante* resultado);
+void inicializar(char**,char*,char*,receta_precio**,char*,char*);
+
 #endif

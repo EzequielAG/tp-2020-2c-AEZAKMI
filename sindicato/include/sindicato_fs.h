@@ -1,9 +1,9 @@
 #ifndef SINDICATO_FS_H
 #define SINDICATO_FS_H
 
-#include <sys/stat.h>
-#include <dirent.h>
 #include "sindicato_config.h"
+#include "dirent.h"
+#include <sys/stat.h>
 
 // VARIABLES Y ESTRUCTURAS
 typedef struct {

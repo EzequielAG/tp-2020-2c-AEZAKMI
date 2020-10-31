@@ -174,10 +174,7 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
 
     r_obtener_restaurante* respuesta_obtener_restaurante = malloc (sizeof(r_obtener_restaurante));
 
-    //char ** separar_por_comillas(char** string_separado_por_espacios)
-
-
-    respuesta_obtener_restaurante->afinidades = obtener_array_mensajes(respuesta->mensajes[0]);;
+    respuesta_obtener_restaurante->afinidades = obtener_list_mensajes(respuesta->mensajes[0]);;
     respuesta_obtener_restaurante->pos_x = respuesta->mensajes[1];
     respuesta_obtener_restaurante->pos_y = respuesta->mensajes[2];
     respuesta_obtener_restaurante->recetas = obtener_receta_precios(respuesta->mensajes[3]) ;
@@ -199,9 +196,18 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
 char** obtener_array_mensajes(char* array_mensaje){
 
     char** array_string = string_split(array_mensaje, ",");
-    array_string = separar_por_comillas(array_string);
+    array_string =separar_por_comillas(array_string);
+ 
     return array_string;
 
+}
+
+List* obtener_list_mensajes(char* array_mensaje){
+
+    char** array_string = string_split(array_mensaje, ",");
+    List* resultado = separar_por_comillas_lista(array_string);
+
+    return resultado;
 }
 
 receta_precio** obtener_receta_precios(char* array_mensajes){
@@ -222,7 +228,7 @@ receta_precio** obtener_receta_precios(char* array_mensajes){
 }
 
 
-char** enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
+List* enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
 
     if(restaurante == NULL){
         printf("Faltan parametros \n");
@@ -248,7 +254,7 @@ char** enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
     
     liberar_conexion(socket);
 
-    return obtener_array_mensajes(respuesta->mensajes[0]);
+    return obtener_list_mensajes(respuesta->mensajes[0]);
 }
 
 char* enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido){
@@ -530,16 +536,66 @@ char ** separar_por_comillas(char** string_separado_por_espacios){
 
     }
 
-    int size = sizelist(lista_separado_por_comillas);
-
-    char ** separado_por_comillas = malloc(sizeof(char*) * size);
-
-    for (int i = 0; i < size; i++){
-        char* elemento = popfrontlist(&lista_separado_por_comillas);
-        separado_por_comillas[i] = elemento;
-    }
+    char ** separado_por_comillas = list_a_char(lista_separado_por_comillas);
 
     return separado_por_comillas;
+
+}
+
+char ** list_a_char(List lista)
+{
+    int size = sizelist(lista);
+    int i = 0;
+    char ** resultado = malloc(sizeof(char*) * size);
+
+    for(IteratorList iterator_a = beginlist(lista); iterator_a != NULL; iterator_a = nextlist(iterator_a))
+    {
+        resultado[i] = iterator_a->data;
+        i++;
+    }
+
+    return resultado;
+}
+
+List* separar_por_comillas_lista(char** string_separado_por_espacios){
+    
+    List* lista_separado_por_comillas = malloc(sizeof(List));
+    initlist(lista_separado_por_comillas);
+
+    for (int i = 0; string_separado_por_espacios[i] != NULL; i++){
+
+        if (string_starts_with(string_separado_por_espacios[i], "\"")){
+            if (string_ends_with(string_separado_por_espacios[i], "\"")){
+                char* string_sin_comillas = string_substring(string_separado_por_espacios[i], 1, strlen(string_separado_por_espacios[i]) - 2);
+                pushbacklist(lista_separado_por_comillas, string_sin_comillas);
+            } else {
+                char* string_concatenado = string_new();
+                string_append(&string_concatenado, string_separado_por_espacios[i]);
+                i++;
+                int finalize_correctamente = 0;
+                while(string_separado_por_espacios[i] != NULL){
+                    string_append(&string_concatenado, " ");
+                    string_append(&string_concatenado, string_separado_por_espacios[i]);
+                    if (string_ends_with(string_separado_por_espacios[i], "\"")){
+                        finalize_correctamente = 1;
+                        break;
+                    }
+                    i++;
+                }
+                if (finalize_correctamente == 1){
+                    char* string_sin_comillas = string_substring(string_concatenado, 1, strlen(string_concatenado) - 2);
+                    pushbacklist(lista_separado_por_comillas, string_sin_comillas);
+                } else {
+                    return NULL;
+                }
+            }
+        } else {
+            pushbacklist(lista_separado_por_comillas, string_separado_por_espacios[i]);
+        }
+
+    }
+
+    return lista_separado_por_comillas;
 
 }
 

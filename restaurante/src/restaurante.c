@@ -195,13 +195,16 @@ void handle_client(t_result* result){
 
     if (result->operacion == MENSAJES){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
+        
+        //CONSULTAR_PLATOS
         if (tipo_mensaje == consultar_platos){
-            char** platos = enviar_mensaje_consultar_platos(&modulo_sindicato, restaurante_config->nombre_restaurante);
-            int cant_platos = len_array(platos);
+            List* platos = enviar_mensaje_consultar_platos(&modulo_sindicato, restaurante_config->nombre_restaurante);
+            int cant_platos = sizelist(*platos);
             if(cant_platos == 0)
             {
-                    send_messages_socket(result->socket, platos, cant_platos);
+                send_messages_socket(result->socket,list_a_char(*platos), cant_platos);
             }
+
         } else if (tipo_mensaje == crear_pedido) {
             // TODO : FALTA LOGICA CREAR_PEDIDO
         } else if (tipo_mensaje == anadir_plato) {

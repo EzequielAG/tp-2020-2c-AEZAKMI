@@ -38,7 +38,7 @@ typedef struct{
 
 
 typedef struct {
-    char** afinidades;
+    List* afinidades;
     char* pos_x;
     char* pos_y;
     receta_precio** recetas;
@@ -74,11 +74,13 @@ receta_precio** obtener_receta_precios(char* array_mensajes);
 informacion_comidas** obtener_informacion_comidas(char* mensaje);
 
 char** obtener_array_mensajes(char* array_mensaje);
-
+List* obtener_list_mensajes(char* array_mensaje);
+char ** list_a_char(List lista);
+List* separar_por_comillas_lista(char** string_separado_por_espacios);
 char** enviar_mensaje_consultar_restaurantes(t_modulo* modulo);
 char* enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* cliente, char* restaurante);
 r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char* restaurante);
-char** enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante);
+List* enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante);
 char* enviar_mensaje_crear_pedido(t_modulo* modulo);
 char* enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido);
 char* enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido);

@@ -6,12 +6,29 @@ int main(void){
 
     printf("Imprimiendo el path %s", sindicato_config->ruta_log);
 
-    //TODO: Hacer que reciba ip y puerto de config
-    iniciar_servidor("127.0.0.1", "5003", handle_client);
+    iniciar_servidor_desacoplado();
+    sleep(1);
+    iniciar_consola();
 
     sindicato_finally(sindicato_config, logger);
     return 0;
 }
+
+void iniciar_servidor_desacoplado(){
+    
+    pthread_t thread;
+
+	pthread_create(&thread,NULL,(void*)iniciar_servidor_sindicato, NULL);
+	pthread_detach(thread);
+}
+
+void iniciar_servidor_sindicato(){
+
+    //TODO: Hacer que reciba ip y puerto de config
+    iniciar_servidor("127.0.0.1", "5003", handle_client);
+
+}
+
 
 void handle_client(t_result* result){
     
@@ -248,7 +265,7 @@ void handle_terminar_pedido(int socket, char* id_pedido,  char* restaurante){
     if (resultado_operacion){
         resultado_operacion = existe_pedido(restaurante, id_pedido);
     }
-    
+
     //Verificar que el pedido esté en estado “Confirmado”. En caso contrario se deberá informar dicha situación.
 
     //Cambiar el estado del pedido a “Terminado” 
@@ -269,4 +286,69 @@ void handle_error(int socket){
     char* respuesta[1];
     respuesta[0] = "ERROR";
     send_messages_socket(socket, respuesta, 1);
+}
+
+void iniciar_consola(){
+    do {
+        printf("Ingrese alguno de los siguientes comandos: \n");
+        printf("1. CrearRestaurante [NOMBRE] [CANTIDAD_COCINEROS] [POSICION] [AFINIDAD_COCINEROS] [PLATOS] [PRECIO_PLATOS] [CANTIDAD_HORNOS] \n");
+        printf("2. CrearReceta [NOMBRE] [PASOS] [TIEMPO_PASOS] \n");
+        printf("3. Exit \n");
+        char * line = getlinefromconsole();
+        process_line(line);
+        if (strcmp("Exit\n", line) == 0){
+            printf("Se reconoce el comando Exit: %s\n", line);
+            break;
+        }
+    } while (1);
+    
+}
+
+void process_line(char* line){
+    char** lineas = string_split(line, " ");
+    
+    if (strcmp("CrearRestaurante", lineas[0])== 0){
+        printf("Se reconoce el comando Crear Restaurante: %s\n", line);
+        return;
+    }
+    if (strcmp("CrearReceta", lineas[0])== 0){
+        printf("Se reconoce el comando Crear Receta: %s\n", line);
+        return;
+    }
+    if (strcmp("Exit\n", lineas[0]) != 0){
+        printf("No se reconoce el comando ingresado: %s\n", line);
+        return;
+    }
+}
+
+char * getlinefromconsole(void) {
+    char * line = malloc(100), * linep = line;
+    size_t lenmax = 100, len = lenmax;
+    int c;
+
+    if(line == NULL)
+        return NULL;
+
+    for(;;) {
+        c = fgetc(stdin);
+        if(c == EOF)
+            break;
+
+        if(--len == 0) {
+            len = lenmax;
+            char * linen = realloc(linep, lenmax *= 2);
+
+            if(linen == NULL) {
+                free(linep);
+                return NULL;
+            }
+            line = linen + (line - linep);
+            linep = linen;
+        }
+
+        if((*line++ = c) == '\n')
+            break;
+    }
+    *line = '\0';
+    return linep;
 }

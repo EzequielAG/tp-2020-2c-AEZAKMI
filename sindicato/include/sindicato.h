@@ -2,6 +2,7 @@
 #define SINDICATO_H
 
 #include "sindicato_fs.h"
+#include <unistd.h>
 
 // VARIABLES Y ESTRUCTURAS
 
@@ -18,5 +19,10 @@ void handle_plato_listo(int socket, char* restaurante,  char* id_pedido, char* c
 void handle_obtener_receta(int socket, char* comida);
 void handle_terminar_pedido(int socket, char* id_pedido,  char* restaurante);
 void handle_error(int socket);
+void iniciar_consola();
+void iniciar_servidor_desacoplado();
+void iniciar_servidor_sindicato();
+char* getlinefromconsole(void);
+void process_line(char* line);
 
 #endif

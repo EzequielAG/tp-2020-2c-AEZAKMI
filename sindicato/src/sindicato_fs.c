@@ -113,9 +113,91 @@ int necesita_recrearse(char * block_size, char * blocks, char * magic_number){
 
 }
 
-void crear_bitmap(){
-	//TODO: Crear el bitmap con todo seteado en 0 y ver como mapearlo a memoria principal.
+
+/* --- BITMAP --- */
+FILE * get_or_create_bitmap_file(char * mode){
+	char * bitmap_address = string_new();
+	string_append(&bitmap_address, sindicato_config->punto_montaje);
+	string_append(&bitmap_address, "/Metadata/Bitmap.bin");
+
+	FILE * bitmap_file = fopen(bitmap_address, mode);
+	free(bitmap_address);
+
+	return bitmap_file;
 }
+
+void update_bitmap_file(t_bitarray * bitmap){
+	FILE * bitmap_file = get_or_create_bitmap_file("wb");
+	if (bitmap_file == NULL)
+		log_error(logger, "No se pudo obtener 'bitmap file'");
+
+	fwrite(bitmap->bitarray, sizeof(char), bitmap->size, bitmap_file);
+
+	fclose(bitmap_file);
+	free(bitmap->bitarray);
+	free(bitmap);
+}
+
+void crear_bitmap(){
+	FILE * bitmap_file = get_or_create_bitmap_file("rb");
+	if (bitmap_file == NULL)
+		log_error(logger, "No se pudo obtener 'bitmap file'");
+
+	int blocks = atoi(sindicato_config->blocks);
+
+	size_t bytes = BIT_SIZE(blocks, CHAR_BIT);
+	char * bitarray = calloc(bytes, sizeof(char));
+	t_bitarray	* bitmap = bitarray_create_with_mode(bitarray, bytes, LSB_FIRST);
+
+	for(int pos=0; pos < blocks; pos++){
+		//Limpia los bits del bitarray (Los pone en 0)
+		bitarray_clean_bit(bitmap, pos);
+	}
+	update_bitmap_file(bitmap);
+
+	bitarray_destroy(bitmap);
+}
+
+t_bitarray * get_bitarray(){
+	FILE * bitmap_file = get_or_create_bitmap_file("rb");
+	if (bitmap_file == NULL)
+		log_error(logger, "No se pudo obtener 'bitmap file'");
+
+	int blocks = atoi(sindicato_config->blocks);
+
+	size_t bitarray_size = BIT_SIZE(blocks, CHAR_BIT);
+	char * bitarray = malloc(bitarray_size);
+
+	return bitarray_create_with_mode(bitarray, bitarray_size, LSB_FIRST);
+}
+
+void modify_block(t_bitarray * bitmap, bool status, int position){
+	if(status) //si esta libre ese bloque
+		bitarray_set_bit(bitmap, position);
+
+	else   //si esta ocupado ese bloque
+		bitarray_clean_bit(bitmap, position);
+}
+
+void take_block(int block_pos){
+	// Setea 1 en la posicion indicada (bloque ocupado)
+	pthread_mutex_lock(&mutex_bitmap);
+	t_bitarray * bitmap = get_bitarray();
+	modify_block(bitmap, true, block_pos);
+	update_bitmap_file(bitmap);
+	pthread_mutex_unlock(&mutex_bitmap);
+}
+
+void free_block(int block_pos){
+	// Setea 0 en la posicion indicada (bloque libre)
+	pthread_mutex_lock(&mutex_bitmap);
+	t_bitarray * bitmap = get_bitarray();
+	modify_block(bitmap, false, block_pos);
+	update_bitmap_file(bitmap);
+	pthread_mutex_unlock(&mutex_bitmap);
+}
+/* --- END BITMAP --- */
+
 
 int existe_archivo(char* ruta_archivo){
 	if( access( ruta_archivo, F_OK ) != -1 ) {
@@ -124,7 +206,6 @@ int existe_archivo(char* ruta_archivo){
 		return 0;
 	}
 }
-
 
 void crear_files(){
 	char * files_adress = string_new();

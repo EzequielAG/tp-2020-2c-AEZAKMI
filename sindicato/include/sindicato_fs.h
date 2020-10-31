@@ -29,5 +29,6 @@ int get_or_create_folder();
 int existe_archivo(char* archivo_path);
 int necesita_recrearse(char * block_size, char * blocks, char * magic_number);
 void crear_files();
+int existe_restaurante(char* restaurante);
 
 #endif

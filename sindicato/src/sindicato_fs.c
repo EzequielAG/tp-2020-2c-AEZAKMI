@@ -229,3 +229,19 @@ void crear_files(){
 	get_or_create_folder(recetas_adress);
 	get_or_create_folder(bloques_adress);
 }
+
+int existe_restaurante(char* restaurante){
+	DIR* folder_dir;
+
+	char* folder_adress = string_new();
+	string_append(&folder_adress, sindicato_config->punto_montaje);
+	string_append(&folder_adress, "/Files/Restaurantes/");
+	string_append(&folder_adress, restaurante);
+
+	if ((folder_dir = opendir(folder_adress)) == NULL){
+		return 0;
+	} else {
+		closedir(folder_dir);
+		return 1;
+	}
+}

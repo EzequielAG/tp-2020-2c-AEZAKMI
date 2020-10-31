@@ -15,7 +15,7 @@ int main(void){
     cantidad_pedidos = malloc(sizeof(char*));
 
     //TODO: Hacer que reciba ip y puerto de config
-    iniciar_servidor("127.0.0.1", "5002", handle_client);
+   // iniciar_servidor("127.0.0.1", "5002", handle_client);
 
     //0. Inicializo modulos a los que me voy a tener que conectar
     //t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
@@ -33,21 +33,24 @@ int main(void){
     if (handshake_sindicato_r == -1){
         printf("No se pudo realizar la conexion inicial con el modulo sindicato\n");
         inicializacion_default();
-        return -1;
     }
     else{
         handle_obtener_restaurante(enviar_mensaje_obtener_restaurante(&modulo_sindicato, restaurante_config->nombre_restaurante));
     }
 
-    for(int i = 0;i< sizeof(afinidades);i++)
-    {
-        printf("<< RESTAURANTE >> Iniciado con afinidades = %s\n", afinidades[i]);
+
+    //PRINTF AFINIDIDADES Y ESO
+
+    for(int i = 0;i < 2;i++) {
+
+        printf("<< RESTAURANTE >> Iniciado con afinidades = %s \n", afinidades[i]);
+
     }
 
     printf("<< RESTAURANTE >> Iniciado con posiciones x = %s ; y = %s\n", pos_x,pos_y);
     
-    for(int j = 0;j< sizeof(recetas);j++)
-    {
+    for(int j = 0;j< 3;j++)  {
+
         printf("<< RESTAURANTE >> Iniciado con recetas = %s %s\n", recetas[j]->precio, recetas[j]->receta);
     }
 
@@ -58,6 +61,16 @@ int main(void){
 
     restaurante_finally(restaurante_config, logger);
     return 0;
+}
+
+int len_array(char** arrayInput){
+    int i = 0;    int cont = 0;
+
+    for(i=0 ; arrayInput[i] != NULL ; i++)
+    {
+        cont++;
+    }
+    return cont;
 }
 
 int handshake_app(t_modulo modulo_app)
@@ -254,11 +267,14 @@ inicializar(af,"4","5",recetas,"2","6");
 
 void inicializar(char** afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,char* cantidad_pedidos_f){
 
-afinidades = afinidades_f;
-pos_x = pos_x_f;
-pos_y = pos_y_f;
+// afinidades = afinidades_f;
+strcpy((char*)afinidades,(char*)afinidades_f);
+strcpy(pos_x,pos_x_f);
+strcpy(pos_y,pos_y_f);
+strcpy(cantidad_hornos,cantidad_hornos_f);
+strcpy(cantidad_pedidos,cantidad_pedidos_f);
 recetas = recetas_f;
-cantidad_hornos = cantidad_hornos_f;
-cantidad_pedidos = cantidad_pedidos_f;
+
+
 
 }

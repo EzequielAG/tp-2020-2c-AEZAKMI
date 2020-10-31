@@ -56,5 +56,6 @@ void handle_client(t_result* result);
 void inicializacion_default();
 void handle_obtener_restaurante(r_obtener_restaurante* resultado);
 void inicializar(char**,char*,char*,receta_precio**,char*,char*);
+int len_array(char** arrayInput);
 
 #endif

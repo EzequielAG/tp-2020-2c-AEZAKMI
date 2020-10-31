@@ -5,25 +5,24 @@ int main(void){
     //ESTE VA A ACTUAR DE SERVER
     restaurante_init(&restaurante_config, &logger);
     log_info(logger, "Soy el MODULO RESTAURANTE! %s", mi_funcion_compartida());
-    printf("Imprimiendo el path %s", restaurante_config->ruta_log);
     
-    //VARIABLES GLOBALES
-    afinidades = malloc(sizeof(char) * 2);
-    pos_x = malloc(sizeof(char));
-    pos_y = malloc(sizeof(char));
-    recetas = malloc(sizeof(receta_precio) * 2);
-    cantidad_hornos = malloc(sizeof(char));
-    cantidad_pedidos = malloc(sizeof(char));
+    //MALLOC VARIABLES GLOBALES
+    afinidades = malloc(sizeof(char**));
+    pos_x = malloc(sizeof(char*));
+    pos_y = malloc(sizeof(char*));
+    recetas = malloc(sizeof(receta_precio**));
+    cantidad_hornos = malloc(sizeof(char*));
+    cantidad_pedidos = malloc(sizeof(char*));
 
     //TODO: Hacer que reciba ip y puerto de config
-    //iniciar_servidor("127.0.0.1", "5002", handle_client);
+    iniciar_servidor("127.0.0.1", "5002", handle_client);
 
     //0. Inicializo modulos a los que me voy a tener que conectar
-    t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
+    //t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
     t_modulo modulo_sindicato = {restaurante_config->ip_sindicato, restaurante_config->puerto_sindicato, "sindicato"};
 
     //1.1 Handshake con el modulo app
-    int handshake_app_r = handshake_app(modulo_app);
+    //int handshake_app_r = handshake_app(modulo_app);
 
     //1.2 Handshake con el modulo sindicato
     //Obtencion de metadata del restaurante
@@ -32,18 +31,26 @@ int main(void){
     int handshake_sindicato_r = handshake(&modulo_sindicato);
 
     if (handshake_sindicato_r == -1){
-        printf("No se pudo realizar la conexion inicial con el modulo app\n");
+        printf("No se pudo realizar la conexion inicial con el modulo sindicato\n");
         inicializacion_default();
         return -1;
     }
     else{
-        char* mensajes[2] = {"obtener_restaurante", restaurante_config->nombre_restaurante};
-        send_messages_socket(socket_sindicato, mensajes, 2);
+        handle_obtener_restaurante(enviar_mensaje_obtener_restaurante(&modulo_sindicato, restaurante_config->nombre_restaurante));
     }
 
-    printf("<< RESTAURANTE >> Iniciado con afinidades = %s\n", afinidades);
+    for(int i = 0;i< sizeof(afinidades);i++)
+    {
+        printf("<< RESTAURANTE >> Iniciado con afinidades = %s\n", afinidades[i]);
+    }
+
     printf("<< RESTAURANTE >> Iniciado con posiciones x = %s ; y = %s\n", pos_x,pos_y);
-    printf("<< RESTAURANTE >> Iniciado con recetas = %s\n", recetas);
+    
+    for(int j = 0;j< sizeof(recetas);j++)
+    {
+        printf("<< RESTAURANTE >> Iniciado con recetas = %s %s\n", recetas[j]->precio, recetas[j]->receta);
+    }
+
     printf("<< RESTAURANTE >> Iniciado con cantidad de hornos = %s\n", cantidad_hornos);
     printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %s\n", cantidad_pedidos);
 
@@ -193,17 +200,6 @@ void handle_client(t_result* result){
             // TODO : FALTA LOGICA CONFIRMAR_PEDIDO
         } else if (tipo_mensaje == consultar_pedido) {
             // TODO : FALTA LOGICA CONSULTAR_PEDIDO
-        } else if (tipo_mensaje == obtener_restaurante) {
-
-            r_obtener_restaurante* este_restaurante = malloc(sizeof(r_obtener_restaurante));
-            este_restaurante->afinidades = obtener_array_mensajes(result->mensajes->mensajes[0]);;
-            este_restaurante->pos_x = result->mensajes->mensajes[1];
-            este_restaurante->pos_y = result->mensajes->mensajes[2];
-            este_restaurante->recetas = obtener_receta_precios(result->mensajes->mensajes[3]) ;
-            este_restaurante->cantidad_hornos = result->mensajes->mensajes[4];
-            este_restaurante->cantidad_pedidos = result->mensajes->mensajes[5];
-            
-            handle_obtener_restaurante(este_restaurante);
         }
     }
 }

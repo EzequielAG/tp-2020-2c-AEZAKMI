@@ -116,6 +116,9 @@ void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* 
     //Verificar si el Pedido existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
     //En caso de no existir se deberá informar dicha situación.
+    if (resultado_operacion){
+        resultado_operacion = existe_pedido(restaurante, id_pedido);
+    }
 
     //Verificar que el pedido esté en estado “Pendiente”. En caso contrario se deberá informar dicha situación.
 
@@ -144,6 +147,9 @@ void handle_confirmar_pedido(int socket, char* id_pedido,  char* restaurante){
     //Verificar si el Pedido existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
     //En caso de no existir se deberá informar dicha situación.
+    if (resultado_operacion){
+        resultado_operacion = existe_pedido(restaurante, id_pedido);
+    }
 
     //Verificar que el pedido esté en estado “Pendiente”. En caso contrario se deberá informar dicha situación.
 
@@ -169,6 +175,9 @@ void handle_obtener_pedido(int socket, char* restaurante,  char* id_pedido){
     //Verificar si el Pedido existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
     //En caso de no existir se deberá informar dicha situación.
+    if (resultado_operacion){
+        resultado_operacion = existe_pedido(restaurante, id_pedido);
+    }
 
     //Responder el mensaje indicando si se pudo realizar en conjunto con la información del pedido si correspondiera.
 
@@ -196,6 +205,9 @@ void handle_plato_listo(int socket, char* restaurante,  char* id_pedido, char* c
     //Verificar si el Pedido existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
     //En caso de no existir se deberá informar dicha situación.
+    if (resultado_operacion){
+        resultado_operacion = existe_pedido(restaurante, id_pedido);
+    }
 
     //Verificar que el pedido esté en estado “Confirmado”. 
     //En caso contrario se deberá informar dicha situación.
@@ -233,7 +245,10 @@ void handle_terminar_pedido(int socket, char* id_pedido,  char* restaurante){
     //Verificar si el Pedido existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
     //En caso de no existir se deberá informar dicha situación.
-
+    if (resultado_operacion){
+        resultado_operacion = existe_pedido(restaurante, id_pedido);
+    }
+    
     //Verificar que el pedido esté en estado “Confirmado”. En caso contrario se deberá informar dicha situación.
 
     //Cambiar el estado del pedido a “Terminado” 

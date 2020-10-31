@@ -30,5 +30,6 @@ int existe_archivo(char* archivo_path);
 int necesita_recrearse(char * block_size, char * blocks, char * magic_number);
 void crear_files();
 int existe_restaurante(char* restaurante);
+int existe_pedido(char* restaurante, char* nro_pedido);
 
 #endif

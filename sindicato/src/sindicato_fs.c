@@ -33,16 +33,16 @@ void get_or_create_fs() {
 
 }
 /* < 0 si no puede crear el punto de montaje, 0 si ya existia previamente, > 0 si creo correctamente el punto de montaje*/
-int get_or_create_folder(char* folder_adress){
+int get_or_create_folder(char* file_adress){
 
 	DIR* folder_dir;
 
-	if ((folder_dir = opendir(folder_adress)) == NULL){
-		printf("No existe la carpeta: %s \n", folder_adress);
-		int rv = mkdir(folder_adress, 0777);
+	if ((folder_dir = opendir(file_adress)) == NULL){
+		printf("No existe la carpeta: %s \n", file_adress);
+		int rv = mkdir(file_adress, 0777);
 		if (rv == 0){
-			printf("Se creo la carpeta: %s \n", folder_adress);
-			log_info(logger, "Se creo la carpeta: %s \n", folder_adress);
+			printf("Se creo la carpeta: %s \n", file_adress);
+			log_info(logger, "Se creo la carpeta: %s \n", file_adress);
 			closedir(folder_dir);
 			return 1;
 		}
@@ -233,15 +233,34 @@ void crear_files(){
 int existe_restaurante(char* restaurante){
 	DIR* folder_dir;
 
-	char* folder_adress = string_new();
-	string_append(&folder_adress, sindicato_config->punto_montaje);
-	string_append(&folder_adress, "/Files/Restaurantes/");
-	string_append(&folder_adress, restaurante);
+	char* file_adress = string_new();
+	string_append(&file_adress, sindicato_config->punto_montaje);
+	string_append(&file_adress, "/Files/Restaurantes/");
+	string_append(&file_adress, restaurante);
 
-	if ((folder_dir = opendir(folder_adress)) == NULL){
+	if ((folder_dir = opendir(file_adress)) == NULL){
 		return 0;
 	} else {
 		closedir(folder_dir);
+		return 1;
+	}
+}
+
+int existe_pedido(char* restaurante, char* nro_pedido){
+	FILE *fp;
+
+	char* file_adress = string_new();
+	string_append(&file_adress, sindicato_config->punto_montaje);
+	string_append(&file_adress, "/Files/Restaurantes/");
+	string_append(&file_adress, restaurante);
+	string_append(&file_adress, "/Pedido");
+	string_append(&file_adress, nro_pedido);
+	string_append(&file_adress, ".AFIP");
+
+	if ((fp = fopen(file_adress, "r")) == NULL){
+		return 0;
+	} else {
+		fclose(fp);
 		return 1;
 	}
 }

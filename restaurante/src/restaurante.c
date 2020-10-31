@@ -19,7 +19,9 @@ int main(void){
 
     //0. Inicializo modulos a los que me voy a tener que conectar
     //t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
-    t_modulo modulo_sindicato = {restaurante_config->ip_sindicato, restaurante_config->puerto_sindicato, "sindicato"};
+    modulo_sindicato.ip = restaurante_config->ip_sindicato;
+    modulo_sindicato.puerto = restaurante_config->puerto_sindicato;
+    modulo_sindicato.nombre = "sindicato";
 
     //1.1 Handshake con el modulo app
     //int handshake_app_r = handshake_app(modulo_app);
@@ -41,15 +43,16 @@ int main(void){
 
     //PRINTF AFINIDIDADES Y ESO
 
-    for(int i = 0;i < 2;i++) {
+    int cant_afinidades = len_array(afinidades);
+    printf("CANTIDAD AFINIDADES %i \n",cant_afinidades);
 
+    for(int i = 0;i < cant_afinidades;i++) {
         printf("<< RESTAURANTE >> Iniciado con afinidades = %s \n", afinidades[i]);
-
     }
 
     printf("<< RESTAURANTE >> Iniciado con posiciones x = %s ; y = %s\n", pos_x,pos_y);
     
-    for(int j = 0;j< 3;j++)  {
+    for(int j = 0;j< 0;j++)  {
 
         printf("<< RESTAURANTE >> Iniciado con recetas = %s %s\n", recetas[j]->precio, recetas[j]->receta);
     }
@@ -63,15 +66,6 @@ int main(void){
     return 0;
 }
 
-int len_array(char** arrayInput){
-    int i = 0;    int cont = 0;
-
-    for(i=0 ; arrayInput[i] != NULL ; i++)
-    {
-        cont++;
-    }
-    return cont;
-}
 
 int handshake_app(t_modulo modulo_app)
 {
@@ -204,7 +198,12 @@ void handle_client(t_result* result){
     if (result->operacion == MENSAJES){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
         if (tipo_mensaje == consultar_platos){
-            // TODO : FALTA LOGICA CONSULTAR_PLATOS
+            char** platos = enviar_mensaje_consultar_platos(&modulo_sindicato, restaurante_config->nombre_restaurante);
+            int cant_platos = len_array(platos);
+            if(cant_platos == 0)
+            {
+                    send_messages_socket(result->socket, platos, cant_platos);
+            }
         } else if (tipo_mensaje == crear_pedido) {
             // TODO : FALTA LOGICA CREAR_PEDIDO
         } else if (tipo_mensaje == anadir_plato) {
@@ -243,38 +242,70 @@ char* conveRecetasString(receta_precio** recetas)
 
 void inicializacion_default(){
 
-receta_precio* receta1 = malloc(sizeof(receta_precio));
+receta_precio* receta1 = malloc(sizeof(receta_precio*));
 receta1->receta = "Milanesas";
 receta1->precio = "400";
 
-receta_precio* receta2 = malloc(sizeof(receta_precio));
+receta_precio* receta2 = malloc(sizeof(receta_precio*));
 receta2->receta = "Empanadas";
 receta2->precio = "350";
 
-receta_precio* receta3 = malloc(sizeof(receta_precio));
+receta_precio* receta3 = malloc(sizeof(receta_precio*));
 receta3->receta = "Ensalada";
 receta3->precio = "300";
 
-receta_precio** recetas = malloc(sizeof(receta_precio)*3);
+receta_precio** recetas = malloc(sizeof(receta_precio**));
 recetas[0] = receta1;
 recetas[1] = receta2;
 recetas[2] = receta3;
-char* af[2] = {"Milanesas","Empanadas"};
+
+char* af[2];
+af[0] = "Milanesas";
+af[1] = "Empanadas";
 
 inicializar(af,"4","5",recetas,"2","6");
 
 }
 
 void inicializar(char** afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,char* cantidad_pedidos_f){
+// for(int i = 0; i < 1; i++)
+// {
+//     strcpy(afinidades[i],afinidades_f[i]);
+// }
+printf("Cantidad afin = %i \n", len_array_v2(afinidades_f));
 
-// afinidades = afinidades_f;
-strcpy((char*)afinidades,(char*)afinidades_f);
 strcpy(pos_x,pos_x_f);
 strcpy(pos_y,pos_y_f);
 strcpy(cantidad_hornos,cantidad_hornos_f);
 strcpy(cantidad_pedidos,cantidad_pedidos_f);
 recetas = recetas_f;
-
-
-
 }
+
+void consultar_platos_f()
+{
+};
+
+int len_array(char** arrayInput)
+{
+    int i = 0;
+    int cont = 0;
+ 
+    for(i=0 ; arrayInput[i] != NULL ; i++)
+    {
+       cont = cont + 1; 
+    }
+        
+    return cont;
+}
+
+int len_array_v2(char** p)
+{
+    int r = 0;
+    while (strcmp(*p,'\0')) {
+		r++;
+		// printf( "%c\n", *p );	/* Mostramos la letra actual */
+		p++;			/* Vamos a la siguiente letra */
+	}
+    return r;
+}
+

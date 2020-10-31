@@ -39,7 +39,8 @@ receta_precio** recetas;
 char* cantidad_hornos;
 char* cantidad_pedidos;
 int socket_sindicato;
-    
+t_modulo modulo_sindicato;
+
 // FUNCIONES
 void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger);
 void restaurante_finally(t_restaurante_config* restaurante_config, t_log* logger);
@@ -57,5 +58,6 @@ void inicializacion_default();
 void handle_obtener_restaurante(r_obtener_restaurante* resultado);
 void inicializar(char**,char*,char*,receta_precio**,char*,char*);
 int len_array(char** arrayInput);
+void consultar_platos_f();
 
 #endif

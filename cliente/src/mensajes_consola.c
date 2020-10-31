@@ -74,52 +74,54 @@ void enviar_mensajes_por_consola(t_struct_mensajes* mensaje){
 
 }
 
-char ** separar_por_comillas(char** string_separado_por_espacios){
-    List lista_separado_por_comillas;
-    initlist(&lista_separado_por_comillas);
 
-    for (int i = 0; string_separado_por_espacios[i] != NULL; i++){
+//MOVIDA A SHARED
+// char ** separar_por_comillas(char** string_separado_por_espacios){
+//     List lista_separado_por_comillas;
+//     initlist(&lista_separado_por_comillas);
 
-        if (string_starts_with(string_separado_por_espacios[i], "\"")){
-            if (string_ends_with(string_separado_por_espacios[i], "\"")){
-                char* string_sin_comillas = string_substring(string_separado_por_espacios[i], 1, strlen(string_separado_por_espacios[i]) - 2);
-                pushbacklist(&lista_separado_por_comillas, string_sin_comillas);
-            } else {
-                char* string_concatenado = string_new();
-                string_append(&string_concatenado, string_separado_por_espacios[i]);
-                i++;
-                int finalize_correctamente = 0;
-                while(string_separado_por_espacios[i] != NULL){
-                    string_append(&string_concatenado, " ");
-                    string_append(&string_concatenado, string_separado_por_espacios[i]);
-                    if (string_ends_with(string_separado_por_espacios[i], "\"")){
-                        finalize_correctamente = 1;
-                        break;
-                    }
-                    i++;
-                }
-                if (finalize_correctamente == 1){
-                    char* string_sin_comillas = string_substring(string_concatenado, 1, strlen(string_concatenado) - 2);
-                    pushbacklist(&lista_separado_por_comillas, string_sin_comillas);
-                } else {
-                    return NULL;
-                }
-            }
-        } else {
-            pushbacklist(&lista_separado_por_comillas, string_separado_por_espacios[i]);
-        }
+//     for (int i = 0; string_separado_por_espacios[i] != NULL; i++){
 
-    }
+//         if (string_starts_with(string_separado_por_espacios[i], "\"")){
+//             if (string_ends_with(string_separado_por_espacios[i], "\"")){
+//                 char* string_sin_comillas = string_substring(string_separado_por_espacios[i], 1, strlen(string_separado_por_espacios[i]) - 2);
+//                 pushbacklist(&lista_separado_por_comillas, string_sin_comillas);
+//             } else {
+//                 char* string_concatenado = string_new();
+//                 string_append(&string_concatenado, string_separado_por_espacios[i]);
+//                 i++;
+//                 int finalize_correctamente = 0;
+//                 while(string_separado_por_espacios[i] != NULL){
+//                     string_append(&string_concatenado, " ");
+//                     string_append(&string_concatenado, string_separado_por_espacios[i]);
+//                     if (string_ends_with(string_separado_por_espacios[i], "\"")){
+//                         finalize_correctamente = 1;
+//                         break;
+//                     }
+//                     i++;
+//                 }
+//                 if (finalize_correctamente == 1){
+//                     char* string_sin_comillas = string_substring(string_concatenado, 1, strlen(string_concatenado) - 2);
+//                     pushbacklist(&lista_separado_por_comillas, string_sin_comillas);
+//                 } else {
+//                     return NULL;
+//                 }
+//             }
+//         } else {
+//             pushbacklist(&lista_separado_por_comillas, string_separado_por_espacios[i]);
+//         }
 
-    int size = sizelist(lista_separado_por_comillas);
+//     }
 
-    char ** separado_por_comillas = malloc(sizeof(char*) * size);
+//     int size = sizelist(lista_separado_por_comillas);
 
-    for (int i = 0; i < size; i++){
-        char* elemento = popfrontlist(&lista_separado_por_comillas);
-        separado_por_comillas[i] = elemento;
-    }
+//     char ** separado_por_comillas = malloc(sizeof(char*) * size);
 
-    return separado_por_comillas;
+//     for (int i = 0; i < size; i++){
+//         char* elemento = popfrontlist(&lista_separado_por_comillas);
+//         separado_por_comillas[i] = elemento;
+//     }
 
-}
+//     return separado_por_comillas;
+
+// }

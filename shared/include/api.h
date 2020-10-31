@@ -90,7 +90,7 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
 char* enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 char* enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 char* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
-
+char ** separar_por_comillas(char** string_separado_por_espacios);
 
 
 #endif

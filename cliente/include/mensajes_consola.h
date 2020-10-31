@@ -11,4 +11,3 @@ typedef struct {
 
 void leer_consola(t_log* logger,t_modulo* modulo);
 void enviar_mensajes_por_consola(t_struct_mensajes* mensaje);
-char ** separar_por_comillas(char** string_separado_por_espacios);

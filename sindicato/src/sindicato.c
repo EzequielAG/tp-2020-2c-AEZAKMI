@@ -71,48 +71,177 @@ int guardar_pedido_en_afip(char* restaurante, char* id_pedido){
 }
 
 void handle_consultar_platos(int socket, char* restaurante){
+    //Verificar si el Restaurante existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Obtener los platos que puede preparar dicho Restaurante del archivo info.AFIP.
+
+    //Responder el mensaje indicando los platos que puede preparar el Restaurante.
 
 }
 
 void handle_guardar_pedido(int socket, char* restaurante, char* id_pedido){
     
+    //Verificar si el Restaurante existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Verificar que el ID de pedido no exista para dicho restaurante. 
+    //En caso de existir se deberá informar sobre dicha situación. 
+    //En caso de que no exista, se deberá crear el archivo.  
+    int resultado_operacion = guardar_pedido_en_afip(restaurante, id_pedido);
+
+
+    //Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
     char* respuesta[1];
 
-    if (guardar_pedido_en_afip(restaurante, id_pedido)){
+    if (resultado_operacion){
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
     }
-
     send_messages_socket(socket, respuesta, 1);
-    liberar_conexion(socket);
 }
 
 void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* comida, char* cantidad){
+    //Verificar si el Restaurante existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Verificar si el Pedido existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Verificar que el pedido esté en estado “Pendiente”. En caso contrario se deberá informar dicha situación.
+
+    //Verificar si ese plato ya existe dentro del archivo. 
+    //En caso de existir, se deberán agregar la cantidad pasada por parámetro a la actual. 
+    //En caso de no existir se deberá agregar el plato a la lista de Platos y anexar la cantidad que se tiene que cocinar de dicho plato y aumentar el precio total del pedido.
+    int resultado_operacion = 1;
+
+    //Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
+    char* respuesta[1];
+
+    if (resultado_operacion){
+        respuesta[0] = "Ok";
+    } else {
+        respuesta[0] = "Fail";
+    }
+    send_messages_socket(socket, respuesta, 1);
 
 }
 
 void handle_confirmar_pedido(int socket, char* id_pedido,  char* restaurante){
+    //Verificar si el Restaurante existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
+    //En caso de no existir se deberá informar dicha situación.
 
+    //Verificar si el Pedido existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Verificar que el pedido esté en estado “Pendiente”. En caso contrario se deberá informar dicha situación.
+
+    //Cambiar el estado del pedido de “Pendiente” a “Confirmado” (se debe truncar el archivo en caso de ser necesario).
+    int resultado_operacion = 1;
+
+    //Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
+    char* respuesta[1];
+
+    if (resultado_operacion){
+        respuesta[0] = "Ok";
+    } else {
+        respuesta[0] = "Fail";
+    }
+    send_messages_socket(socket, respuesta, 1);
 }
 
 void handle_obtener_pedido(int socket, char* restaurante,  char* id_pedido){
+    //Verificar si el Restaurante existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Verificar si el Pedido existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Responder el mensaje indicando si se pudo realizar en conjunto con la información del pedido si correspondiera.
 
 }
 
 void handle_obtener_restaurante(int socket, char* restaurante){
+    //Verificar si el Restaurante existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Obtener todo los datos del archivo info.AFIP.
+
+    //Responder el mensaje indicando los datos del Restaurante.
 
 }
 
 void handle_plato_listo(int socket, char* restaurante,  char* id_pedido, char* comida){
 
+    //Verificar si el Restaurante existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Verificar si el Pedido existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Verificar que el pedido esté en estado “Confirmado”. 
+    //En caso contrario se deberá informar dicha situación.
+
+    //Verificar si ese plato ya existe dentro del archivo. 
+    //En caso de existir, se deberá aumentar en uno la cantidad lista de ese plato. 
+    //En caso contrario se deberá informar dicha situación.
+    int resultado_operacion = 1;
+
+    //Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
+    char* respuesta[1];
+
+    if (resultado_operacion){
+        respuesta[0] = "Ok";
+    } else {
+        respuesta[0] = "Fail";
+    }
+    send_messages_socket(socket, respuesta, 1);
+
 }
 
 void handle_obtener_receta(int socket, char* comida){
+    //Verificar si existe el plato dado dentro del directorio de recetas.
+    //En caso de no existir, se deberá informar dicha situación.
+
+    //Responder el mensaje con la receta solicitada.
 
 }
 
 void handle_terminar_pedido(int socket, char* id_pedido,  char* restaurante){
+    //Verificar si el Restaurante existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Verificar si el Pedido existe dentro del File System. 
+    //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
+    //En caso de no existir se deberá informar dicha situación.
+
+    //Verificar que el pedido esté en estado “Confirmado”. En caso contrario se deberá informar dicha situación.
+
+    //Cambiar el estado del pedido a “Terminado” 
+    int resultado_operacion = 1;
+
+    //Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
+    char* respuesta[1];
+
+    if (resultado_operacion){
+        respuesta[0] = "Ok";
+    } else {
+        respuesta[0] = "Fail";
+    }
+    send_messages_socket(socket, respuesta, 1);
 
 }
 

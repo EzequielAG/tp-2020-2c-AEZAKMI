@@ -352,3 +352,28 @@ char * getlinefromconsole(void) {
     *line = '\0';
     return linep;
 }
+
+void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posicion, char* afinidad_cocineros, char* platos, char* precio_platos, char* cantidad_hornos){
+    //VERIFICAR QUE NO EXISTE EL RESTAURANTE
+    if (existe_restaurante(nombre) == 1){
+        printf("Ya existe un restaurante con el nombre: %s \n", nombre);
+        return;
+    }
+
+    //VALIDAR FORMATO ??
+
+    //CREAR RESTAURANTE
+}
+
+void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos){
+    
+    //VERIFICAR QUE NO EXISTE LA RECETA
+    if (existe_receta(nombre) == 1){
+        printf("Ya existe una receta con el nombre: %s \n", nombre);
+        return;
+    }
+
+    //VALIDAR FORMATO ??
+
+    //CREAR RECETA
+}

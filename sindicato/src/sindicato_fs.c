@@ -264,3 +264,20 @@ int existe_pedido(char* restaurante, char* nro_pedido){
 		return 1;
 	}
 }
+
+int existe_receta(char* receta){
+	FILE *fp;
+
+	char* file_adress = string_new();
+	string_append(&file_adress, sindicato_config->punto_montaje);
+	string_append(&file_adress, "/Files/Recetas/");
+	string_append(&file_adress, receta);
+	string_append(&file_adress, ".AFIP");
+
+	if ((fp = fopen(file_adress, "r")) == NULL){
+		return 0;
+	} else {
+		fclose(fp);
+		return 1;
+	}
+}

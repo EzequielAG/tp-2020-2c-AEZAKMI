@@ -416,6 +416,7 @@ void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posi
 
 void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos){
     
+    //CHECK PARAMETROS
     if (nombre == NULL){
         printf("El nombre de la receta es obligatorio. \n");
         return;
@@ -436,8 +437,6 @@ void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos){
         printf("Ya existe una receta con el nombre: %s \n", nombre);
         return;
     }
-
-    //VALIDAR FORMATO ??
 
     //CREAR RECETA
 }

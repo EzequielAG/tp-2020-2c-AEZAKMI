@@ -25,7 +25,7 @@ void iniciar_servidor_desacoplado(){
 void iniciar_servidor_sindicato(){
 
     //TODO: Hacer que reciba ip y puerto de config
-    iniciar_servidor("127.0.0.1", "5003", handle_client);
+    iniciar_servidor(sindicato_config->ip, sindicato_config->puerto_escucha, handle_client);
 
 }
 

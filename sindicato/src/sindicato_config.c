@@ -27,6 +27,7 @@ void sindicato_config_parser(t_config* config, t_sindicato_config* sindicato_con
     sindicato_config->block_size = strdup(config_get_string_value(config, "BLOCK_SIZE"));
     sindicato_config->blocks = strdup(config_get_string_value(config, "BLOCKS"));
     sindicato_config->magic_number = strdup(config_get_string_value(config, "MAGIC_NUMBER"));
+    sindicato_config->ip = strdup(config_get_string_value(config, "IP"));
 }
 
 void sindicato_destroy(t_sindicato_config* sindicato_config) {

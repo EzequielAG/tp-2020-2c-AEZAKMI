@@ -11,6 +11,7 @@ typedef struct {
     char* block_size;
     char* blocks;
     char* magic_number;
+    char* ip;
 } t_sindicato_config;
 
 t_sindicato_config* sindicato_config;

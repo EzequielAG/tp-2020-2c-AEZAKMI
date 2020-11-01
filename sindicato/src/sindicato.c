@@ -291,7 +291,9 @@ void handle_error(int socket){
 void iniciar_consola(){
     do {
         printf("Ingrese alguno de los siguientes comandos: \n");
+        //CrearRestaurante MiRestaurante 5 [4,5] [Milanesa] [Milanesa,Empanadas,Ensalada] [200,50,150] 2
         printf("1. CrearRestaurante [NOMBRE] [CANTIDAD_COCINEROS] [POSICION] [AFINIDAD_COCINEROS] [PLATOS] [PRECIO_PLATOS] [CANTIDAD_HORNOS] \n");
+        //CrearReceta Milanesa [Trocear,Empanar,Reposar,Hornear] [4,5,3,10]
         printf("2. CrearReceta [NOMBRE] [PASOS] [TIEMPO_PASOS] \n");
         printf("3. Exit \n");
         char * line = getlinefromconsole();
@@ -306,13 +308,25 @@ void iniciar_consola(){
 
 void process_line(char* line){
     char** lineas = string_split(line, " ");
+    int longitud = 0;
+    while (lineas[longitud] != NULL){
+        longitud++;
+    }
     
     if (strcmp("CrearRestaurante", lineas[0])== 0){
         printf("Se reconoce el comando Crear Restaurante: %s\n", line);
+        if (longitud < 8){
+            printf("No se tienen los suficientes parametros para llamar a Crear restaurante, se requieren 7 y se obtuvieron: %d\n", longitud - 1);
+        }
+        handle_crear_restaurante(lineas[1], lineas[2], lineas[3], lineas[4], lineas[5], lineas[6], lineas[7]);
         return;
     }
     if (strcmp("CrearReceta", lineas[0])== 0){
         printf("Se reconoce el comando Crear Receta: %s\n", line);
+        if (longitud < 4){
+            printf("No se tienen los suficientes parametros para llamar a Crear restaurante, se requieren 7 y se obtuvieron: %d\n", longitud - 1);
+        }
+        handle_crear_receta(lineas[1], lineas[2], lineas[3]);
         return;
     }
     if (strcmp("Exit\n", lineas[0]) != 0){
@@ -354,19 +368,69 @@ char * getlinefromconsole(void) {
 }
 
 void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posicion, char* afinidad_cocineros, char* platos, char* precio_platos, char* cantidad_hornos){
+
+    //CHECK PARAMETROS
+    if (nombre == NULL){
+        printf("El nombre es obligatorio. \n");
+        return;
+    }
+
+    if (cantidad_cocineros == NULL){
+        printf("La cantidad de cocineros es obligatoria. \n");
+        return;
+    }
+
+    if (posicion == NULL){
+        printf("La posicion es obligatoria. \n");
+        return;
+    }
+
+    if (afinidad_cocineros == NULL){
+        printf("La afinidad de los cocineros es obligatoria. \n");
+        return;
+    }
+
+    if (platos == NULL){
+        printf("Los platos son obligatorios. \n");
+        return;
+    }
+
+    if (precio_platos == NULL){
+        printf("Los precios de los platos son obligatorios. \n");
+        return;
+    }
+
+    if (cantidad_hornos == NULL){
+        printf("La cantidad de hornos es obligatoria. \n");
+        return;
+    }
+
     //VERIFICAR QUE NO EXISTE EL RESTAURANTE
     if (existe_restaurante(nombre) == 1){
         printf("Ya existe un restaurante con el nombre: %s \n", nombre);
         return;
     }
 
-    //VALIDAR FORMATO ??
-
     //CREAR RESTAURANTE
 }
 
 void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos){
     
+    if (nombre == NULL){
+        printf("El nombre de la receta es obligatorio. \n");
+        return;
+    }
+
+    if (pasos == NULL){
+        printf("Los pasos de la receta son obligatorios. \n");
+        return;
+    }
+
+    if (tiempo_pasos == NULL){
+        printf("El tiempo de los pasos de la receta son obligatorios obligatoria. \n");
+        return;
+    }
+
     //VERIFICAR QUE NO EXISTE LA RECETA
     if (existe_receta(nombre) == 1){
         printf("Ya existe una receta con el nombre: %s \n", nombre);

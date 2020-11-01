@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <limits.h>
 #include <commons/bitarray.h>
+#include <commons/string.h>
 #include "sindicato_config.h"
 
 #define BIT_SIZE(x,y) ((x - 1) / y + 1);

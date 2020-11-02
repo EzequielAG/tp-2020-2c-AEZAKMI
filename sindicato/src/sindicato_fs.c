@@ -1,5 +1,44 @@
 #include "sindicato_fs.h"
 
+/* --- SUITES DE PATH O RUTAS --- */
+char* get_path_restaurante(char* restaurante){
+	char* path = string_new();
+	string_append(&path, sindicato_config->punto_montaje);
+	string_append(&path, "Files/Restaurantes/");
+	string_append(&path, restaurante);
+	return path;
+}
+
+char* get_path_info_file(char* restaurante){
+	char* path = string_new();
+	string_append(&path, sindicato_config->punto_montaje);
+	string_append(&path, "Files/Restaurantes/");
+	string_append(&path, restaurante);
+	string_append(&path, "/Info.AFIP");
+	return path;
+}
+
+char* get_path_pedido_file(char* restaurante, char* id_pedido){
+	char* path = string_new();
+	string_append(&path, sindicato_config->punto_montaje);
+	string_append(&path, "Files/Restaurantes/Pedido");
+	string_append(&path, restaurante);
+	string_append(&path, "/Pedido");
+	string_append(&path, id_pedido);
+	string_append(&path, ".AFIP");
+	return path;
+}
+
+char* get_path_receta_file(char* nombre_receta){
+	char* path = string_new();
+	string_append(&path, sindicato_config->punto_montaje);
+	string_append(&path, "Files/Recetas/");
+	string_append(&path, nombre_receta);
+	string_append(&path, ".AFIP");
+	return path;
+}
+/* --- END SUITES DE PATH O RUTAS --- */
+
 void get_or_create_fs() {
 
 	char * punto_de_montaje = sindicato_config->punto_montaje;
@@ -233,12 +272,9 @@ void crear_files(){
 bool existe_restaurante(char* restaurante){
 	DIR* folder_dir;
 
-	char* file_adress = string_new();
-	string_append(&file_adress, sindicato_config->punto_montaje);
-	string_append(&file_adress, "/Files/Restaurantes/");
-	string_append(&file_adress, restaurante);
+	char* path_restaurante = get_path_restaurante(restaurante);
 
-	if ((folder_dir = opendir(file_adress)) == NULL){
+	if ((folder_dir = opendir(path_restaurante)) == NULL){
 		return false;
 	} else {
 		closedir(folder_dir);
@@ -257,7 +293,9 @@ int existe_pedido(char* restaurante, char* nro_pedido){
 	string_append(&file_adress, nro_pedido);
 	string_append(&file_adress, ".AFIP");
 
-	if ((fp = fopen(file_adress, "r")) == NULL){
+	char* path_pedido = get_path_pedido_file(restaurante, nro_pedido);
+
+	if ((fp = fopen(path_pedido, "r")) == NULL){
 		return 0;
 	} else {
 		fclose(fp);

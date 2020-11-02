@@ -22,6 +22,10 @@ t_sindicato_metadata* sindicato_metadata;
 pthread_mutex_t mutex_bitmap;
 
 // FUNCIONES
+char* get_path_restaurante(char* restaurante);
+char* get_path_info_file(char* restaurante);
+char* get_path_pedido_file(char* restaurante, char* id_pedido);
+char* get_path_receta_file(char* nombre_receta);
 void get_or_create_fs();
 void crear_metadata_default();
 int leer_metadata_afip();

@@ -230,7 +230,7 @@ void crear_files(){
 	get_or_create_folder(bloques_adress);
 }
 
-int existe_restaurante(char* restaurante){
+bool existe_restaurante(char* restaurante){
 	DIR* folder_dir;
 
 	char* file_adress = string_new();
@@ -239,10 +239,10 @@ int existe_restaurante(char* restaurante){
 	string_append(&file_adress, restaurante);
 
 	if ((folder_dir = opendir(file_adress)) == NULL){
-		return 0;
+		return false;
 	} else {
 		closedir(folder_dir);
-		return 1;
+		return true;
 	}
 }
 

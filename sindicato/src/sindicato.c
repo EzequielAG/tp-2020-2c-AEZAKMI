@@ -91,7 +91,7 @@ void handle_consultar_platos(int socket, char* restaurante){
     //Verificar si el Restaurante existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
     //En caso de no existir se deberá informar dicha situación.
-    int resultado_operacion = existe_restaurante(restaurante);
+    bool resultado_operacion = existe_restaurante(restaurante);
 
     //Obtener los platos que puede preparar dicho Restaurante del archivo info.AFIP.
 
@@ -104,7 +104,7 @@ void handle_guardar_pedido(int socket, char* restaurante, char* id_pedido){
     //Verificar si el Restaurante existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
     //En caso de no existir se deberá informar dicha situación.
-    int resultado_operacion = existe_restaurante(restaurante);
+    bool resultado_operacion = existe_restaurante(restaurante);
 
     //Verificar que el ID de pedido no exista para dicho restaurante. 
     //En caso de existir se deberá informar sobre dicha situación. 
@@ -128,7 +128,7 @@ void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* 
     //Verificar si el Restaurante existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
     //En caso de no existir se deberá informar dicha situación.
-    int resultado_operacion = existe_restaurante(restaurante);
+    bool resultado_operacion = existe_restaurante(restaurante);
 
     //Verificar si el Pedido existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
@@ -159,7 +159,7 @@ void handle_confirmar_pedido(int socket, char* id_pedido,  char* restaurante){
     //Verificar si el Restaurante existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
     //En caso de no existir se deberá informar dicha situación.
-    int resultado_operacion = existe_restaurante(restaurante);
+    bool resultado_operacion = existe_restaurante(restaurante);
 
     //Verificar si el Pedido existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
@@ -187,7 +187,7 @@ void handle_obtener_pedido(int socket, char* restaurante,  char* id_pedido){
     //Verificar si el Restaurante existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
     //En caso de no existir se deberá informar dicha situación.
-    int resultado_operacion = existe_restaurante(restaurante);
+    bool resultado_operacion = existe_restaurante(restaurante);
 
     //Verificar si el Pedido existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
@@ -204,7 +204,7 @@ void handle_obtener_restaurante(int socket, char* restaurante){
     //Verificar si el Restaurante existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
     //En caso de no existir se deberá informar dicha situación.
-    int resultado_operacion = existe_restaurante(restaurante);
+    bool resultado_operacion = existe_restaurante(restaurante);
 
     //Obtener todo los datos del archivo info.AFIP.
 
@@ -217,7 +217,7 @@ void handle_plato_listo(int socket, char* restaurante,  char* id_pedido, char* c
     //Verificar si el Restaurante existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
     //En caso de no existir se deberá informar dicha situación.
-    int resultado_operacion = existe_restaurante(restaurante);
+    bool resultado_operacion = existe_restaurante(restaurante);
 
     //Verificar si el Pedido existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
@@ -257,7 +257,7 @@ void handle_terminar_pedido(int socket, char* id_pedido,  char* restaurante){
     //Verificar si el Restaurante existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
     //En caso de no existir se deberá informar dicha situación.
-    int resultado_operacion = existe_restaurante(restaurante);
+    bool resultado_operacion = existe_restaurante(restaurante);
 
     //Verificar si el Pedido existe dentro del File System. 
     //Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
@@ -406,7 +406,7 @@ void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posi
     }
 
     //VERIFICAR QUE NO EXISTE EL RESTAURANTE
-    if (existe_restaurante(nombre) == 1){
+    if (existe_restaurante(nombre)){
         printf("Ya existe un restaurante con el nombre: %s \n", nombre);
         return;
     }

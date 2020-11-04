@@ -17,6 +17,33 @@ typedef struct {
     char* magic_number;
 } t_sindicato_metadata;
 
+typedef struct {
+	int x;
+	int y;
+} t_posicion;
+
+typedef struct {
+    int cantidad_cocineros;
+    t_posicion* posicion;
+    t_list* afinidad_cocineros;
+    t_list* platos;
+    t_list* precio_platos;
+    int cantidad_hornos;
+} t_info_file;
+
+typedef struct {
+    char* estado_pedido;
+    t_list* lista_platos;
+    t_list* cantidad_platos;
+    t_list* cantidad_lista;
+    int precio_total;
+} t_pedido_file;
+
+typedef struct {
+    t_list* pasos;
+    t_list* tiempo_paso;
+} t_receta_file;
+
 t_sindicato_metadata* sindicato_metadata;
 
 pthread_mutex_t mutex_bitmap;

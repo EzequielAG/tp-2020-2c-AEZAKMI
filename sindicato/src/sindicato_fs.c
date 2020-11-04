@@ -39,6 +39,92 @@ char* get_path_receta_file(char* nombre_receta){
 }
 /* --- END SUITES DE PATH O RUTAS --- */
 
+/* --- SUITES DE FILES PARSER --- */
+/* -- REFACTOR -- */
+t_list* strings_to_list(char** strings) {
+	t_list* list = list_create();
+	while (*strings != NULL) {
+		list_add(list, strdup(*strings));
+		strings++;
+	}
+	return list;
+}
+/* -- END REFACTOR -- */
+t_posicion* get_position_from_config(t_config* config, char* key){
+	char* posicion_str = config_get_array_value(config, key);
+	t_posicion* posicion_aux = malloc(sizeof(posicion_str));
+	posicion_aux->x = atoi(posicion_str[0]);
+	posicion_aux->y = atoi(posicion_str[1]);
+	return posicion_aux;
+}
+
+void info_file_parser(t_config* config, t_info_file* info_config){
+	//preparing lists
+	char** afinidad_cocineros_str = config_get_array_value(config, "AFINIDAD_COCINEROS");
+	char** platos_str = config_get_array_value(config, "PLATOS");
+	char** precio_platos_str = config_get_array_value(config, "PRECIO_PLATOS");
+
+	info_config->cantidad_cocineros = strdup(config_get_int_value(config, "CANTIDAD_COCINEROS"));
+	info_config->posicion = get_position_from_config(config, "POSICION");
+	info_config->afinidad_cocineros = strings_to_list(afinidad_cocineros_str);
+	info_config->platos = strings_to_list(platos_str);
+	info_config->precio_platos = strings_to_list(precio_platos_str);
+	info_config->cantidad_hornos = strdup(config_get_int_value(config, "CANTIDAD_COCINEROS"));
+}
+
+t_info_file* create_info_config(char* restaurante){
+	char* path_info = get_path_info_file(restaurante);
+	t_config* config = config_create(path_info);
+	t_info_file* info_config = malloc(sizeof(t_info_file));
+
+	info_file_parser(config, info_config);
+	//TODO: config_destroy(config);
+	return info_config;
+}
+
+void pedido_file_parser(t_config* config, t_pedido_file* pedido_config){
+	//preparing lists
+	char** lista_platos_str = config_get_array_value(config, "LISTA_PLATOS");
+	char** cantidad_platos_str = config_get_array_value(config, "CANTIDAD_PLATOS");
+	char** cantidad_lista_str = config_get_array_value(config, "CANTIDAD_LISTA");
+
+	pedido_config->estado_pedido = config_get_string_value(config, "ESTADO_PEDIDO");
+	pedido_config->lista_platos = strings_to_list(lista_platos_str);
+	pedido_config->cantidad_platos = strings_to_list(cantidad_platos_str);
+	pedido_config->cantidad_lista = strings_to_list(cantidad_lista_str);
+	pedido_config->precio_total = strdup(config_get_int_value(config, "PRECIO_TOTAL"));
+}
+
+t_pedido_file* create_pedido_config(char* restaurante, char* id_pedido){
+	char* path_pedido = get_path_pedido_file(restaurante, id_pedido);
+	t_config* config = config_create(path_pedido);
+	t_pedido_file* pedido_config = malloc(sizeof(t_pedido_file));
+
+	pedido_file_parser(config, pedido_config);
+	//TODO: config_destroy(config);
+	return pedido_config;
+}
+
+void receta_file_parser(t_config* config, t_receta_file* receta_config){
+	//preparing lists
+	char** pasos_str = config_get_array_value(config, "PASOS");
+	char** tiempo_paso_str = config_get_array_value(config, "TIEMPO_PASOS");
+
+	receta_config->pasos = strings_to_list(pasos_str);
+	receta_config->tiempo_paso = strings_to_list(tiempo_paso_str);
+}
+
+t_receta_file* create_receta_config(char* nombre_receta){
+	char* path_receta = get_path_receta_file(nombre_receta);
+	t_config* config = config_create(path_receta);
+	t_receta_file* receta_config = malloc(sizeof(t_receta_file));
+
+	receta_file_parser(config, receta_config);
+	//TODO: config_destroy(config);
+	return receta_config;
+}
+/* --- END SUITES DE FILES PARSER--- */
+
 void get_or_create_fs() {
 
 	char * punto_de_montaje = sindicato_config->punto_montaje;
@@ -306,16 +392,17 @@ int existe_pedido(char* restaurante, char* nro_pedido){
 int existe_receta(char* receta){
 	FILE *fp;
 
-	char* file_adress = string_new();
-	string_append(&file_adress, sindicato_config->punto_montaje);
-	string_append(&file_adress, "/Files/Recetas/");
-	string_append(&file_adress, receta);
-	string_append(&file_adress, ".AFIP");
+	char* path_receta = get_path_receta_file(receta);
 
-	if ((fp = fopen(file_adress, "r")) == NULL){
+	if ((fp = fopen(path_receta, "r")) == NULL){
 		return 0;
 	} else {
 		fclose(fp);
 		return 1;
 	}
+}
+
+List obtener_platos(char* restaurante){
+	List* platos;
+
 }

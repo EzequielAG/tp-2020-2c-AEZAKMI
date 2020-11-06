@@ -49,9 +49,24 @@ t_list* strings_to_list(char** strings) {
 	}
 	return list;
 }
+
+t_estado_pedido config_get_estado_pedido(t_config* config, char* key){
+	if (!config_has_property(config, key)) exit(EXIT_FAILURE);
+
+	char* value = config_get_string_value(config, key);
+	if (strcmp(value, "Pendiente")){
+		return PENDIENTE;
+	} else if (strcmp(value, "Confirmado")){
+		return CONFIRMADO;
+	} else if (strcmp(valloc, "Terminado")){
+		return TERMINADO;
+	} else {
+		return exit(EXIT_FAILURE);
+	}
+}
 /* -- END REFACTOR -- */
 t_posicion* get_position_from_config(t_config* config, char* key){
-	char* posicion_str = config_get_array_value(config, key);
+	char** posicion_str = config_get_array_value(config, key);
 	t_posicion* posicion_aux = malloc(sizeof(posicion_str));
 	posicion_aux->x = atoi(posicion_str[0]);
 	posicion_aux->y = atoi(posicion_str[1]);
@@ -88,11 +103,12 @@ void pedido_file_parser(t_config* config, t_pedido_file* pedido_config){
 	char** cantidad_platos_str = config_get_array_value(config, "CANTIDAD_PLATOS");
 	char** cantidad_lista_str = config_get_array_value(config, "CANTIDAD_LISTA");
 
-	pedido_config->estado_pedido = config_get_string_value(config, "ESTADO_PEDIDO");
+	// pedido_config->estado_pedido = config_get_string_value(config, "ESTADO_PEDIDO");
+	pedido_config->estado_pedido = config_get_estado_pedido(config, "ESTADO_PEDIDO");
 	pedido_config->lista_platos = strings_to_list(lista_platos_str);
 	pedido_config->cantidad_platos = strings_to_list(cantidad_platos_str);
 	pedido_config->cantidad_lista = strings_to_list(cantidad_lista_str);
-	pedido_config->precio_total = strdup(config_get_int_value(config, "PRECIO_TOTAL"));
+	pedido_config->precio_total = config_get_int_value(config, "PRECIO_TOTAL");
 }
 
 t_pedido_file* create_pedido_config(char* restaurante, char* id_pedido){
@@ -368,41 +384,34 @@ bool existe_restaurante(char* restaurante){
 	}
 }
 
-int existe_pedido(char* restaurante, char* nro_pedido){
+bool existe_pedido(char* restaurante, char* nro_pedido){
 	FILE *fp;
-
-	char* file_adress = string_new();
-	string_append(&file_adress, sindicato_config->punto_montaje);
-	string_append(&file_adress, "/Files/Restaurantes/");
-	string_append(&file_adress, restaurante);
-	string_append(&file_adress, "/Pedido");
-	string_append(&file_adress, nro_pedido);
-	string_append(&file_adress, ".AFIP");
 
 	char* path_pedido = get_path_pedido_file(restaurante, nro_pedido);
 
 	if ((fp = fopen(path_pedido, "r")) == NULL){
-		return 0;
+		return false;
 	} else {
 		fclose(fp);
-		return 1;
+		return true;
 	}
 }
 
-int existe_receta(char* receta){
+bool existe_receta(char* receta){
 	FILE *fp;
 
 	char* path_receta = get_path_receta_file(receta);
 
 	if ((fp = fopen(path_receta, "r")) == NULL){
-		return 0;
+		return false;
 	} else {
 		fclose(fp);
-		return 1;
+		return true;
 	}
 }
 
-List obtener_platos(char* restaurante){
-	List* platos;
-
+List* obtener_platos(char* restaurante){
+	t_info_file* info_file = create_info_config(restaurante);
+	List* platos = info_file->platos;
+	return platos;
 }

@@ -11,10 +11,16 @@
 #define BIT_SIZE(x,y) ((x - 1) / y + 1);
 
 // VARIABLES Y ESTRUCTURAS
+typedef enum {
+	PENDIENTE,
+	CONFIRMADO,
+	TERMINADO,
+} t_estado_pedido;
+
 typedef struct {
-    char* block_size;
-    char* blocks;
-    char* magic_number;
+	char* block_size;
+	char* blocks;
+	char* magic_number;
 } t_sindicato_metadata;
 
 typedef struct {
@@ -23,25 +29,25 @@ typedef struct {
 } t_posicion;
 
 typedef struct {
-    int cantidad_cocineros;
-    t_posicion* posicion;
-    t_list* afinidad_cocineros;
-    t_list* platos;
-    t_list* precio_platos;
-    int cantidad_hornos;
+	int cantidad_cocineros;
+	t_posicion* posicion;
+	t_list* afinidad_cocineros;
+	t_list* platos;
+	t_list* precio_platos;
+	int cantidad_hornos;
 } t_info_file;
 
 typedef struct {
-    char* estado_pedido;
-    t_list* lista_platos;
-    t_list* cantidad_platos;
-    t_list* cantidad_lista;
-    int precio_total;
+	t_estado_pedido estado_pedido;
+	t_list* lista_platos;
+	t_list* cantidad_platos;
+	t_list* cantidad_lista;
+	int precio_total;
 } t_pedido_file;
 
 typedef struct {
-    t_list* pasos;
-    t_list* tiempo_paso;
+	t_list* pasos;
+	t_list* tiempo_paso;
 } t_receta_file;
 
 t_sindicato_metadata* sindicato_metadata;
@@ -62,7 +68,10 @@ int existe_archivo(char* archivo_path);
 int necesita_recrearse(char * block_size, char * blocks, char * magic_number);
 void crear_files();
 bool existe_restaurante(char* restaurante);
-int existe_pedido(char* restaurante, char* nro_pedido);
-int existe_receta(char* receta);
+bool existe_pedido(char* restaurante, char* nro_pedido);
+bool existe_receta(char* receta);
+t_info_file* create_info_config(char* restaurante);
+t_pedido_file* create_pedido_config(char* restaurante, char* id_pedido);
+t_receta_file* create_receta_config(char* nombre_receta);
 
 #endif

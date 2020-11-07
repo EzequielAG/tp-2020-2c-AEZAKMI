@@ -13,6 +13,7 @@ int main(void){
     recetas = malloc(sizeof(receta_precio**));
     cantidad_hornos = malloc(sizeof(char*));
     cantidad_pedidos = malloc(sizeof(char*));
+    cantidad_cocineros = malloc(sizeof(char*));
 
     //TODO: Hacer que reciba ip y puerto de config
    // iniciar_servidor("127.0.0.1", "5002", handle_client);
@@ -40,7 +41,6 @@ int main(void){
         handle_obtener_restaurante(enviar_mensaje_obtener_restaurante(&modulo_sindicato, restaurante_config->nombre_restaurante));
     }
 
-
     //PRINTF AFINIDIDADES Y ESO
 
     for(IteratorList iterator_afinidades = beginlist(*afinidades); iterator_afinidades != NULL; iterator_afinidades = nextlist(iterator_afinidades))
@@ -59,6 +59,8 @@ int main(void){
     printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %s\n", cantidad_pedidos);
 
     //2. Creacion/inicializacion de colas de planificacion
+    inicializar_colas();
+
 
     restaurante_finally(restaurante_config, logger);
     return 0;
@@ -222,7 +224,7 @@ void handle_obtener_restaurante(r_obtener_restaurante* respuesta){
 // Cantidad de cocineros y sus afinidades, posición del restaurante en el mapa, recetas disponibles con sus precios y 
 //la cantidad de hornos. A su vez, deberá retornar la cantidad de pedidos que ya disponga para no pisar los ID con los
 // nuevos generados.
-inicializar(respuesta->afinidades,respuesta->pos_x,respuesta->pos_y,respuesta->recetas,respuesta->cantidad_hornos,respuesta->cantidad_pedidos);
+inicializar(respuesta->afinidades,respuesta->pos_x,respuesta->pos_y,respuesta->recetas,respuesta->cantidad_hornos,respuesta->cantidad_pedidos,respuesta->cantidad_cocineros);
 }
 
 char* conveRecetasString(receta_precio** recetas)
@@ -265,11 +267,11 @@ initlist(afinidades_default);
 pushbacklist(afinidades_default, "Milanesas");
 pushbacklist(afinidades_default, "Empanadas");
 
-inicializar(afinidades_default,"4","5",recetas,"2","6");
+inicializar(afinidades_default,"4","5",recetas,"2","6","2");
 
 }
 
-void inicializar(List* afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,char* cantidad_pedidos_f){
+void inicializar(List* afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,char* cantidad_pedidos_f,char* cantidad_cocineros_f){
 
 for(IteratorList iterator_afinidades = beginlist(*afinidades_f); iterator_afinidades != NULL; iterator_afinidades = nextlist(iterator_afinidades))
 {
@@ -280,6 +282,8 @@ strcpy(pos_x,pos_x_f);
 strcpy(pos_y,pos_y_f);
 strcpy(cantidad_hornos,cantidad_hornos_f);
 strcpy(cantidad_pedidos,cantidad_pedidos_f);
+strcpy(cantidad_cocineros,cantidad_cocineros_f);
+
 recetas = recetas_f;
 }
 

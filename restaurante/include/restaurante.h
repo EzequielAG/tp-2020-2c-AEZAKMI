@@ -5,10 +5,10 @@
 #include <commons/config.h>
 #include <commons/string.h>
 #include <stdbool.h>
-#include "shared_utils.h"
 #include "server.h"
 #include "tests.h"
-#include "api.h"
+
+#include "planificacion.h"
 
 // VARIABLES Y ESTRUCTURAS
 typedef struct {
@@ -31,15 +31,6 @@ t_log* logger;
 //     char* precio;
 // } receta_precio;
 
-//VARIABLES GLOBALES
-List* afinidades;
-char* pos_x;
-char* pos_y;
-receta_precio** recetas;
-char* cantidad_hornos;
-char* cantidad_pedidos;
-int socket_sindicato;
-t_modulo modulo_sindicato;
 
 // FUNCIONES
 void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger);
@@ -56,7 +47,7 @@ void escuchar_mensajes_socket(t_parameter* parametro);
 void handle_client(t_result* result);
 void inicializacion_default();
 void handle_obtener_restaurante(r_obtener_restaurante* resultado);
-void inicializar(List*,char*,char*,receta_precio**,char*,char*);
+void inicializar(List*,char*,char*,receta_precio**,char*,char*,char*);
 int len_array(char** arrayInput);
 void consultar_platos_f();
 

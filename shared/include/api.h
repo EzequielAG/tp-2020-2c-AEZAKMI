@@ -44,6 +44,7 @@ typedef struct {
     receta_precio** recetas;
     char* cantidad_hornos;
     char* cantidad_pedidos;
+    char* cantidad_cocineros;
 } r_obtener_restaurante;
 
 typedef struct{

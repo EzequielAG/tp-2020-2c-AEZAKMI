@@ -180,7 +180,7 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
     respuesta_obtener_restaurante->recetas = obtener_receta_precios(respuesta->mensajes[3]) ;
     respuesta_obtener_restaurante->cantidad_hornos = respuesta->mensajes[4];
     respuesta_obtener_restaurante->cantidad_pedidos = respuesta->mensajes[5];
-
+    respuesta_obtener_restaurante->cantidad_cocineros = respuesta->mensajes[6];
 
     for (int i= 0; i < *respuesta->size; i++){
        printf("%s ", respuesta->mensajes[i]);

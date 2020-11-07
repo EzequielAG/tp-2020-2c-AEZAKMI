@@ -12,11 +12,12 @@ int main(void){
     pos_y = malloc(sizeof(char*));
     recetas = malloc(sizeof(receta_precio**));
     cantidad_hornos = malloc(sizeof(char*));
-    cantidad_pedidos = malloc(sizeof(char*));
+    cantidad_pedidos = 0;
     cantidad_cocineros = malloc(sizeof(char*));
+    initlist(&l_pedidos);
 
     //TODO: Hacer que reciba ip y puerto de config
-   // iniciar_servidor("127.0.0.1", "5002", handle_client);
+    //iniciar_servidor("127.0.0.1", "5002", handle_client);
 
     //0. Inicializo modulos a los que me voy a tener que conectar
     //t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
@@ -56,7 +57,7 @@ int main(void){
     }
 
     printf("<< RESTAURANTE >> Iniciado con cantidad de hornos = %s\n", cantidad_hornos);
-    printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %s\n", cantidad_pedidos);
+    printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %i\n", cantidad_pedidos);
 
     //2. Creacion/inicializacion de colas de planificacion
     inicializar_colas();
@@ -123,29 +124,26 @@ void restaurante_destroy(t_restaurante_config* restaurante_config) {
     free(restaurante_config);
 }
 
-int obtener_id_pedido(){
-    //TODO: Obtener un id de pedido unico para la instancia del restaurante
-    int id_pedido = 435;
-    return id_pedido;
+int asignar_pedido_id(){
+
+    cantidad_pedidos = cantidad_pedidos + 1;
+        
+    return cantidad_pedidos;
 }
 
 void handle_crear_pedido(int socket){
 
-    int id_pedido = obtener_id_pedido();
-    char* respuesta[1];
-
-    respuesta[0] = string_itoa(id_pedido);
-
-    t_modulo modulo_sindicato;
-    modulo_sindicato.ip = restaurante_config->ip_sindicato;
-    modulo_sindicato.puerto = restaurante_config->puerto_sindicato;
-    modulo_sindicato.nombre = "Comanda";
-
-    //TODO: De donde saco el restaurante?
-    enviar_mensaje_guardar_pedido(&modulo_sindicato, "Restaurante1", respuesta[0]);
-
-    send_messages_socket(socket, respuesta, 1);
-    liberar_conexion(socket);
+    int id = asignar_pedido_id();
+    t_pedido* pedido = malloc(sizeof(t_pedido));
+    pedido->id = id;
+    
+    //lo pusheo en la cola de pedidos con el id respectivo
+    if(pushbacklist(&l_pedidos,pedido) == 1)
+    {
+        //lo mando a guardar al sindicato
+        char* respuesta = enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,string_itoa(id));
+        send_message_socket(socket,respuesta);
+    }
 }
 
 int handshake(t_modulo* modulo){
@@ -208,7 +206,9 @@ void handle_client(t_result* result){
             }
 
         } else if (tipo_mensaje == crear_pedido) {
-            // TODO : FALTA LOGICA CREAR_PEDIDO
+
+            handle_crear_pedido(result->socket);
+
         } else if (tipo_mensaje == anadir_plato) {
             // TODO : FALTA LOGICA ANADIR_PLATO
         } else if (tipo_mensaje == confirmar_pedido) {
@@ -224,7 +224,7 @@ void handle_obtener_restaurante(r_obtener_restaurante* respuesta){
 // Cantidad de cocineros y sus afinidades, posición del restaurante en el mapa, recetas disponibles con sus precios y 
 //la cantidad de hornos. A su vez, deberá retornar la cantidad de pedidos que ya disponga para no pisar los ID con los
 // nuevos generados.
-inicializar(respuesta->afinidades,respuesta->pos_x,respuesta->pos_y,respuesta->recetas,respuesta->cantidad_hornos,respuesta->cantidad_pedidos,respuesta->cantidad_cocineros);
+inicializar(respuesta->afinidades,respuesta->pos_x,respuesta->pos_y,respuesta->recetas,respuesta->cantidad_hornos,atoi(respuesta->cantidad_pedidos),respuesta->cantidad_cocineros);
 }
 
 char* conveRecetasString(receta_precio** recetas)
@@ -267,11 +267,11 @@ initlist(afinidades_default);
 pushbacklist(afinidades_default, "Milanesas");
 pushbacklist(afinidades_default, "Empanadas");
 
-inicializar(afinidades_default,"4","5",recetas,"2","6","2");
+inicializar(afinidades_default,"4","5",recetas,"2",6,"2");
 
 }
 
-void inicializar(List* afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,char* cantidad_pedidos_f,char* cantidad_cocineros_f){
+void inicializar(List* afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,int cantidad_pedidos_f,char* cantidad_cocineros_f){
 
 for(IteratorList iterator_afinidades = beginlist(*afinidades_f); iterator_afinidades != NULL; iterator_afinidades = nextlist(iterator_afinidades))
 {
@@ -281,7 +281,7 @@ for(IteratorList iterator_afinidades = beginlist(*afinidades_f); iterator_afinid
 strcpy(pos_x,pos_x_f);
 strcpy(pos_y,pos_y_f);
 strcpy(cantidad_hornos,cantidad_hornos_f);
-strcpy(cantidad_pedidos,cantidad_pedidos_f);
+cantidad_pedidos = cantidad_pedidos_f;
 strcpy(cantidad_cocineros,cantidad_cocineros_f);
 
 recetas = recetas_f;

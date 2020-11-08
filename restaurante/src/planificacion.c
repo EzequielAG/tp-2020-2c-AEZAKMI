@@ -2,6 +2,7 @@
 
 void inicializar_colas()
 {
+    initlist(&cola_new);
     inicializar_colas_ready();
     inicializar_colas_exec();
     inicializar_colas_io();
@@ -78,3 +79,11 @@ int paso_block(t_plato* plato)
     plato->pcb->estado = BLOCKED;
     return 1;
 }
+
+int paso_new(t_plato* plato)
+{
+    pushbacklist(&cola_new,plato);
+    plato->pcb->estado = NEW;
+    return 1;
+}
+

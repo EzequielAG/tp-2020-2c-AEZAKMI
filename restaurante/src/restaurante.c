@@ -16,6 +16,7 @@ int main(void){
     recetas = malloc(sizeof(receta_precio**));
     cantidad_hornos = malloc(sizeof(char*));
     cantidad_pedidos = 0;
+    cantidad_platos = 0;
     cantidad_cocineros = malloc(sizeof(char*));
     initlist(&l_pedidos);
 
@@ -163,61 +164,51 @@ void handle_confirmar_pedido(t_result* result){
 
     // OBTENER PEDIDO DEL SINDICATO
     
-
-   
     r_obtener_pedido2* pedido = enviar_mensaje_obtener_pedido2(&(modulo_sindicato), result->mensajes->mensajes[1], restaurante_config->nombre_restaurante);
 
-
-    for(IteratorList iter = beginlist(*(pedido->info_comidas)); iter != NULL; iter = nextlist(iter))
-    {
-        List* receta_comida = enviar_mensaje_obtener_receta2(&modulo_sindicato, iter->data);
-        
+    t_pedido* pedido_restaurante = malloc(sizeof(t_pedido));
+    pedido_restaurante->id = atoi(result->mensajes->mensajes[1]);
     
+    
+    if(strcmp(pedido->estado,"LISTO"))
+    {
+        for(IteratorList iter = beginlist(*(pedido->info_comidas)); iter != NULL; iter = nextlist(iter))
+        {
+            informacion_comidas* info_comida = iter->data;
+            List* receta_comida = enviar_mensaje_obtener_receta2(&modulo_sindicato, info_comida->comida);
+
+            t_plato* plato = malloc(sizeof(t_plato));
+            plato->pcb->pid = cantidad_platos + 1;
+            cantidad_platos++;
+            plato->cantidad_total = atoi(info_comida->cantidad_total);
+            plato->cantidad_listo = atoi(info_comida->cantidad_lista);
+
+            strcpy(plato->nombre,info_comida->comida);
 
             for(IteratorList iter2 = beginlist(*receta_comida); iter2 != NULL; iter2 = nextlist(iter2)){
-
-                // t_pasos_platos* pasos_plato = NULL;
-
+                t_paso* paso = iter2->data;
+                t_pasos_platos* paso_plato = malloc(sizeof(t_pasos_platos));
+                paso_plato->nombre = paso->nombre_paso;
+                paso_plato->ciclos_cpu = atoi(paso->ciclo_cpu);
+                paso_plato->se_ejecuto = 0;
+                if(!strcmp(paso->nombre_paso, "HORNEAR"))
+                {
+                        paso_plato->es_io = 1;
+                }  
+                else{
+                        paso_plato->es_io = 0;
+                }
+                pushbacklist(&plato->pasos,paso_plato);
                 
-
             }
-        
-        
-        
-        
-    }
+            pushbacklist(&pedido_restaurante->platos,plato);
+            paso_new(plato);
+        }
+        pushbacklist(&l_pedidos,pedido_restaurante);
     
-
-
-    // t_pedido* pedido_vacio = malloc(sizeof(t_pedido));
-
-    // GENERAR EL PCB, ITERAR PLATOS DEL PEDIDO Y CONSULTAR LAS RECETAS A SINDICATO.
-
-
-
-    for(int i=0; i<10 ;i++){
-    //    char* comida = pedido->info_comidas[i]->comida;
-
-    //    char* receta_comida = enviar_mensaje_obtener_receta(&modulo_sindicato, comida); // MODIFICAR API PARA QUE DEVUELVA UNA RECETA
-
-
-       
+        // INFORMAR AL MODULO QUE CONFIRMO EL PEDIDO QUE SU PEDIDO FUE CONFIRMADO.
+        send_message_socket(result->socket,"OK");
     }
-
-
-
-        
-        
- 
-
-
-
-
-    // INFORMAR AL MODULO QUE CONFIRMO EL PEDIDO QUE SU PEDIDO FUE CONFIRMADO.
-
-
-    // MANDAR LOS PLATOS A NEW
-
 
 }
 

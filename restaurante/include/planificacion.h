@@ -11,6 +11,7 @@ void inicializar_colas_block();
 void inicializar_colas_exit();
 
 typedef enum estado_proceso{
+    NEW = 0,
     READY = 1,
     READY_MAS = 2,
     EXEC = 3,
@@ -29,6 +30,8 @@ typedef struct {
     t_pcb* pcb;
     char* nombre;
     List pasos;
+    int cantidad_total;
+    int cantidad_listo;
 }
 t_plato;
 
@@ -48,7 +51,9 @@ typedef struct{
 int paso_ready(t_plato* plato);
 int paso_block(t_plato* plato);
 int paso_io(t_plato* plato);
+int paso_new(t_plato* plato);
 
+List cola_new;
 List cola_ready_mas;
 List cola_ready;
 List cola_exec;

@@ -5,6 +5,7 @@
 #include <commons/config.h>
 #include <commons/string.h>
 #include <stdbool.h>
+#include <semaphore.h>
 #include "server.h"
 #include "tests.h"
 #include "planificacion.h"
@@ -48,5 +49,10 @@ void handle_obtener_restaurante(r_obtener_restaurante* resultado);
 void inicializar(List*,char*,char*,receta_precio**,char*,int,char*);
 int len_array(char** arrayInput);
 void consultar_platos_f();
+void handle_crear_pedido(int socket);
+void handle_anadir_plato(t_result* result);
+void handle_confirmar_pedido(t_result* result);
+
+sem_t* sem_id;
 
 #endif

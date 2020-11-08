@@ -53,6 +53,10 @@ typedef struct{
     char* cantidad_lista;    
 } informacion_comidas;
 
+typedef struct{
+    char* nombre_paso;
+    char* ciclo_cpu;
+}t_paso;
 
 typedef struct {
     char* restaurante;
@@ -65,6 +69,12 @@ typedef struct {
     char* estado;
     informacion_comidas** info_comidas;
 } r_obtener_pedido;
+
+typedef struct {
+    char* estado;
+    List* info_comidas;
+} r_obtener_pedido2;
+
 
 
 
@@ -95,5 +105,8 @@ char* enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* res
 char* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
 char ** separar_por_comillas(char** string_separado_por_espacios);
 
+r_obtener_pedido2* enviar_mensaje_obtener_pedido2(t_modulo* modulo, char* id_pedido,char* restaurante);
+List* obtener_informacion_comidas2(char* array_mensajes);
+List* enviar_mensaje_obtener_receta2(t_modulo* modulo, char* nombre_plato);
 
 #endif

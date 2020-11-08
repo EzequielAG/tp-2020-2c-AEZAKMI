@@ -12,6 +12,7 @@ int id;
 List platos;
 } t_pedido;
 
+
 char* pos_x;
 char* pos_y;
 receta_precio** recetas;

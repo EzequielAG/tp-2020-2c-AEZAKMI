@@ -2,6 +2,9 @@
 
 int main(void){
 
+    sem_id = malloc(sizeof(sem_t));
+    sem_init(sem_id, 0, 1);
+
     //ESTE VA A ACTUAR DE SERVER
     restaurante_init(&restaurante_config, &logger);
     log_info(logger, "Soy el MODULO RESTAURANTE! %s", mi_funcion_compartida());
@@ -67,6 +70,288 @@ int main(void){
     return 0;
 }
 
+void handle_client(t_result* result){
+
+    for(int i = 0; i < *result->mensajes->size; i++){
+        printf("%s", result->mensajes->mensajes[i]);
+    }
+    printf("\n");
+
+    if (result->operacion == MENSAJES){
+        int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
+        
+        if (tipo_mensaje == consultar_platos){
+            List* platos = enviar_mensaje_consultar_platos(&modulo_sindicato, restaurante_config->nombre_restaurante);
+            int cant_platos = sizelist(*platos);
+            if(cant_platos == 0)
+            {
+                send_messages_socket(result->socket,list_a_char(*platos), cant_platos);
+            }
+
+        } else if (tipo_mensaje == crear_pedido) {
+
+            handle_crear_pedido(result->socket);
+
+        } else if (tipo_mensaje == anadir_plato) {
+            handle_anadir_plato(result);
+        } else if (tipo_mensaje == confirmar_pedido) {
+        
+            handle_confirmar_pedido(result);
+            
+        } else if (tipo_mensaje == consultar_pedido) {
+            // TODO : FALTA LOGICA CONSULTAR_PEDIDO
+        }
+    }
+}
+
+
+int asignar_pedido_id(){
+
+    sem_wait(sem_id);
+    cantidad_pedidos = cantidad_pedidos + 1;
+    sem_post(sem_id);
+        
+    return cantidad_pedidos;
+}
+
+void handle_crear_pedido(int socket){
+
+    int id = asignar_pedido_id();
+    t_pedido* pedido = malloc(sizeof(t_pedido));
+    pedido->id = id;
+    initlist(&pedido->platos);
+    
+    //lo pusheo en la cola de pedidos con el id respectivo
+    if(pushbacklist(&l_pedidos,pedido) == 1)
+    {
+        //lo mando a guardar al sindicato
+        char* respuesta = enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,string_itoa(id));
+        if(!strcmp(respuesta,"OK")){
+            send_message_socket(socket,string_itoa(id));
+        }else{
+            send_message_socket(socket,"FAIL");
+        }
+    }
+}
+
+void handle_anadir_plato(t_result* result){
+
+     for(IteratorList iter = beginlist(l_pedidos); iter != NULL; iter = nextlist(iter)) {
+        t_pedido* pedido = iter->data;
+
+        if((pedido->id) == atoi(result->mensajes->mensajes[2])){
+            pushbacklist(&(pedido->platos), result->mensajes->mensajes[1]);
+            // REVISAR CANTIDAD 
+            char* respuesta = enviar_mensaje_guardar_plato(&modulo_sindicato, restaurante_config->nombre_restaurante,result->mensajes->mensajes[2] ,result->mensajes->mensajes[1] , "1");
+
+            send_message_socket(result->socket,respuesta);
+
+            return;
+
+        }
+
+        
+    }
+
+    send_message_socket(result->socket,"FAIL");
+
+};
+
+
+void handle_confirmar_pedido(t_result* result){
+
+
+    // OBTENER PEDIDO DEL SINDICATO
+    
+
+   
+    r_obtener_pedido2* pedido = enviar_mensaje_obtener_pedido2(&(modulo_sindicato), result->mensajes->mensajes[1], restaurante_config->nombre_restaurante);
+
+
+    for(IteratorList iter = beginlist(*(pedido->info_comidas)); iter != NULL; iter = nextlist(iter))
+    {
+        List* receta_comida = enviar_mensaje_obtener_receta2(&modulo_sindicato, iter->data);
+        
+    
+
+            for(IteratorList iter2 = beginlist(*receta_comida); iter2 != NULL; iter2 = nextlist(iter2)){
+
+                // t_pasos_platos* pasos_plato = NULL;
+
+                
+
+            }
+        
+        
+        
+        
+    }
+    
+
+
+    // t_pedido* pedido_vacio = malloc(sizeof(t_pedido));
+
+    // GENERAR EL PCB, ITERAR PLATOS DEL PEDIDO Y CONSULTAR LAS RECETAS A SINDICATO.
+
+
+
+    for(int i=0; i<10 ;i++){
+    //    char* comida = pedido->info_comidas[i]->comida;
+
+    //    char* receta_comida = enviar_mensaje_obtener_receta(&modulo_sindicato, comida); // MODIFICAR API PARA QUE DEVUELVA UNA RECETA
+
+
+       
+    }
+
+
+
+        
+        
+ 
+
+
+
+
+    // INFORMAR AL MODULO QUE CONFIRMO EL PEDIDO QUE SU PEDIDO FUE CONFIRMADO.
+
+
+    // MANDAR LOS PLATOS A NEW
+
+
+}
+
+int handshake(t_modulo* modulo){
+
+    char* mensajes[2] = {string_itoa(handshake_restaurante), restaurante_config->nombre_restaurante};
+
+    socket_sindicato = send_messages_and_return_socket(modulo->ip, modulo->puerto, mensajes, 2);
+
+    if (socket_sindicato == -1){
+        return -1;
+    }
+
+    char * mensaje = receive_simple_message(socket_sindicato);
+
+    if (mensaje == NULL){
+        return -1;
+    }
+
+    printf("El handshake con el modulo %s fue correcto\n", modulo->nombre);
+
+    escuchar_mensajes_socket_desacoplado(socket_sindicato);
+
+    return 0;
+}
+
+void escuchar_mensajes_socket_desacoplado(int socket){
+    
+    pthread_t thread;
+    t_parameter* parametro = malloc(sizeof(t_parameter));
+
+	parametro->socket = socket;
+	parametro->f = handle_client;
+
+	pthread_create(&thread,NULL,(void*)escuchar_mensajes_socket, parametro);
+	pthread_detach(thread);
+
+}
+
+void escuchar_mensajes_socket(t_parameter* parametro){
+    escuchar_socket(&parametro->socket, parametro->f);
+}
+
+
+
+void handle_obtener_restaurante(r_obtener_restaurante* respuesta){
+//Se ejecutará el mensaje Obtener Restaurante al módulo Sindicato obteniendo todos los datos del mismo, siendo algunos de ellos:
+// Cantidad de cocineros y sus afinidades, posición del restaurante en el mapa, recetas disponibles con sus precios y 
+//la cantidad de hornos. A su vez, deberá retornar la cantidad de pedidos que ya disponga para no pisar los ID con los
+// nuevos generados.
+inicializar(respuesta->afinidades,respuesta->pos_x,respuesta->pos_y,respuesta->recetas,respuesta->cantidad_hornos,atoi(respuesta->cantidad_pedidos),respuesta->cantidad_cocineros);
+}
+
+char* conveRecetasString(receta_precio** recetas)
+{
+    char* a = string_new();
+			
+    for(int i=0 ; i < sizeof(recetas); i++)
+	{
+        string_append(&a,recetas[i]->receta);
+        string_append(&a," | ");
+        string_append(&a,recetas[i]->precio);
+        string_append(&a," , ");
+	}
+
+    return a;
+}
+
+
+void inicializacion_default(){
+
+    receta_precio* receta1 = malloc(sizeof(receta_precio*));
+    receta1->receta = "Milanesas";
+    receta1->precio = "400";
+
+    receta_precio* receta2 = malloc(sizeof(receta_precio*));
+    receta2->receta = "Empanadas";
+    receta2->precio = "350";
+
+    receta_precio* receta3 = malloc(sizeof(receta_precio*));
+    receta3->receta = "Ensalada";
+    receta3->precio = "300";
+
+    receta_precio** recetas = malloc(sizeof(receta_precio**));
+    recetas[0] = receta1;
+    recetas[1] = receta2;
+    recetas[2] = receta3;
+
+    List* afinidades_default = malloc(sizeof(List));
+    initlist(afinidades_default);
+    pushbacklist(afinidades_default, "Milanesas");
+    pushbacklist(afinidades_default, "Empanadas");
+
+    inicializar(afinidades_default,"4","5",recetas,"2",6,"2");
+
+}
+
+void inicializar(List* afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,int cantidad_pedidos_f,char* cantidad_cocineros_f){
+
+    for(IteratorList iterator_afinidades = beginlist(*afinidades_f); iterator_afinidades != NULL; iterator_afinidades = nextlist(iterator_afinidades))
+    {
+        pushbacklist(afinidades, iterator_afinidades->data);
+    }
+
+    strcpy(pos_x,pos_x_f);
+    strcpy(pos_y,pos_y_f);
+    strcpy(cantidad_hornos,cantidad_hornos_f);
+    cantidad_pedidos = cantidad_pedidos_f;
+    strcpy(cantidad_cocineros,cantidad_cocineros_f);
+
+    recetas = recetas_f;
+}
+
+void consultar_platos_f()
+{
+};
+
+
+int len_array(char** arrayInput)
+{
+    int i = 0;
+    int cont = 0;
+ 
+    for(i=0 ; arrayInput[i] != NULL ; i++)
+    {
+       cont = cont + 1; 
+    }
+        
+    return cont;
+}
+
+
+
+
 
 int handshake_app(t_modulo modulo_app)
 {
@@ -122,184 +407,4 @@ void restaurante_destroy(t_restaurante_config* restaurante_config) {
     free(restaurante_config->algoritmo_planificador);
     free(restaurante_config->nombre_restaurante);
     free(restaurante_config);
-}
-
-int asignar_pedido_id(){
-
-    cantidad_pedidos = cantidad_pedidos + 1;
-        
-    return cantidad_pedidos;
-}
-
-void handle_crear_pedido(int socket){
-
-    int id = asignar_pedido_id();
-    t_pedido* pedido = malloc(sizeof(t_pedido));
-    pedido->id = id;
-    
-    //lo pusheo en la cola de pedidos con el id respectivo
-    if(pushbacklist(&l_pedidos,pedido) == 1)
-    {
-        //lo mando a guardar al sindicato
-        char* respuesta = enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,string_itoa(id));
-        send_message_socket(socket,respuesta);
-    }
-}
-
-int handshake(t_modulo* modulo){
-
-    char* mensajes[2] = {string_itoa(handshake_restaurante), restaurante_config->nombre_restaurante};
-
-    socket_sindicato = send_messages_and_return_socket(modulo->ip, modulo->puerto, mensajes, 2);
-
-    if (socket_sindicato == -1){
-        return -1;
-    }
-
-    char * mensaje = receive_simple_message(socket_sindicato);
-
-    if (mensaje == NULL){
-        return -1;
-    }
-
-    printf("El handshake con el modulo %s fue correcto\n", modulo->nombre);
-
-    escuchar_mensajes_socket_desacoplado(socket_sindicato);
-
-    return 0;
-}
-
-void escuchar_mensajes_socket_desacoplado(int socket){
-    
-    pthread_t thread;
-    t_parameter* parametro = malloc(sizeof(t_parameter));
-
-	parametro->socket = socket;
-	parametro->f = handle_client;
-
-	pthread_create(&thread,NULL,(void*)escuchar_mensajes_socket, parametro);
-	pthread_detach(thread);
-
-}
-
-void escuchar_mensajes_socket(t_parameter* parametro){
-    escuchar_socket(&parametro->socket, parametro->f);
-}
-
-void handle_client(t_result* result){
-
-    for(int i = 0; i < *result->mensajes->size; i++){
-        printf("%s", result->mensajes->mensajes[i]);
-    }
-    printf("\n");
-
-    if (result->operacion == MENSAJES){
-        int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
-        
-        //CONSULTAR_PLATOS
-        if (tipo_mensaje == consultar_platos){
-            List* platos = enviar_mensaje_consultar_platos(&modulo_sindicato, restaurante_config->nombre_restaurante);
-            int cant_platos = sizelist(*platos);
-            if(cant_platos == 0)
-            {
-                send_messages_socket(result->socket,list_a_char(*platos), cant_platos);
-            }
-
-        } else if (tipo_mensaje == crear_pedido) {
-
-            handle_crear_pedido(result->socket);
-
-        } else if (tipo_mensaje == anadir_plato) {
-            // TODO : FALTA LOGICA ANADIR_PLATO
-        } else if (tipo_mensaje == confirmar_pedido) {
-            // TODO : FALTA LOGICA CONFIRMAR_PEDIDO
-        } else if (tipo_mensaje == consultar_pedido) {
-            // TODO : FALTA LOGICA CONSULTAR_PEDIDO
-        }
-    }
-}
-
-void handle_obtener_restaurante(r_obtener_restaurante* respuesta){
-//Se ejecutará el mensaje Obtener Restaurante al módulo Sindicato obteniendo todos los datos del mismo, siendo algunos de ellos:
-// Cantidad de cocineros y sus afinidades, posición del restaurante en el mapa, recetas disponibles con sus precios y 
-//la cantidad de hornos. A su vez, deberá retornar la cantidad de pedidos que ya disponga para no pisar los ID con los
-// nuevos generados.
-inicializar(respuesta->afinidades,respuesta->pos_x,respuesta->pos_y,respuesta->recetas,respuesta->cantidad_hornos,atoi(respuesta->cantidad_pedidos),respuesta->cantidad_cocineros);
-}
-
-char* conveRecetasString(receta_precio** recetas)
-{
-    char* a = string_new();
-			
-    for(int i=0 ; i < sizeof(recetas); i++)
-	{
-        string_append(&a,recetas[i]->receta);
-        string_append(&a," | ");
-        string_append(&a,recetas[i]->precio);
-        string_append(&a," , ");
-	}
-
-    return a;
-}
-
-
-void inicializacion_default(){
-
-receta_precio* receta1 = malloc(sizeof(receta_precio*));
-receta1->receta = "Milanesas";
-receta1->precio = "400";
-
-receta_precio* receta2 = malloc(sizeof(receta_precio*));
-receta2->receta = "Empanadas";
-receta2->precio = "350";
-
-receta_precio* receta3 = malloc(sizeof(receta_precio*));
-receta3->receta = "Ensalada";
-receta3->precio = "300";
-
-receta_precio** recetas = malloc(sizeof(receta_precio**));
-recetas[0] = receta1;
-recetas[1] = receta2;
-recetas[2] = receta3;
-
-List* afinidades_default = malloc(sizeof(List));
-initlist(afinidades_default);
-pushbacklist(afinidades_default, "Milanesas");
-pushbacklist(afinidades_default, "Empanadas");
-
-inicializar(afinidades_default,"4","5",recetas,"2",6,"2");
-
-}
-
-void inicializar(List* afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,int cantidad_pedidos_f,char* cantidad_cocineros_f){
-
-for(IteratorList iterator_afinidades = beginlist(*afinidades_f); iterator_afinidades != NULL; iterator_afinidades = nextlist(iterator_afinidades))
-{
-    pushbacklist(afinidades, iterator_afinidades->data);
-}
-
-strcpy(pos_x,pos_x_f);
-strcpy(pos_y,pos_y_f);
-strcpy(cantidad_hornos,cantidad_hornos_f);
-cantidad_pedidos = cantidad_pedidos_f;
-strcpy(cantidad_cocineros,cantidad_cocineros_f);
-
-recetas = recetas_f;
-}
-
-void consultar_platos_f()
-{
-};
-
-int len_array(char** arrayInput)
-{
-    int i = 0;
-    int cont = 0;
- 
-    for(i=0 ; arrayInput[i] != NULL ; i++)
-    {
-       cont = cont + 1; 
-    }
-        
-    return cont;
 }

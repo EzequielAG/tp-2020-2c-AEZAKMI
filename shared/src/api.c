@@ -402,6 +402,34 @@ informacion_comidas** obtener_informacion_comidas(char* array_mensajes){
 
 };
 
+
+List* obtener_informacion_comidas2(char* array_mensajes){
+
+    List* lista_comidas = NULL;
+
+    initlist(lista_comidas);
+
+    char** array_string = string_split(array_mensajes, "|");
+
+
+    for(int i = 0; array_string[i]!=NULL; i++){
+
+        informacion_comidas* informacion_comidas_final = NULL;
+
+        char** info_comidas_individual = string_split(array_string[i], ",");
+
+        informacion_comidas_final->comida = info_comidas_individual[0];
+        informacion_comidas_final->cantidad_total = info_comidas_individual[1];
+        informacion_comidas_final->cantidad_lista = info_comidas_individual[2];
+
+        pushbacklist(lista_comidas,informacion_comidas_final);
+
+    }
+
+    return lista_comidas;
+
+};
+
 r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
 
     if(restaurante == NULL || id_pedido == NULL){
@@ -431,6 +459,36 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
     return respuesta_obtener_pedido;
 }
 
+
+
+r_obtener_pedido2* enviar_mensaje_obtener_pedido2(t_modulo* modulo, char* id_pedido,char* restaurante){
+
+    if(restaurante == NULL || id_pedido == NULL){
+        printf("Faltan parametros \n");
+        return NULL;
+    }
+    
+    char* tipo_mensaje = string_itoa(obtener_pedido);
+    int socket;
+
+    char* obtener_pedido[3] ={tipo_mensaje, id_pedido, restaurante};
+    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, obtener_pedido, 3);
+
+    t_mensajes* respuesta = receive_simple_messages(socket);
+
+    for (int i= 0; i < *respuesta->size; i++){
+       printf("%s ", respuesta->mensajes[i]);
+    } printf("\n");
+
+    r_obtener_pedido2* respuesta_obtener_pedido = malloc(sizeof(r_obtener_pedido2));
+
+    respuesta_obtener_pedido->estado = respuesta->mensajes[0];
+    respuesta_obtener_pedido->info_comidas = obtener_informacion_comidas2(respuesta->mensajes[1]);
+
+    liberar_conexion(socket);
+
+    return respuesta_obtener_pedido;
+}
 
 char* enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
 
@@ -497,6 +555,46 @@ char* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
     liberar_conexion(socket);
     
     return respuesta->mensajes[0];
+}
+
+
+List* enviar_mensaje_obtener_receta2(t_modulo* modulo, char* nombre_plato){
+
+    if(nombre_plato == NULL){
+        printf("Faltan parametros \n");
+        return NULL;
+    }
+
+    char* tipo_mensaje = string_itoa(obtener_receta);
+    int socket;
+    List* lista_pasos_receta = malloc(sizeof(List));
+
+    char* obtener_receta[2] ={tipo_mensaje, nombre_plato};
+    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, obtener_receta, 2);
+    
+    t_mensajes* respuesta = receive_simple_messages(socket);
+
+    printf("%s \n" , respuesta->mensajes[0]);
+
+
+    char** respuesta_pasos = string_split(respuesta->mensajes[1], ",");
+
+
+    for(int i = 0; respuesta_pasos[i]!=NULL; i=i+2){
+
+        t_paso* paso = NULL;
+
+        paso->nombre_paso = respuesta_pasos[i];
+        paso->ciclo_cpu = respuesta_pasos[i+1];
+
+        pushbacklist(lista_pasos_receta,paso);
+
+    }
+
+
+    liberar_conexion(socket);
+    
+    return lista_pasos_receta;
 }
 
 char ** separar_por_comillas(char** string_separado_por_espacios){

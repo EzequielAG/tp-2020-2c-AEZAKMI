@@ -94,7 +94,9 @@ void handle_client(t_result* result){
             handle_crear_pedido(result->socket);
 
         } else if (tipo_mensaje == anadir_plato) {
+
             handle_anadir_plato(result);
+
         } else if (tipo_mensaje == confirmar_pedido) {
         
             handle_confirmar_pedido(result);
@@ -118,43 +120,22 @@ int asignar_pedido_id(){
 void handle_crear_pedido(int socket){
 
     int id = asignar_pedido_id();
-    t_pedido* pedido = malloc(sizeof(t_pedido));
-    pedido->id = id;
-    initlist(&pedido->platos);
     
-    //lo pusheo en la cola de pedidos con el id respectivo
-    if(pushbacklist(&l_pedidos,pedido) == 1)
-    {
-        //lo mando a guardar al sindicato
-        char* respuesta = enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,string_itoa(id));
-        if(!strcmp(respuesta,"OK")){
-            send_message_socket(socket,string_itoa(id));
-        }else{
-            send_message_socket(socket,"FAIL");
-        }
+    //lo mando a guardar al sindicato
+    char* respuesta = enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,string_itoa(id));
+    if(!strcmp(respuesta,"OK")){
+        send_message_socket(socket,string_itoa(id));
+    }else{
+        send_message_socket(socket,"FAIL");
     }
 }
 
 void handle_anadir_plato(t_result* result){
+ 
+    // REVISAR CANTIDAD 
+    char* respuesta = enviar_mensaje_guardar_plato(&modulo_sindicato, restaurante_config->nombre_restaurante,result->mensajes->mensajes[2] ,result->mensajes->mensajes[1] , "1");
 
-     for(IteratorList iter = beginlist(l_pedidos); iter != NULL; iter = nextlist(iter)) {
-        t_pedido* pedido = iter->data;
-
-        if((pedido->id) == atoi(result->mensajes->mensajes[2])){
-            pushbacklist(&(pedido->platos), result->mensajes->mensajes[1]);
-            // REVISAR CANTIDAD 
-            char* respuesta = enviar_mensaje_guardar_plato(&modulo_sindicato, restaurante_config->nombre_restaurante,result->mensajes->mensajes[2] ,result->mensajes->mensajes[1] , "1");
-
-            send_message_socket(result->socket,respuesta);
-
-            return;
-
-        }
-
-        
-    }
-
-    send_message_socket(result->socket,"FAIL");
+    send_message_socket(result->socket,respuesta);
 
 };
 

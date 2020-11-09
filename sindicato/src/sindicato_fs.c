@@ -408,8 +408,20 @@ bool existe_receta(char* receta){
 	}
 }
 
-List* obtener_platos(char* restaurante){
-	t_info_file* info_file = create_info_config(restaurante);
-	List* platos = info_file->platos;
+t_list* get_platos(char* restaurante){
+	t_info* info_file = create_info_config(restaurante);
+	t_list* platos = info_file->platos;
 	return platos;
+}
+
+t_pedido* get_pedido(char* restaurante, char* id_pedido){
+	return create_pedido_config(restaurante, id_pedido);
+}
+
+t_info* get_restaurante(char* restaurante){
+	return create_info_config(restaurante);
+}
+
+t_receta* get_receta(char* comida){
+	return create_receta_config(comida);
 }

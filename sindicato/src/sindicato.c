@@ -196,15 +196,18 @@ void handle_obtener_pedido(int socket, char* restaurante, char* id_pedido){
 	//Verificar si el Restaurante existe dentro del File System. 
 	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
 	//En caso de no existir se deberá informar dicha situación.
-	bool resultado_operacion = existe_restaurante(restaurante);
+	if (!existe_restaurante(restaurante)){
+		// TODO: En caso de no existir se deberá informar dicha situación.
+	}
 
 	//Verificar si el Pedido existe dentro del File System. 
 	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
 	//En caso de no existir se deberá informar dicha situación.
-	if (resultado_operacion){
-		resultado_operacion = existe_pedido(restaurante, id_pedido);
+	if (!existe_pedido(restaurante, id_pedido)){
+		// TODO: En caso de no existir se deberá informar dicha situación.
 	}
 
+	t_pedido* get_pedido(restaurante, id_pedido);
 	//Responder el mensaje indicando si se pudo realizar en conjunto con la información del pedido si correspondiera.
 
 }
@@ -213,9 +216,12 @@ void handle_obtener_restaurante(int socket, char* restaurante){
 	//Verificar si el Restaurante existe dentro del File System. 
 	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
 	//En caso de no existir se deberá informar dicha situación.
-	bool resultado_operacion = existe_restaurante(restaurante);
+	if (!existe_restaurante(restaurante)){
+		// TODO: En caso de no existir se deberá informar dicha situación.
+	}
 
 	//Obtener todo los datos del archivo info.AFIP.
+	t_info* info = get_restaurante(restaurante);
 
 	//Responder el mensaje indicando los datos del Restaurante.
 
@@ -257,6 +263,11 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* co
 void handle_obtener_receta(int socket, char* comida){
 	//Verificar si existe el plato dado dentro del directorio de recetas.
 	//En caso de no existir, se deberá informar dicha situación.
+	if (!existe_receta(comida)){
+		// TODO: En caso de no existir, se deberá informar dicha situación.
+	}
+
+	t_receta* get_receta(comida);
 
 	//Responder el mensaje con la receta solicitada.
 

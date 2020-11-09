@@ -205,15 +205,13 @@ int guardar_plato_en_memoria(char* nombreResto, char* idPedido, char* cantidadPl
     l_pagina* pagina_plato = plato_en_pagina(plato, segmento->punteroTablaPaginas);
 
     if(pagina_plato == NULL){
-        crear_pagina(segmento, atoi(cantidadPlato), plato); 
-        return 1;  
+        crear_pagina2(segmento, atoi(cantidadPlato), plato); 
+        return 1; 
     }
 
+    modificarPagina(pagina_plato);
+
     agregar_plato_pedido(pagina_plato,atoi(cantidadPlato));
-
-    //FALTA AGREGAR LO DE SWAPP
-
-    
 
     return 1;
 };
@@ -261,6 +259,8 @@ l_segmento* obtener_pedido_en_memoria(char* nombreResto, char* id_pedido){
 
     l_segmento *segmento = find_segmento_lista(id_pedido, restoEnTabla->punteroTablaSegmentos);
 
+    pasarPaginasAPrincipal(segmento);
+
     return segmento;
 }
 
@@ -285,9 +285,9 @@ int plato_listo_en_memoria(char* nombreResto, char* idPedido, char* plato){
 
     }
 
-    if(segmento->idPedido == 0){
+    if(segmento->estadoPedido == 0 || segmento->estadoPedido == 2){
 
-        printf("El plato no esta confirmado \n");
+        printf("El pedido no esta confirmado o ya esta terminado \n");
         
         return 0;
 
@@ -295,19 +295,39 @@ int plato_listo_en_memoria(char* nombreResto, char* idPedido, char* plato){
 
     l_pagina* pagina_plato = plato_en_pagina(plato, segmento->punteroTablaPaginas);
 
+    modificarPagina(pagina_plato);
+
     terminarPlatoPagina(pagina_plato);
 
     if(platos_listos(segmento)){
-        segmento->estadoPedido = 2;   
+        terminar_pedido_segmento(segmento); 
     };
-
-
-    //FALTA AGREGAR LO DE SWAPP    
-
 
     return 1;
 }
 
 int finalizar_pedido_en_memoria(char* restaurante, char* id_pedido){
+
+    l_proceso *restoEnTabla = find_resto_lista(restaurante);
+
+    if(restoEnTabla == NULL){
+        
+        printf("El restaurante no esta en la tabla de restaurantes \n");
+        
+        return 0;
+    }
+
+    l_segmento *segmento = find_segmento_lista(id_pedido, restoEnTabla->punteroTablaSegmentos);
+
+    if(segmento == NULL){
+
+        printf("El segmento no esta en la tabla de segmentos \n");
+        
+        return 0;
+
+    }
+
+    eliminarSegmento(restoEnTabla, segmento);
+
     return 1;
 }

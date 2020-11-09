@@ -6,37 +6,78 @@ int main(int argc, char *argv[]){
 	
     initlist(&tablaRestaurantes);
     initlist(&tablaFrames);
+    initlist(&tablaSwap);
+    initlist(&pilaPaginasAlgoritmos);
 
-	punteroBitMap = malloc(comanda_config->tamanio_memoria/256);
+	punteroBitMap = malloc((comanda_config->tamanio_memoria/256));
+	punteroBitMapSwap = malloc(comanda_config->tamanio_swap/256);
 
-	bitMap = bitarray_create_with_mode(punteroBitMap, comanda_config->tamanio_memoria/256, MSB_FIRST);
+	bitMap = bitarray_create_with_mode(punteroBitMap, (comanda_config->tamanio_memoria/256), MSB_FIRST);
+    bitMapSwap = bitarray_create_with_mode(punteroBitMapSwap, comanda_config->tamanio_swap/256, MSB_FIRST);
 
     puntero_memoria_principal = malloc(comanda_config->tamanio_memoria);
-    puntero_memoria_swap = malloc(comanda_config->tamanio_swap); 
+
+    algoritmo = comanda_config->algoritmo_reemplazo;
+    tamanioMemoria = comanda_config->tamanio_memoria;
+    tamanioSwap = comanda_config->tamanio_swap;
     
     printf("Imprimiendo el path %s", comanda_config->ruta_log);
 
     signal(SIGUSR1,&imprimirBitMap);
 
     iniciarMemoria();
+
+    iniciarMemoriaSwap();
     
-    iniciar_servidor("127.0.0.1", "5001", handle_client);
+    //iniciar_servidor("127.0.0.1", "5001", handle_client);
 
     //ASIGNAR SEGUN LA CONFIG
 
     //iniciarMemoria();
 
-    //guardar_pedido_en_memoria("Lo de tito", "5");
-    //guardar_pedido_en_memoria("Lo de tito", "7");
-    //guardar_pedido_en_memoria("Lo de nacho", "6");
+    char *string = "Lo de tito";
+    char* numero = "5";
 
-    //guardar_plato_en_memoria("Lo de tito", "5", "4", "Arroz");
-    //guardar_plato_en_memoria("Lo de tito", "7", "4", "Arroz con pollo");
+    guardar_pedido_en_memoria(string, numero);
+    guardar_pedido_en_memoria(string, "7"); 
+    guardar_pedido_en_memoria("Lo de nacho", "6");
+    guardar_pedido_en_memoria("Lo de nacho", "8");
+    guardar_pedido_en_memoria("Lo de nacho", "9");
+    guardar_pedido_en_memoria("Lo de nacho", "10");
+    guardar_pedido_en_memoria("Lo de nacho", "11");
+    guardar_pedido_en_memoria("Lo de nacho", "12");
+    guardar_pedido_en_memoria("Lo de nacho", "13");
+    guardar_pedido_en_memoria("Lo de nacho", "14");
+    
+
+    guardar_plato_en_memoria(string, numero, "4", "Arroz");
+    guardar_plato_en_memoria(string, "7", "4", "Arroz con pollo");
+    guardar_plato_en_memoria("Lo de nacho", "6", "3", "Pollito bien fresco");
+    guardar_plato_en_memoria("Lo de nacho", "13", "4", "Curcuma escurtida");
+    guardar_plato_en_memoria("Lo de nacho", "8", "4", "Cebollita caramelizada");
+    guardar_plato_en_memoria("Lo de nacho", "9", "4", "Pepinos");
+    guardar_plato_en_memoria("Lo de nacho", "11", "4", "Puede serphite");
+    guardar_plato_en_memoria("Lo de nacho", "10", "4", "Hamburguesa completa");
+    guardar_plato_en_memoria("Lo de nacho", "10", "3", "Hamburguesa completa");
+    guardar_plato_en_memoria("Lo de nacho", "11", "2", "Puede serphite");
+    guardar_plato_en_memoria("Lo de nacho", "12", "4", "Ensalada de tomate");
+
+    finalizar_pedido_en_memoria(string, numero);
+
+    //guardar_plato_en_memoria("Lo de nacho", "14", "4", "Pure de papa");
+
     //guardar_plato_en_memoria("Lo de nacho", "6", "3", "Pollito bien fresco");
+    //guardar_plato_en_memoria("Lo de tito", "5", "4", "Arroz");
 
-    //imprimirBitMap();
+    imprimirBitMap();
 
-    //imprimirMemoria();
+    imprimirMemoria();
+
+    imprimirSwap();
+
+    //imprimirTodo();
+
+    close(archivoSwap);
 
     comanda_finally(comanda_config, logger);
     return 0;
@@ -70,7 +111,7 @@ void comanda_config_parser(t_config* config, t_comanda_config* comanda_config) {
     comanda_config->tamanio_memoria = config_get_int_value(config, "TAMANIO_MEMORIA");
     comanda_config->tamanio_swap = config_get_int_value(config, "TAMANIO_SWAP");
     comanda_config->frecuencia_compactacion = config_get_int_value(config, "FRECUENCIA_COMPACTACION");
-    comanda_config->algoritmo_reemplazo = strdup(config_get_string_value(config, "ARCHIVO_LOG"));
+    comanda_config->algoritmo_reemplazo = strdup(config_get_string_value(config, "ALGORITMO_REEMPLAZO"));
     comanda_config->ruta_log = strdup(config_get_string_value(config, "ARCHIVO_LOG"));
 }
 

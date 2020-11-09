@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include "shared_utils.h"
 #include <commons/bitarray.h>
+#include "memoria_swap.h"
 #include "server.h"
 #include "tests.h"
 #include "api.h"
@@ -31,18 +32,14 @@ typedef struct frame{
 
 } l_frame;
 
-typedef struct puntero{
-
-    int bitOcupado;
-    void *punteroFrame;
-
-} l_punteroFrame;
-
 typedef struct pagina{
 
+    int numPagina;
     int bitUso;
     int bitPresencia;
+    int bitModificado;
     void *frame;
+    void *swap;
 
 } l_pagina;
 
@@ -53,25 +50,56 @@ typedef struct proceso{
 
 } l_proceso;
 
-void *puntero_memoria_principal;
-void *puntero_memoria_swap;
+// MEMORIA PRINCIPAL
+
+void iniciarMemoria();
+l_proceso *crearProceso(char *);
 int crearSegmento(l_proceso*, char* idPedido);
 void crear_pagina(l_segmento*, int cantidad, char plato[24]);
-l_proceso *find_resto_lista(char*);
-l_proceso *crearProceso(char *);
-void imprimirMemoria();
-l_segmento *find_segmento_lista(char* idSegmento, List *segmentos);
-l_frame *inicializarFrame(int cantidad, char* plato);
-void limpiarMemoria();
-void iniciarMemoria();
-void *frameLibre();
+void crear_pagina2(l_segmento*, int cantidad, char plato[24]);
+void terminarPlatoPagina(l_pagina *pagina);
+int platos_listos(l_segmento* segmento);
+void agregar_plato_pedido(l_pagina* pagina, int cantidad);
+void confirmar_pedido_segmento(l_segmento *segmento);
+void terminar_pedido_segmento(l_segmento*);
+void eliminarSegmento(l_proceso*,l_segmento*);
+void desalojarPedido(l_proceso *resto, l_segmento* segmento);
+void pasarPaginasAPrincipal(l_segmento*);
+void ocuparFrame(void*);
+void desocuparFrame(void*);
 void imprimirBitMap();
+void imprimirTodo();
+void imprimirMemoria();
+void *puntero_memoria_principal;
+
+
+// FINDS
+
+void *frameLibre();
+void *frameLibreSwap();
+l_proceso *find_resto_lista(char*);
+l_segmento *find_segmento_lista(char* idSegmento, List *segmentos);
+l_pagina* plato_en_pagina(char* plato, List* lista);
+
+// SWAP
+
+void escribirArchivo(void*);
+void modificarPagina(l_pagina*);
+void quitarSiExiste(l_pagina*);
+int pasarAPrincipal(l_pagina*);
+void imprimirSwap();
+
+// ALGORITMOS
+
+void *ejecutarAlgoritmo();
+void *ejecutarLRU();
+void *ejecutarClockMej();
+void* desalojarDePrincipal(l_pagina*);
+
+
 List tablaRestaurantes;
 List tablaFrames;
 char* punteroBitMap;
 t_bitarray *bitMap;
-
-l_pagina* plato_en_pagina(char* plato, List* lista);
-
-void agregar_plato_pedido(l_pagina* pagina, int cantidad);
-void confirmar_pedido_segmento(l_segmento *segmento);
+int numeroPaginaGlobal;
+List pilaPaginasAlgoritmos;

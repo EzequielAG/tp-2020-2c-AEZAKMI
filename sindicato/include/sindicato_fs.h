@@ -35,7 +35,7 @@ typedef struct {
 	t_list* platos;
 	t_list* precio_platos;
 	int cantidad_hornos;
-} t_info_file;
+} t_info;
 
 typedef struct {
 	t_estado_pedido estado_pedido;
@@ -43,12 +43,12 @@ typedef struct {
 	t_list* cantidad_platos;
 	t_list* cantidad_lista;
 	int precio_total;
-} t_pedido_file;
+} t_pedido;
 
 typedef struct {
 	t_list* pasos;
 	t_list* tiempo_paso;
-} t_receta_file;
+} t_receta;
 
 t_sindicato_metadata* sindicato_metadata;
 
@@ -70,8 +70,11 @@ void crear_files();
 bool existe_restaurante(char* restaurante);
 bool existe_pedido(char* restaurante, char* nro_pedido);
 bool existe_receta(char* receta);
-t_info_file* create_info_config(char* restaurante);
-t_pedido_file* create_pedido_config(char* restaurante, char* id_pedido);
-t_receta_file* create_receta_config(char* nombre_receta);
-
+t_info* create_info_config(char* restaurante);
+t_pedido* create_pedido_config(char* restaurante, char* id_pedido);
+t_receta* create_receta_config(char* nombre_receta);
+t_list* get_platos(char* restaurante);
+t_pedido* get_pedido(char* restaurante, char* id_pedido);
+t_info* get_restaurante(char* restaurante);
+t_receta* get_receta(char* comida);
 #endif

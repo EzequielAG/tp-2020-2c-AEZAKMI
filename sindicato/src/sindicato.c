@@ -93,7 +93,7 @@ void handle_consultar_platos(int socket, char* restaurante){
 	}
 
 	//Obtener los platos que puede preparar dicho Restaurante del archivo info.AFIP.
-	List* platos = obtener_platos(restaurante);
+	t_list* platos = get_platos(restaurante);
 
 	//Responder el mensaje indicando los platos que puede preparar el Restaurante.
 
@@ -142,7 +142,7 @@ void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* 
 		// TODO: En caso de no existir se deberá informar dicha situación.
 	}
 
-	t_pedido_file* pedido = create_pedido_config(restaurante, id_pedido);
+	t_pedido* pedido = create_pedido_config(restaurante, id_pedido);
 	//Verificar que el pedido esté en estado “Pendiente”. En caso contrario se deberá informar dicha situación.
 	if (pedido->estado_pedido != PENDIENTE){
 		// TODO: En caso contrario se deberá informar dicha situación.

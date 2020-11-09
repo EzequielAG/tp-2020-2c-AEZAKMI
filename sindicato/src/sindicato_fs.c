@@ -58,10 +58,10 @@ t_estado_pedido config_get_estado_pedido(t_config* config, char* key){
 		return PENDIENTE;
 	} else if (strcmp(value, "Confirmado")){
 		return CONFIRMADO;
-	} else if (strcmp(valloc, "Terminado")){
+	} else if (strcmp(value, "Terminado")){
 		return TERMINADO;
 	} else {
-		return exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
 }
 /* -- END REFACTOR -- */
@@ -73,7 +73,7 @@ t_posicion* get_position_from_config(t_config* config, char* key){
 	return posicion_aux;
 }
 
-void info_file_parser(t_config* config, t_info_file* info_config){
+void info_file_parser(t_config* config, t_info* info_config){
 	//preparing lists
 	char** afinidad_cocineros_str = config_get_array_value(config, "AFINIDAD_COCINEROS");
 	char** platos_str = config_get_array_value(config, "PLATOS");
@@ -87,17 +87,17 @@ void info_file_parser(t_config* config, t_info_file* info_config){
 	info_config->cantidad_hornos = strdup(config_get_int_value(config, "CANTIDAD_COCINEROS"));
 }
 
-t_info_file* create_info_config(char* restaurante){
+t_info* create_info_config(char* restaurante){
 	char* path_info = get_path_info_file(restaurante);
 	t_config* config = config_create(path_info);
-	t_info_file* info_config = malloc(sizeof(t_info_file));
+	t_info* info_config = malloc(sizeof(t_info));
 
 	info_file_parser(config, info_config);
 	//TODO: config_destroy(config);
 	return info_config;
 }
 
-void pedido_file_parser(t_config* config, t_pedido_file* pedido_config){
+void pedido_file_parser(t_config* config, t_pedido* pedido_config){
 	//preparing lists
 	char** lista_platos_str = config_get_array_value(config, "LISTA_PLATOS");
 	char** cantidad_platos_str = config_get_array_value(config, "CANTIDAD_PLATOS");
@@ -111,17 +111,17 @@ void pedido_file_parser(t_config* config, t_pedido_file* pedido_config){
 	pedido_config->precio_total = config_get_int_value(config, "PRECIO_TOTAL");
 }
 
-t_pedido_file* create_pedido_config(char* restaurante, char* id_pedido){
+t_pedido* create_pedido_config(char* restaurante, char* id_pedido){
 	char* path_pedido = get_path_pedido_file(restaurante, id_pedido);
 	t_config* config = config_create(path_pedido);
-	t_pedido_file* pedido_config = malloc(sizeof(t_pedido_file));
+	t_pedido* pedido_config = malloc(sizeof(t_pedido));
 
 	pedido_file_parser(config, pedido_config);
 	//TODO: config_destroy(config);
 	return pedido_config;
 }
 
-void receta_file_parser(t_config* config, t_receta_file* receta_config){
+void receta_file_parser(t_config* config, t_receta* receta_config){
 	//preparing lists
 	char** pasos_str = config_get_array_value(config, "PASOS");
 	char** tiempo_paso_str = config_get_array_value(config, "TIEMPO_PASOS");
@@ -130,10 +130,10 @@ void receta_file_parser(t_config* config, t_receta_file* receta_config){
 	receta_config->tiempo_paso = strings_to_list(tiempo_paso_str);
 }
 
-t_receta_file* create_receta_config(char* nombre_receta){
+t_receta* create_receta_config(char* nombre_receta){
 	char* path_receta = get_path_receta_file(nombre_receta);
 	t_config* config = config_create(path_receta);
-	t_receta_file* receta_config = malloc(sizeof(t_receta_file));
+	t_receta* receta_config = malloc(sizeof(t_receta));
 
 	receta_file_parser(config, receta_config);
 	//TODO: config_destroy(config);
@@ -169,9 +169,7 @@ void get_or_create_fs() {
 		crear_metadata_default(metadata_afip_adress);
 		crear_bitmap();
 		crear_files();
-	}	
-	
-
+	}
 }
 /* < 0 si no puede crear el punto de montaje, 0 si ya existia previamente, > 0 si creo correctamente el punto de montaje*/
 int get_or_create_folder(char* file_adress){

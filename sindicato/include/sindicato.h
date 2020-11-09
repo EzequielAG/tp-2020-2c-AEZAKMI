@@ -1,32 +1,30 @@
 #ifndef SINDICATO_H
 #define SINDICATO_H
-#include <stdio.h>
-#include <commons/log.h>
-#include <commons/config.h>
-#include <stdbool.h>
-#include "shared_utils.h"
-#include "server.h"
-#include "tests.h"
-#include "api.h"
+
+#include "sindicato_fs.h"
+#include <unistd.h>
 
 // VARIABLES Y ESTRUCTURAS
-typedef struct {
-    char* puerto_escucha;
-    char* punto_montaje;
-    char* ruta_log;
-} t_sindicato_config;
-
-t_sindicato_config* sindicato_config;
-t_log* logger;
 
 // FUNCIONES
-void sindicato_init(t_sindicato_config** sindicato_config, t_log** logger);
-void sindicato_finally(t_sindicato_config* sindicato_config, t_log* logger);
-t_sindicato_config* sindicato_config_loader(char* path_config_file);
-void sindicato_config_parser(t_config* config, t_sindicato_config* sindicato_config);
-void sindicato_destroy(t_sindicato_config* sindicato_config);
 int guardar_pedido_en_afip(char* restaurante, char* id_pedido);
-void handle_guardar_pedidos(int socket, char* restaurante, char* id_pedido);
+void handle_guardar_pedido(int socket, char* restaurante, char* id_pedido);
 void handle_client(t_result* result);
+void handle_consultar_platos(int socket, char* restaurante);
+void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* comida, char* cantidad);
+void handle_confirmar_pedido(int socket, char* id_pedido,  char* restaurante);
+void handle_obtener_pedido(int socket, char* restaurante,  char* id_pedido);
+void handle_obtener_restaurante(int socket, char* restaurante);
+void handle_plato_listo(int socket, char* restaurante,  char* id_pedido, char* comida);
+void handle_obtener_receta(int socket, char* comida);
+void handle_terminar_pedido(int socket, char* id_pedido,  char* restaurante);
+void handle_error(int socket);
+void iniciar_consola();
+void iniciar_servidor_desacoplado();
+void iniciar_servidor_sindicato();
+char* getlinefromconsole(void);
+void process_line(char* line);
+void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posicion, char* afinidad_cocineros, char* platos, char* precio_platos, char* cantidad_hornos);
+void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos);
 
 #endif

@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
-    t_modulo* modulo = get_modulo_by_name(argv[1]);
+    t_modulo* modulo = get_modulo_config();
 
     if (modulo == NULL){
         printf("%s\n", "El modulo indicado no existe");
@@ -34,8 +34,6 @@ int main(int argc, char *argv[]){
 
 
     leer_consola(logger,modulo);
-
-
 
     cliente_finally(cliente_config, logger);
 
@@ -63,14 +61,8 @@ t_cliente_config* cliente_config_loader(char* path_config_file) {
 }
 
 void cliente_config_parser(t_config* config, t_cliente_config* cliente_config) {
-    cliente_config->ip_comanda = strdup(config_get_string_value(config, "IP_COMANDA"));
-    cliente_config->puerto_comanda = strdup(config_get_string_value(config, "PUERTO_COMANDA"));
-    cliente_config->ip_restaurante = strdup(config_get_string_value(config, "IP_RESTAURANTE"));
-    cliente_config->puerto_restaurante = strdup(config_get_string_value(config, "PUERTO_RESTAURANTE"));
-    cliente_config->ip_sindicato = strdup(config_get_string_value(config, "IP_SINDICATO"));
-    cliente_config->puerto_sindicato = strdup(config_get_string_value(config, "PUERTO_SINDICATO"));
-    cliente_config->ip_app = strdup(config_get_string_value(config, "IP_APP"));
-    cliente_config->puerto_app = strdup(config_get_string_value(config, "PUERTO_APP"));
+    cliente_config->ip = strdup(config_get_string_value(config, "IP_APP"));
+    cliente_config->puerto = strdup(config_get_string_value(config, "PUERTO_APP"));
     cliente_config->ruta_log = strdup(config_get_string_value(config, "ARCHIVO_LOG"));
     cliente_config->posicion_x = config_get_int_value(config, "POCISION_X");
     cliente_config->posicion_y = config_get_int_value(config, "POCISION_Y");
@@ -79,39 +71,21 @@ void cliente_config_parser(t_config* config, t_cliente_config* cliente_config) {
 }
 
 void cliente_destroy(t_cliente_config* cliente_config) {
-    free(cliente_config->ip_comanda);
-    free(cliente_config->puerto_comanda);
-    free(cliente_config->ip_restaurante);
-    free(cliente_config->puerto_restaurante);
-    free(cliente_config->ip_sindicato);
-    free(cliente_config->puerto_sindicato);
-    free(cliente_config->ip_app);
-    free(cliente_config->puerto_app);
+    free(cliente_config->ip);
+    free(cliente_config->puerto);
     free(cliente_config->ruta_log);
     free(cliente_config->id_cliente);
     free(cliente_config);
 }
 
-t_modulo* get_modulo_by_name(char* nombre_del_modulo){
-    t_modulo* modulo = NULL;
-    if (!strcmp(nombre_del_modulo, "app")){
-        modulo = crear_modulo(cliente_config->ip_app, cliente_config->puerto_app, "app");
-    } else if (!strcmp(nombre_del_modulo, "sindicato")){
-        modulo = crear_modulo(cliente_config->ip_sindicato, cliente_config->puerto_sindicato, "sindicato");
-    } else if (!strcmp(nombre_del_modulo, "comanda")){
-        modulo = crear_modulo(cliente_config->ip_comanda, cliente_config->puerto_comanda, "comanda");
-    } else if (!strcmp(nombre_del_modulo, "restaurante")){
-        modulo = crear_modulo(cliente_config->ip_restaurante, cliente_config->puerto_restaurante, "restaurante");
-    }
-    return modulo;
+t_modulo* get_modulo_config(){
+    return crear_modulo(cliente_config->ip, cliente_config->puerto);
 }
 
-
-t_modulo * crear_modulo(char* ip, char* puerto, char* nombre){
+t_modulo * crear_modulo(char* ip, char* puerto){
     t_modulo* modulo = malloc(sizeof(t_modulo));
     modulo->ip = ip;
     modulo->puerto = puerto;
-    modulo->nombre = nombre;
     return modulo;
 }
 
@@ -131,7 +105,7 @@ int handshake(t_modulo* modulo){
         return -1;
     }
 
-    printf("El handshake con el modulo %s fue correcto\n", modulo->nombre);
+    printf("El handshake con el modulo %s fue correcto\n", mensaje);
 
     escuchar_mensajes_socket_desacoplado(socket);
 

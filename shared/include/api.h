@@ -38,12 +38,13 @@ typedef struct{
 
 
 typedef struct {
-    char** afinidades;
+    List* afinidades;
     char* pos_x;
     char* pos_y;
     receta_precio** recetas;
     char* cantidad_hornos;
     char* cantidad_pedidos;
+    char* cantidad_cocineros;
 } r_obtener_restaurante;
 
 typedef struct{
@@ -52,6 +53,10 @@ typedef struct{
     char* cantidad_lista;    
 } informacion_comidas;
 
+typedef struct{
+    char* nombre_paso;
+    char* ciclo_cpu;
+}t_paso;
 
 typedef struct {
     char* restaurante;
@@ -65,6 +70,12 @@ typedef struct {
     informacion_comidas** info_comidas;
 } r_obtener_pedido;
 
+typedef struct {
+    char* estado;
+    List* info_comidas;
+} r_obtener_pedido2;
+
+
 
 
 
@@ -74,11 +85,13 @@ receta_precio** obtener_receta_precios(char* array_mensajes);
 informacion_comidas** obtener_informacion_comidas(char* mensaje);
 
 char** obtener_array_mensajes(char* array_mensaje);
-
+List* obtener_list_mensajes(char* array_mensaje);
+char ** list_a_char(List lista);
+List* separar_por_comillas_lista(char** string_separado_por_espacios);
 char** enviar_mensaje_consultar_restaurantes(t_modulo* modulo);
 char* enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* cliente, char* restaurante);
 r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char* restaurante);
-char** enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante);
+List* enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante);
 char* enviar_mensaje_crear_pedido(t_modulo* modulo);
 char* enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido);
 char* enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido);
@@ -90,7 +103,10 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
 char* enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 char* enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 char* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
+char ** separar_por_comillas(char** string_separado_por_espacios);
 
-
+r_obtener_pedido2* enviar_mensaje_obtener_pedido2(t_modulo* modulo, char* id_pedido,char* restaurante);
+List* obtener_informacion_comidas2(char* array_mensajes);
+List* enviar_mensaje_obtener_receta2(t_modulo* modulo, char* nombre_plato);
 
 #endif

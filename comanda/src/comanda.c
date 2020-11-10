@@ -29,53 +29,7 @@ int main(int argc, char *argv[]){
 
     iniciarMemoriaSwap();
     
-    //iniciar_servidor("127.0.0.1", "5001", handle_client);
-
-    //ASIGNAR SEGUN LA CONFIG
-
-    //iniciarMemoria();
-
-    char *string = "Lo de tito";
-    char* numero = "5";
-
-    guardar_pedido_en_memoria(string, numero);
-    guardar_pedido_en_memoria(string, "7"); 
-    guardar_pedido_en_memoria("Lo de nacho", "6");
-    guardar_pedido_en_memoria("Lo de nacho", "8");
-    guardar_pedido_en_memoria("Lo de nacho", "9");
-    guardar_pedido_en_memoria("Lo de nacho", "10");
-    guardar_pedido_en_memoria("Lo de nacho", "11");
-    guardar_pedido_en_memoria("Lo de nacho", "12");
-    guardar_pedido_en_memoria("Lo de nacho", "13");
-    guardar_pedido_en_memoria("Lo de nacho", "14");
-    
-
-    guardar_plato_en_memoria(string, numero, "4", "Arroz");
-    guardar_plato_en_memoria(string, "7", "4", "Arroz con pollo");
-    guardar_plato_en_memoria("Lo de nacho", "6", "3", "Pollito bien fresco");
-    guardar_plato_en_memoria("Lo de nacho", "13", "4", "Curcuma escurtida");
-    guardar_plato_en_memoria("Lo de nacho", "8", "4", "Cebollita caramelizada");
-    guardar_plato_en_memoria("Lo de nacho", "9", "4", "Pepinos");
-    guardar_plato_en_memoria("Lo de nacho", "11", "4", "Puede serphite");
-    guardar_plato_en_memoria("Lo de nacho", "10", "4", "Hamburguesa completa");
-    guardar_plato_en_memoria("Lo de nacho", "10", "3", "Hamburguesa completa");
-    guardar_plato_en_memoria("Lo de nacho", "11", "2", "Puede serphite");
-    guardar_plato_en_memoria("Lo de nacho", "12", "4", "Ensalada de tomate");
-
-    finalizar_pedido_en_memoria(string, numero);
-
-    //guardar_plato_en_memoria("Lo de nacho", "14", "4", "Pure de papa");
-
-    //guardar_plato_en_memoria("Lo de nacho", "6", "3", "Pollito bien fresco");
-    //guardar_plato_en_memoria("Lo de tito", "5", "4", "Arroz");
-
-    imprimirBitMap();
-
-    imprimirMemoria();
-
-    imprimirSwap();
-
-    //imprimirTodo();
+    iniciar_servidor("127.0.0.1", "5001", handle_client);
 
     close(archivoSwap);
 

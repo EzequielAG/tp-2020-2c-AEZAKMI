@@ -30,7 +30,7 @@ void iniciarMemoria(){
 l_proceso *crearProceso(char *nombreResto){
 
     l_proceso *resto = malloc(sizeof(l_proceso));
-	resto->nombreResto = malloc(sizeof(char*));
+	resto->nombreResto = malloc(strlen(nombreResto)+1);
 
     List *tablaSegmentos = malloc(sizeof(List));
     initlist(tablaSegmentos);
@@ -61,29 +61,6 @@ int crearSegmento(l_proceso *resto, char *idPedido){
 	segmento->estadoPedido = 0;
 
     return pushbacklist(resto->punteroTablaSegmentos, segmento);
-}
-
-
-void crear_pagina(l_segmento *segmento, int cantidad, char *plato){
-    l_pagina *pagina = malloc(sizeof(l_pagina));
-
-	l_frame *frame;
-
-	pagina->bitUso = 0;
-    pagina->bitPresencia = 1;
-
-	pagina->frame = frameLibre();
-	pagina->swap = frameLibreSwap();
-
-	frame = pagina->frame;
-	frame->cantidadPlato = cantidad;
-	frame->cantidadLista = 0;
-	strncpy(frame->plato, plato, 24);
-
-	//escribirArchivo(pagina->swap);
-
-
-    pushbacklist(segmento->punteroTablaPaginas, pagina);
 }
 
 void crear_pagina2(l_segmento *segmento, int cantidad, char *plato){
@@ -181,6 +158,8 @@ void eliminarSegmento(l_proceso *resto, l_segmento* segmento){
 	emptylist(segmento->punteroTablaPaginas);
 	free(segmento->punteroTablaPaginas);
 
+	desalojarPedido(resto, segmento);
+
 	free(segmento->idPedido);
 
 	free(segmento);
@@ -201,6 +180,7 @@ void desalojarPedido(l_proceso *resto, l_segmento* segmento){
             popiterlist(resto->punteroTablaSegmentos, iterador);
         }
     }
+
 
 }
 
@@ -242,16 +222,21 @@ l_pagina* plato_en_pagina(char* plato, List* lista){
 
 	l_pagina *pagina = NULL;
 	l_frame* frame = NULL;
+	l_frame* swap = NULL;
 
     IteratorList iterador = NULL;
 
     for(iterador = beginlist(*lista);iterador!=NULL;iterador = nextlist(iterador)){
         pagina = dataiterlist(iterador);
 		frame = pagina->frame;
+		swap = pagina->swap;
 
-        if(!strcmp(plato,frame->plato)){
-            return pagina;
+		if(!strcmp(plato,swap->plato)){
+			if(frame != NULL){
+            	return pagina;
+			}
         }
+        
     }
     return NULL;
 }
@@ -370,7 +355,6 @@ void quitarSiExiste(l_pagina* paginaSwap){
 int pasarAPrincipal(l_pagina* paginaSwap){
 
 	if(paginaSwap->frame != NULL){
-		printf("La pagina ya estaba en Memoria Principal");
 		return 1;
 	}
 
@@ -379,7 +363,7 @@ int pasarAPrincipal(l_pagina* paginaSwap){
 	if(espacioLibre != NULL){
 		
 		ocuparFrame(espacioLibre);
-		memcpy(espacioLibre, paginaSwap->swap, 31);
+		memcpy(espacioLibre, paginaSwap->swap, 32);
 		paginaSwap->frame = espacioLibre;
     	paginaSwap->bitPresencia = 1;
 		return 1;
@@ -395,7 +379,7 @@ void *ejecutarAlgoritmo(){
 
 	if(framelibre != NULL) 
 		return framelibre;
-	
+	printf("Ejecutando algoritmo: %s\n", algoritmo);
 	if(!strcmp(algoritmo, "LRU")) 
 		return ejecutarLRU();
 	
@@ -429,6 +413,7 @@ void *ejecutarClockMej(){
 
 		if(gradoDeBusqueda){
 			if(!pagina->bitUso){
+				popiterlist(&pilaPaginasAlgoritmos, iterador);
 				return desalojarDePrincipal(pagina);
 			} else {
 				pagina->bitUso = 0;
@@ -438,6 +423,7 @@ void *ejecutarClockMej(){
 		if(!gradoDeBusqueda){
 			if(!pagina->bitUso){
 				if(!pagina->bitModificado){
+					popiterlist(&pilaPaginasAlgoritmos, iterador);
 					return desalojarDePrincipal(pagina);
 				}
 			}
@@ -451,7 +437,7 @@ void *ejecutarClockMej(){
 		}
 	
 	}
-
+	printf("\nError ejecutando el algoritmo!!\n");
 	return NULL;
 }
 
@@ -499,9 +485,9 @@ void imprimirTodo(){
         		pagina = dataiterlist(kterador);
 
 				frame = pagina->frame;
-
-				printf("\t\tPlato: %s | Cantidad: %i | CantLista: %i | Direccion Memoria: %p | Direccion Swap: %p\n", frame->plato, frame->cantidadPlato, frame->cantidadLista, pagina->frame, pagina->swap);
-
+				if(frame != NULL){
+					printf("\t\tPlato: %s | Cantidad: %i | CantLista: %i | Direccion Memoria: %p | Direccion Swap: %p\n", frame->plato, frame->cantidadPlato, frame->cantidadLista, pagina->frame, pagina->swap);
+				}
     		}
     	
 		}

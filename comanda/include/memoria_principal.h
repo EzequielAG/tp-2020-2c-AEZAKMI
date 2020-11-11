@@ -55,7 +55,6 @@ typedef struct proceso{
 void iniciarMemoria();
 l_proceso *crearProceso(char *);
 int crearSegmento(l_proceso*, char* idPedido);
-void crear_pagina(l_segmento*, int cantidad, char plato[24]);
 void crear_pagina2(l_segmento*, int cantidad, char plato[24]);
 void terminarPlatoPagina(l_pagina *pagina);
 int platos_listos(l_segmento* segmento);
@@ -65,8 +64,8 @@ void terminar_pedido_segmento(l_segmento*);
 void eliminarSegmento(l_proceso*,l_segmento*);
 void desalojarPedido(l_proceso *resto, l_segmento* segmento);
 void pasarPaginasAPrincipal(l_segmento*);
-void ocuparFrame(void*);
-void desocuparFrame(void*);
+void ocuparFrame(void*, t_bitarray *, List);
+void desocuparFrame(void*, t_bitarray *, List);
 void imprimirBitMap();
 void imprimirTodo();
 void imprimirMemoria();

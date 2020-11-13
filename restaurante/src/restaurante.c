@@ -27,7 +27,6 @@ int main(void){
     //t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
     modulo_sindicato.ip = restaurante_config->ip_sindicato;
     modulo_sindicato.puerto = restaurante_config->puerto_sindicato;
-    modulo_sindicato.nombre = "sindicato";
 
     //1.1 Handshake con el modulo app
     //int handshake_app_r = handshake_app(modulo_app);
@@ -197,7 +196,7 @@ int handshake(t_modulo* modulo){
 
     char* mensajes[2] = {string_itoa(handshake_restaurante), restaurante_config->nombre_restaurante};
 
-    socket_sindicato = send_messages_and_return_socket(modulo->ip, modulo->puerto, mensajes, 2);
+    socket_sindicato = send_messages_and_return_socket(restaurante_config->nombre_restaurante, modulo->ip, modulo->puerto, mensajes, 2);
 
     if (socket_sindicato == -1){
         return -1;
@@ -209,7 +208,7 @@ int handshake(t_modulo* modulo){
         return -1;
     }
 
-    printf("El handshake con el modulo %s fue correcto\n", modulo->nombre);
+    printf("El handshake con el modulo %s fue correcto\n", modulo->identificacion);
 
     escuchar_mensajes_socket_desacoplado(socket_sindicato);
 

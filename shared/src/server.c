@@ -91,6 +91,8 @@ void serve_client(t_parameter* parametros)
 void process_request(int cod_op, t_parameter* parametros) {
 
 	t_result* resultado = malloc(sizeof(t_result));
+	resultado->identificador_cliente = receive_message(parametros->socket);
+	recv(parametros->socket, &cod_op, sizeof(int), MSG_WAITALL);
 		switch (cod_op) {
 		case MENSAJE:
 			resultado->operacion = cod_op;
@@ -151,11 +153,11 @@ void escuchar_socket_sin_conexion(int* socket_servidor, void (*f)(t_result*)){
 		serve_client(parametro);
 }
 
-int send_message_and_return_socket(char* ip, char* puerto, char* mensaje) {
+int send_message_and_return_socket(char* identificador, char* ip, char* puerto, char* mensaje) {
 
 	int conexion;
 
-	conexion = crear_conexion(ip, puerto);
+	conexion = crear_conexion(ip, puerto, identificador);
 
 	if (conexion == -1){
 		return conexion;
@@ -166,11 +168,11 @@ int send_message_and_return_socket(char* ip, char* puerto, char* mensaje) {
 	return conexion;
 }
 
-int send_messages_and_return_socket(char* ip, char* puerto, char* mensajes[], int cantidadDeMensajes) {
+int send_messages_and_return_socket(char* identificador, char* ip, char* puerto, char* mensajes[], int cantidadDeMensajes) {
 
 	int conexion;
 
-	conexion = crear_conexion(ip, puerto);
+	conexion = crear_conexion(ip, puerto, identificador);
 
 	if (conexion == -1){
 		return conexion;
@@ -181,7 +183,7 @@ int send_messages_and_return_socket(char* ip, char* puerto, char* mensajes[], in
 	return conexion;
 }
 
-int crear_conexion(char *ip, char* puerto)
+int crear_conexion(char *ip, char* puerto, char* identificador)
 {
 	printf("Creando conexion con %s:%s \n", ip, puerto);
 	struct addrinfo hints;
@@ -208,8 +210,10 @@ int crear_conexion(char *ip, char* puerto)
 		}
 
 	}
-
+	
 	freeaddrinfo(server_info);
+
+	enviar_mensaje(identificador, socket_cliente);
 
 	return socket_cliente;
 }

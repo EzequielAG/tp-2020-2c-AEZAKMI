@@ -28,7 +28,7 @@ typedef enum tipo_mensaje{
 typedef struct {
     char* ip;
     char* puerto;
-    char* nombre;
+    char* identificacion;
 } t_modulo;
 
 typedef struct{

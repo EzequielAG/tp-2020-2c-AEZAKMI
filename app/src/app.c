@@ -14,9 +14,9 @@ void handle_client(t_result* result){
     if (result->operacion == MENSAJES){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
         if (tipo_mensaje == handshake_cliente){
-            handle_handshake_cliente(result->socket, result->mensajes->mensajes[1]);
+            handle_handshake_cliente(result->socket, result->identificador_cliente);
         } else if (tipo_mensaje == handshake_restaurante) {
-            handle_handshake_restaurante(result->socket, result->mensajes->mensajes[1]);
+            handle_handshake_restaurante(result->socket, result->identificador_cliente);
         } else if (tipo_mensaje == consultar_restaurantes){
             handle_consultar_restaurantes(result->socket);
         } else if (tipo_mensaje == seleccionar_restaurante){
@@ -113,7 +113,7 @@ void handle_crear_pedido(int socket){
     t_modulo modulo_comanda;
     modulo_comanda.ip = app_config->ip_comanda;
     modulo_comanda.puerto = app_config->puerto_comanda;
-    modulo_comanda.nombre = "Comanda";
+    modulo_comanda.identificacion = "APP";
 
     char* respuesta[1];
     respuesta[0] = string_itoa(id_pedido);

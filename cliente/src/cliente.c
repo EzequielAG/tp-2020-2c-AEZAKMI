@@ -10,12 +10,6 @@ int main(int argc, char *argv[]){
         printf("%s\n", argv[i]);
     }
 
-    if (argc < 2){
-        printf("%s\n", "Debe indicar a qué modulo quiere conectarse");
-        cliente_finally(cliente_config, logger);
-        return -1;
-    }
-
     t_modulo* modulo = get_modulo_config();
 
     if (modulo == NULL){
@@ -86,6 +80,7 @@ t_modulo * crear_modulo(char* ip, char* puerto){
     t_modulo* modulo = malloc(sizeof(t_modulo));
     modulo->ip = ip;
     modulo->puerto = puerto;
+    modulo->identificacion = cliente_config->id_cliente;
     return modulo;
 }
 
@@ -93,7 +88,7 @@ int handshake(t_modulo* modulo){
 
     char* mensajes[2] = {string_itoa(handshake_cliente), cliente_config->id_cliente};
 
-    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, mensajes, 2);
+    int socket = send_messages_and_return_socket(modulo->identificacion, modulo->ip, modulo->puerto, mensajes, 2);
 
     if (socket == -1){
         return -1;

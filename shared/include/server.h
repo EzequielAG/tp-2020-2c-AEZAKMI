@@ -50,6 +50,7 @@ typedef struct
 	char* mensaje;
 	t_mensajes* mensajes;
 	int socket;
+	char* identificador_cliente;
 } t_result;
 
 typedef struct
@@ -65,8 +66,8 @@ void esperar_cliente(int socket_servidor, void (*f)(t_result*));
 void serve_client(t_parameter* parametros);
 void process_request(int cod_op, t_parameter* parametros);
 void escuchar_socket_sin_conexion(int* socket_servidor, void (*f)(t_result*));
-int send_messages_and_return_socket(char* ip, char* puerto, char* mensajes[], int cantidadDeMensajes);
-int crear_conexion(char *ip, char* puerto);
+int send_messages_and_return_socket(char* identificador, char* ip, char* puerto, char* mensajes[], int cantidadDeMensajes);
+int crear_conexion(char *ip, char* puerto, char* identificador);
 void enviar_mensajes(int cantidadDeMensajes, char* mensajes[], int socket_cliente);
 void* serializar_paquete(t_paquete* paquete, int bytes);
 void* serializar_paquete_grande(int size, t_paquete_grande* paquete, int bytes);
@@ -77,7 +78,7 @@ t_mensajes* receive_messages(int socket_cliente);
 void enviar_mensaje(char* mensaje, int socket_cliente);
 void send_messages_socket(int socket, char* mensajes[], int cantidadDeMensajes);
 char* recibir_mensaje(int socket_cliente);
-int send_message_and_return_socket(char* ip, char* puerto, char* mensaje);
+int send_message_and_return_socket(char* identificador, char* ip, char* puerto, char* mensaje);
 //void handle_client(t_result* result);
 char* receive_simple_message(int socket_cliente);
 

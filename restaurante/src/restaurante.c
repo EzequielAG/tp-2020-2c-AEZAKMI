@@ -24,12 +24,18 @@ int main(void){
     //iniciar_servidor("127.0.0.1", "5002", handle_client);
 
     //0. Inicializo modulos a los que me voy a tener que conectar
-    //t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
+    t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
     modulo_sindicato.ip = restaurante_config->ip_sindicato;
     modulo_sindicato.puerto = restaurante_config->puerto_sindicato;
 
     //1.1 Handshake con el modulo app
-    //int handshake_app_r = handshake_app(modulo_app);
+
+    int handshake_app_r = handshake(&modulo_app);
+
+    if (handshake_app_r == -1){
+        printf("No se pudo realizar la conexion inicial con el modulo app\n");
+        //RECONECTAR MAYBE
+    }
 
     //1.2 Handshake con el modulo sindicato
     //Obtencion de metadata del restaurante

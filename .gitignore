@@ -54,4 +54,5 @@ dkms.conf
 # Ignore by AEZAKMI
 *.log
 *.code-workspace
+*.txt
 bin/

@@ -10,18 +10,22 @@ void handle_client(t_result* result){
     pthread_t plato_listo_thread;
     pthread_t obtener_pedido_thread;
     pthread_t finalizar_pedido_thread;
-   
+    
+    /*
     IteratorList iterador = NULL;
 
     l_proceso *resto = NULL;
 
-
+    
     printf("La tabla de restaurante contiene los siguientes datos \n");
     for(iterador = beginlist(tablaRestaurantes);iterador!=NULL;iterador = nextlist(iterador)){
         resto = dataiterlist(iterador);
 
         printf("Restaurante: %s | Direccion %p \n", resto->nombreResto,resto->punteroTablaSegmentos);
-    }printf("------------- \n");
+    }
+    
+    printf("-------------------------------------------- \n");
+    */
 
 
 
@@ -91,6 +95,7 @@ void handle_guardar_plato(t_result* result){
     char* respuesta[1];
 
     if (guardar_plato_en_memoria(result->mensajes->mensajes[1],result->mensajes->mensajes[2],result->mensajes->mensajes[4],result->mensajes->mensajes[3])){
+        imprimirTodo();
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
@@ -107,6 +112,7 @@ void handle_guardar_pedidos(t_result* result){
     char* respuesta[1];
 
     if (guardar_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
+        imprimirTodo();
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
@@ -124,6 +130,7 @@ void handle_confirmar_pedido(t_result* result){
     char* respuesta[1];
 
     if (confirmar_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
+        imprimirTodo();
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
@@ -139,6 +146,7 @@ void handle_plato_listo(t_result* result){
     char* respuesta[1];
 
     if (plato_listo_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3])){
+        imprimirTodo();
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
@@ -170,6 +178,7 @@ void handle_finalizar_pedido(t_result* result){
     char* respuesta[1];
 
     if (finalizar_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
+        imprimirTodo();
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
@@ -205,15 +214,13 @@ int guardar_plato_en_memoria(char* nombreResto, char* idPedido, char* cantidadPl
     l_pagina* pagina_plato = plato_en_pagina(plato, segmento->punteroTablaPaginas);
 
     if(pagina_plato == NULL){
-        crear_pagina(segmento, atoi(cantidadPlato), plato); 
-        return 1;  
+        crear_pagina2(segmento, atoi(cantidadPlato), plato); 
+        return 1; 
     }
 
+    modificarPagina(pagina_plato);
+
     agregar_plato_pedido(pagina_plato,atoi(cantidadPlato));
-
-    //FALTA AGREGAR LO DE SWAPP
-
-    
 
     return 1;
 };
@@ -261,6 +268,8 @@ l_segmento* obtener_pedido_en_memoria(char* nombreResto, char* id_pedido){
 
     l_segmento *segmento = find_segmento_lista(id_pedido, restoEnTabla->punteroTablaSegmentos);
 
+    pasarPaginasAPrincipal(segmento);
+
     return segmento;
 }
 
@@ -285,9 +294,9 @@ int plato_listo_en_memoria(char* nombreResto, char* idPedido, char* plato){
 
     }
 
-    if(segmento->idPedido == 0){
+    if(segmento->estadoPedido == 0 || segmento->estadoPedido == 2){
 
-        printf("El plato no esta confirmado \n");
+        printf("El pedido no esta confirmado o ya esta terminado \n");
         
         return 0;
 
@@ -295,19 +304,39 @@ int plato_listo_en_memoria(char* nombreResto, char* idPedido, char* plato){
 
     l_pagina* pagina_plato = plato_en_pagina(plato, segmento->punteroTablaPaginas);
 
+    modificarPagina(pagina_plato);
+
     terminarPlatoPagina(pagina_plato);
 
     if(platos_listos(segmento)){
-        segmento->estadoPedido = 2;   
+        terminar_pedido_segmento(segmento); 
     };
-
-
-    //FALTA AGREGAR LO DE SWAPP    
-
 
     return 1;
 }
 
 int finalizar_pedido_en_memoria(char* restaurante, char* id_pedido){
+
+    l_proceso *restoEnTabla = find_resto_lista(restaurante);
+
+    if(restoEnTabla == NULL){
+        
+        printf("El restaurante no esta en la tabla de restaurantes \n");
+        
+        return 0;
+    }
+
+    l_segmento *segmento = find_segmento_lista(id_pedido, restoEnTabla->punteroTablaSegmentos);
+
+    if(segmento == NULL){
+
+        printf("El segmento no esta en la tabla de segmentos \n");
+        
+        return 0;
+
+    }
+
+    eliminarSegmento(restoEnTabla, segmento);
+
     return 1;
 }

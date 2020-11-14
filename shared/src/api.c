@@ -631,5 +631,69 @@ List* separar_por_comillas_lista(char** string_separado_por_espacios){
 
 }
 
+int obtener_numero_mensaje(char* mensaje_tipo){	
 
+    if(strcmp(mensaje_tipo, "guardar_pedido") == 0){	
+
+        return guardar_pedido;	
+
+    } else if(strcmp(mensaje_tipo, "consultar_restaurantes") == 0){	
+
+        return consultar_restaurantes;	
+
+    } else if(strcmp(mensaje_tipo, "seleccionar_restaurante") == 0){	
+
+        return seleccionar_restaurante;	
+
+    } else if(strcmp(mensaje_tipo, "obtener_restaurante") == 0){	
+
+        return obtener_restaurante;	
+
+    } else if(strcmp(mensaje_tipo, "consultar_platos") == 0){	
+
+        return consultar_platos;	
+
+    } else if(strcmp(mensaje_tipo, "crear_pedido") == 0){	
+
+        return crear_pedido;	
+
+    } else if(strcmp(mensaje_tipo, "anadir_plato") == 0){	
+
+        return anadir_plato;	
+
+    } else if(strcmp(mensaje_tipo, "guardar_plato") == 0){	
+
+        return guardar_plato;	
+
+    } else if(strcmp(mensaje_tipo, "confirmar_pedido") == 0){	
+
+        return confirmar_pedido;	
+
+    } else if(strcmp(mensaje_tipo, "plato_listo") == 0){	
+
+        return plato_listo;	
+
+    } else if(strcmp(mensaje_tipo, "consultar_pedido") == 0){	
+
+        return consultar_pedido;	
+
+    } else if(strcmp(mensaje_tipo, "obtener_pedido") == 0){	
+
+        return obtener_pedido;	
+
+    } else if(strcmp(mensaje_tipo, "finalizar_pedido") == 0){	
+
+        return finalizar_pedido;	
+
+    } else if(strcmp(mensaje_tipo, "terminar_pedido") == 0){	
+
+        return terminar_pedido;	
+
+    } else if(strcmp(mensaje_tipo, "obtener_receta") == 0){	
+
+        return obtener_receta;	
+
+    } 	
+    return -1;	
+};
 

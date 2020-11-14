@@ -15,9 +15,11 @@ typedef struct {
 
 typedef struct {
     t_posicion posicion_restaurante;
+    t_posicion posicion_cliente;
 } t_pedido;
 
 typedef struct {
+    int id;
     t_posicion posicion;
     int frecuencia_de_descanso;
     int tiempo_de_descanso;
@@ -26,6 +28,7 @@ typedef struct {
     int cansancio;
 } t_repartidor;
 
+List repartidores_libres;
 
 
 void repartir_pedidos(t_repartidor* repartidor);

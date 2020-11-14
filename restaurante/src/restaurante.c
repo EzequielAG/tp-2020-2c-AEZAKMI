@@ -323,8 +323,6 @@ void handle_anadir_plato(t_result* result){
 
 void handle_confirmar_pedido(t_result* result){
 
-
-    
     r_obtener_pedido2* pedido = enviar_mensaje_obtener_pedido2(&(modulo_sindicato), result->mensajes->mensajes[1], restaurante_config->nombre_restaurante);
 
     t_pedido* pedido_restaurante = malloc(sizeof(t_pedido));

@@ -4,24 +4,22 @@
 
 
 void inicializar_colas();
-int inicializar_colas_ready();
+
 void inicializar_colas_io();
 
 typedef enum estado_proceso{
     NEW = 0,
     READY = 1,
-    READY_MAS = 2,
-    EXEC = 3,
-    BLOCKED = 4,
-    IO = 5,
-    EXIT = 6
+    EXEC = 2,
+    BLOCKED = 3,
+    EXIT = 4
 } estado_proceso_t;
 
 typedef struct{
     int pid;
+    int id_pedido;
     estado_proceso_t estado;
-}
-t_pcb;
+} t_pcb;
 
 typedef struct {
     t_pcb* pcb;
@@ -29,12 +27,12 @@ typedef struct {
     List* pasos;
     int cantidad_total;
     int cantidad_listo;
-}
-t_plato;
+} t_plato;
 
 typedef struct {
-char* afinidad;
-t_plato* plato_en_ejecucion;
+    char* afinidad;
+    t_plato* plato_en_ejecucion;
+
 } t_cocinero;
 
 typedef struct{
@@ -50,18 +48,37 @@ typedef struct{
     t_plato* plato;
 } t_horno;
 
+typedef struct{
+    t_cocinero* cocinero;
+    int ocupado;
+    t_plato* plato;
+
+}t_exec;
+
+typedef struct{
+    char* afinidad;
+    List* platos_espera;
+    t_exec* puntero_exec;
+
+}t_ready;
+
+
+typedef struct{
+    t_horno** horno;
+    List* platos_espera;
+
+}t_io;
+
+
+
 int paso_ready(t_plato* plato);
 int paso_block(t_plato* plato);
 int paso_io(t_plato* plato);
 int paso_new(t_plato* plato);
 
-List cola_new;
-List** cola_ready;
-List cola_exec;
-List cola_io;
-List cola_block;
-List cola_exit;
+int inicializar_colas_ready_exec();
 List* cola_cocineros;
+t_ready** cola_ready;
 
 
 #endif

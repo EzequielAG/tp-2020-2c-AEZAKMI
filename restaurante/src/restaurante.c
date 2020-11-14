@@ -16,7 +16,9 @@ int main(void){
     cantidad_pedidos = 0;
     cantidad_platos = 0;
     initlist(&l_pedidos);
-    initlist(&l_cocineros);
+
+    
+    initlist(&lista_pedidos);
 
     t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
     modulo_sindicato.ip = restaurante_config->ip_sindicato;
@@ -105,7 +107,7 @@ void casos_uso(){
     pizza->nombre = "pizza";
     pizza->cantidad_total = 3;
     pizza->cantidad_listo = 0;
-    pizza->pcb = pcb2;
+    pizza->pcb = NULL;
     pizza->pasos = malloc(sizeof(List));
     initlist(pizza->pasos);
     pushbacklist((pizza->pasos),paso_cortar);
@@ -115,7 +117,7 @@ void casos_uso(){
     carne->nombre = "carne";
     carne->cantidad_total = 5;
     carne->cantidad_listo = 6;
-    carne->pcb = pcb3;
+    carne->pcb = NULL;
     carne->pasos = malloc(sizeof(List));
     initlist(carne->pasos);
     pushbacklist((carne->pasos),paso_cortar);
@@ -127,7 +129,7 @@ void casos_uso(){
     guiso->nombre = "guiso";
     guiso->cantidad_total = 2;
     guiso->cantidad_listo = 0;
-    guiso->pcb = pcb4;
+    guiso->pcb = NULL;
     guiso->pasos = malloc(sizeof(List));
     initlist(guiso->pasos);
     pushbacklist((guiso->pasos),paso_amasar);
@@ -139,7 +141,7 @@ void casos_uso(){
     empanadas->nombre = "empanadas";
     empanadas->cantidad_total = 2;
     empanadas->cantidad_listo = 0;
-    empanadas->pcb = pcb5;
+    empanadas->pcb = NULL;
     empanadas->pasos = malloc(sizeof(List));
     initlist(empanadas->pasos);
     pushbacklist((empanadas->pasos),paso_amasar);
@@ -164,7 +166,7 @@ void casos_uso(){
     pushbacklist(&(pedido2->platos), pizza);
     pushbacklist(&(pedido2->platos), fideos_tuco);
 
-    List lista_pedidos;
+    
 
     pushbacklist(&lista_pedidos,pedido1);
     pushbacklist(&lista_pedidos,pedido2);
@@ -184,6 +186,7 @@ void ver_info_pedido(List* lista_pedidos){
             t_plato* plato = iter_platos->data;
             printf(" - Nombre plato: %s \n", plato->nombre);
             printf(" - El estado en su pcb es: %i \n", plato->pcb->estado);
+            printf(" - Pertenece al pedido: %i \n", plato->pcb->id_pedido);
             
             printf("Pasos sin ejecutar: \n");
               for(IteratorList iter_pasos = beginlist(*(plato->pasos)); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
@@ -235,14 +238,14 @@ void data_restaurante(){
     printf("<< RESTAURANTE >> Iniciado con cantidad de hornos = %d\n", cantidad_hornos);
     printf("<< RESTAURANTE >> Iniciado con cantidad de cocineros = %d\n", cantidad_cocineros);
     
-    int i = 0;
-    for(IteratorList iterator_cocineros = beginlist(l_cocineros); iterator_cocineros != NULL; iterator_cocineros = nextlist(iterator_cocineros))
-    {
-        i++;
-        t_cocinero* cocinero = iterator_cocineros->data;
-        printf("<< RESTAURANTE >> Cocinero %d con afinidad = %s\n",i, cocinero->afinidad);
+    // int i = 0;
+    // for(IteratorList iterator_cocineros = beginlist(l_cocineros); iterator_cocineros != NULL; iterator_cocineros = nextlist(iterator_cocineros))
+    // {
+    //     i++;
+    //     t_cocinero* cocinero = iterator_cocineros->data;
+    //     printf("<< RESTAURANTE >> Cocinero %d con afinidad = %s\n",i, cocinero->afinidad);
 
-    }
+    // }
     printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %i\n", cantidad_pedidos);
 
 }
@@ -466,20 +469,7 @@ void inicializar(List* afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** 
     for(int i=0;i < atoi(cantidad_cocineros_f) ;i++)
     {
         
-        t_cocinero* cocinero = malloc(sizeof(t_cocinero));
-
-        if(!isemptylist(*afinidades_f))
-        {
-            cocinero->afinidad = popfrontlist(afinidades_f);
-        }
-        else
-        {
-            cocinero->afinidad = NULL;
-        }
-
-        cocinero->plato_en_ejecucion = NULL;
-
-        pushbacklist(&l_cocineros,cocinero);
+       
      
     }
 

@@ -6,7 +6,7 @@
 //VARIABLES GLOBALES
 List afinidades;
 List l_pedidos;
-List l_cocineros;
+
 
 typedef struct {
 int id;
@@ -27,5 +27,7 @@ int socket_sindicato;
 t_modulo modulo_sindicato;
 
 void cocineroMain();
+List lista_pedidos;
+
 
 #endif

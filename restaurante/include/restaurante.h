@@ -58,4 +58,5 @@ void ver_info_pedido(List* lista_pedidos);
 int es_paso_io(t_paso* paso);
 sem_t* sem_id;
 
+
 #endif

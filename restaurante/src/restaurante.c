@@ -17,8 +17,6 @@ int main(void){
     cantidad_platos = 0;
     initlist(&l_pedidos);
 
-    //iniciar_servidor("127.0.0.1", "5002", handle_client);
-
   
     t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
     modulo_sindicato.ip = restaurante_config->ip_sindicato;
@@ -47,11 +45,12 @@ int main(void){
 
    data_restaurante();
 
+   iniciar_servidor("127.0.0.1", "5002", handle_client);
 
     //2. Creacion/inicializacion de colas de planificacion
     inicializar_colas();
 
-    casos_uso();
+    // casos_uso();
 
 
     restaurante_finally(restaurante_config, logger);
@@ -101,11 +100,11 @@ void casos_uso(){
     fideos_tuco->nombre = "Fideos con tuco";
     fideos_tuco->cantidad_total = 2;
     fideos_tuco->cantidad_listo = 0;
-    // fideos_tuco->pcb = &pcb1;
-    fideos_tuco->pasos = NULL;
-    int i = isemptylist(*(fideos_tuco->pasos));
-    printf("%d", i);
-    pushbacklist((fideos_tuco->pasos), paso_amasar);
+    fideos_tuco->pcb = pcb1;
+    fideos_tuco->pasos = malloc(sizeof(List));
+    initlist(fideos_tuco->pasos);
+   
+    pushbacklist((fideos_tuco->pasos),paso_amasar);
     pushbacklist((fideos_tuco->pasos),paso_horno);
     pushbacklist((fideos_tuco->pasos),paso_frito);
   
@@ -114,6 +113,8 @@ void casos_uso(){
     pizza->cantidad_total = 3;
     pizza->cantidad_listo = 0;
     pizza->pcb = pcb2;
+    pizza->pasos = malloc(sizeof(List));
+    initlist(pizza->pasos);
     pushbacklist((pizza->pasos),paso_cortar);
     pushbacklist((pizza->pasos),paso_horno);
 
@@ -122,6 +123,8 @@ void casos_uso(){
     carne->cantidad_total = 5;
     carne->cantidad_listo = 6;
     carne->pcb = pcb3;
+    carne->pasos = malloc(sizeof(List));
+    initlist(carne->pasos);
     pushbacklist((carne->pasos),paso_cortar);
     pushbacklist((carne->pasos),paso_horno);
     pushbacklist((carne->pasos),paso_cortar);
@@ -132,6 +135,8 @@ void casos_uso(){
     guiso->cantidad_total = 2;
     guiso->cantidad_listo = 0;
     guiso->pcb = pcb4;
+    guiso->pasos = malloc(sizeof(List));
+    initlist(guiso->pasos);
     pushbacklist((guiso->pasos),paso_amasar);
     pushbacklist((guiso->pasos),paso_horno);
     pushbacklist((guiso->pasos),paso_frito);
@@ -141,7 +146,9 @@ void casos_uso(){
     empanadas->nombre = "empanadas";
     empanadas->cantidad_total = 2;
     empanadas->cantidad_listo = 0;
-    guiso->pcb = pcb5;
+    empanadas->pcb = pcb5;
+    empanadas->pasos = malloc(sizeof(List));
+    initlist(empanadas->pasos);
     pushbacklist((empanadas->pasos),paso_amasar);
     pushbacklist((empanadas->pasos),paso_horno);
     pushbacklist((empanadas->pasos),paso_frito);
@@ -166,30 +173,59 @@ void casos_uso(){
     pushbacklist(&(pedido2->platos), fideos_tuco);
 
 
-    // List lista_pedidos;
+     List lista_pedidos;
 
-    // pushbacklist(&lista_pedidos,pedido1);
-    // pushbacklist(&lista_pedidos,pedido2);
+     pushbacklist(&lista_pedidos,pedido1);
+     pushbacklist(&lista_pedidos,pedido2);
 
 
-    // ver_info_pedido(&lista_pedidos);
+     ver_info_pedido(&lista_pedidos);
    
- 
-
-
-
 }
 
 void ver_info_pedido(List* lista_pedidos){
  
-    // for(IteratorList iter_pedido = beginlist(*lista_pedidos); iter_pedido != NULL; iter_pedido = nextlist(iter_pedido))
-    // {
-    //     t_pedido* pedido = iter_pedido->data;
-    //     printf("Estoy en el pedido : %d", pedido->id);
+     for(IteratorList iter_pedido = beginlist(*lista_pedidos); iter_pedido != NULL; iter_pedido = nextlist(iter_pedido))
+     {
+        t_pedido* pedido = iter_pedido->data;
+        printf("Estoy en el pedido : %d \n", pedido->id);
+        printf("Y tiene los siguientes platos: \n");
+        for(IteratorList iter_platos = beginlist((pedido->platos)); iter_platos != NULL; iter_platos = nextlist(iter_platos)){
+            t_plato* plato = iter_platos->data;
+            printf(" - Nombre plato: %s \n", plato->nombre);
+            printf(" - El estado en su pcb es: %i \n", plato->pcb->estado);
+            
+            printf("Pasos sin ejecutar: \n");
+              for(IteratorList iter_pasos = beginlist(*(plato->pasos)); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
+                 t_paso* paso_plato = iter_pasos->data;
+                
+                 if(paso_plato->se_ejecuto){
+                 printf(" - Paso: %s \n", paso_plato->nombre_paso);
+                 printf(" - Ciclo cpu: %d \n", paso_plato->ciclo_cpu);
+                 printf(" - Es io : %d \n", es_paso_io(paso_plato));
+
+                 printf("--------\n");
+                }
+              
+              }
+
+            
+        }
+        printf("\n");
+        printf("\n");
         
-    // }
+    }
 };
 
+
+int es_paso_io(t_paso* paso){
+
+    if( !strcmp((paso->nombre_paso),"HORNEAR") || !strcmp((paso->nombre_paso),"Hornear")){
+        return 1;
+    }
+
+   return 0;
+}
 
 void data_restaurante(){
 
@@ -215,12 +251,17 @@ void data_restaurante(){
 void handle_client(t_result* result){
 
     for(int i = 0; i < *result->mensajes->size; i++){
-        printf("%s", result->mensajes->mensajes[i]);
+        printf("%s ", result->mensajes->mensajes[i]);
     }
     printf("\n");
 
     if (result->operacion == MENSAJES){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
+
+        if(tipo_mensaje == 16){
+            send_message_socket(result->socket, "OK");
+
+        }
         
         if (tipo_mensaje == consultar_platos){
             List* platos = enviar_mensaje_consultar_platos(&modulo_sindicato, restaurante_config->nombre_restaurante);
@@ -261,9 +302,9 @@ int asignar_pedido_id(){
 void handle_crear_pedido(int socket){
 
     int id = asignar_pedido_id();
-    
-    //lo mando a guardar al sindicato
+       
     char* respuesta = enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,string_itoa(id));
+
     if(!strcmp(respuesta,"OK")){
         send_message_socket(socket,string_itoa(id));
     }else{
@@ -273,7 +314,6 @@ void handle_crear_pedido(int socket){
 
 void handle_anadir_plato(t_result* result){
  
-    // REVISAR CANTIDAD 
     char* respuesta = enviar_mensaje_guardar_plato(&modulo_sindicato, restaurante_config->nombre_restaurante,result->mensajes->mensajes[2] ,result->mensajes->mensajes[1] , "1");
 
     send_message_socket(result->socket,respuesta);

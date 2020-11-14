@@ -55,6 +55,7 @@ void handle_confirmar_pedido(t_result* result);
 void data_restaurante();
 void casos_uso();
 void ver_info_pedido(List* lista_pedidos);
+int es_paso_io(t_paso* paso);
 sem_t* sem_id;
 
 #endif

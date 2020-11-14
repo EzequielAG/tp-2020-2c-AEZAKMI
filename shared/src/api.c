@@ -1,8 +1,6 @@
 #include "api.h"
 
 
-
-
 char* enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido){
 
     if(restaurante == NULL || id_pedido == NULL){
@@ -15,6 +13,10 @@ char* enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* i
     char* guardad_pedido_mensajes[3] = {tipo_mensaje, restaurante, id_pedido};
     int socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, guardad_pedido_mensajes, 3);
 
+    if(socket == -1){
+        return "FAIL";
+    }
+    
     t_mensajes* respuesta = receive_simple_messages(socket);
 
     for (int i= 0; i < *respuesta->size; i++){
@@ -86,6 +88,7 @@ char* enviar_mensaje_crear_pedido(t_modulo* modulo){
     t_mensajes* respuesta = receive_simple_messages(socket);
 
     char* id_pedido = respuesta->mensajes[0];
+
     printf("%s\n", id_pedido);
 
     liberar_conexion(socket);
@@ -179,6 +182,10 @@ List* enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
         socket = send_message_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, tipo_mensaje);
     }
 
+     if(socket == -1){
+        return NULL;
+    }
+
     t_mensajes* respuesta = receive_simple_messages(socket);
 
     for (int i= 0; i < *respuesta->size; i++){
@@ -204,6 +211,10 @@ char* enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido
     char* anadir_plato[3] ={tipo_mensaje,plato, id_pedido};
     socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, anadir_plato, 3);
     
+     if(socket == -1){
+        return "FAIL";
+    }
+
     t_mensajes* respuesta = receive_simple_messages(socket);
 
     for (int i= 0; i < *respuesta->size; i++){
@@ -229,6 +240,9 @@ char* enviar_mensaje_guardar_plato(t_modulo* modulo, char* restaurante, char* id
     char* guardar_plato[5] ={tipo_mensaje,restaurante, id_pedido, comida, cantidad};
     socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, guardar_plato, 5);
     
+    if(socket == -1){
+        return "FAIL";
+    }
    t_mensajes* respuesta = receive_simple_messages(socket);
 
    printf("%s \n", respuesta->mensajes[0]);
@@ -519,7 +533,7 @@ List* enviar_mensaje_obtener_receta2(t_modulo* modulo, char* nombre_plato){
         t_paso* paso = NULL;
 
         paso->nombre_paso = respuesta_pasos[i];
-        paso->ciclo_cpu = respuesta_pasos[i+1];
+        paso->ciclo_cpu = atoi(respuesta_pasos[i+1]);
 
         pushbacklist(lista_pasos_receta,paso);
 

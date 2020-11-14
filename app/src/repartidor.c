@@ -33,6 +33,12 @@ void esperar_pedido(t_repartidor* repartidor){
 }
 
 void ir_hacia_cliente(t_repartidor* repartidor){
+    t_pedido* pedido = repartidor->pedido;
+
+    while(!misma_posicion(repartidor->posicion, pedido->posicion_cliente)){
+        //sem_post(cpu)
+        avanzar_hacia(repartidor, pedido->posicion_cliente);
+    }
 
 }
 
@@ -46,6 +52,7 @@ bool misma_posicion(t_posicion posicion1, t_posicion posicion2){
 
 void avanzar_hacia(t_repartidor* repartidor, t_posicion destino){
 
+    
     if (repartidor->posicion.posx > destino.posx){
         mover_hacia_izquierda(repartidor);
     } else if(repartidor->posicion.posx < destino.posx) {
@@ -55,6 +62,10 @@ void avanzar_hacia(t_repartidor* repartidor, t_posicion destino){
     } else {
         mover_hacia_arriba(repartidor);
     }
+    
+    char* log_string = string_new();
+    sprintf(log_string, "El repartidor %i se movió a la posición %i - %i", repartidor->id, repartidor->posicion.posx, repartidor->posicion.posy);
+    log_info(logger, log_string);
 
     cansarse(repartidor);
 

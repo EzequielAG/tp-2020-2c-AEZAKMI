@@ -17,7 +17,7 @@ void handle_client(t_result* result){
                 handle_seleccionar_restaurante(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
             break;
             case consultar_platos: 
-                // TODO: FALTA LOGICA DE CONSULTAR_PLATOS
+                handle_consultar_platos(result->socket, result->identificador_cliente);
             break;
             case crear_pedido:
                 handle_crear_pedido(result->socket);
@@ -112,8 +112,8 @@ void handle_crear_pedido(int socket){
     int id_pedido = obtener_id_pedido();
     
     t_modulo modulo_comanda;
-    modulo_comanda.ip = app_config->ip_comanda;
-    modulo_comanda.puerto = app_config->puerto_comanda;
+    modulo_comanda.ip = ip_comanda;
+    modulo_comanda.puerto = puerto_comanda;
     modulo_comanda.identificacion = "APP";
 
     char* respuesta[1];
@@ -195,4 +195,18 @@ char* obtener_restaurantes(){
     string_append(&restaurantes, "]");
 
     return restaurantes;
+}
+
+handle_consultar_platos(int socket, char* idCliente){
+
+    //char* respuesta[1];
+
+    t_cliente* cliente = buscar_cliente_lista(idCliente);
+    t_restaurante* restaurante = cliente->restaurante;
+
+    //enviar_mensaje_consultar_platos(w, NULL);
+
+    //send_messages_socket(socket, respuesta, 1);
+    liberar_conexion(socket);
+
 }

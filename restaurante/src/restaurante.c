@@ -16,12 +16,11 @@ int main(void){
     cantidad_pedidos = 0;
     cantidad_platos = 0;
     initlist(&l_pedidos);
+    initlist(&l_cocineros);
 
-  
     t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
     modulo_sindicato.ip = restaurante_config->ip_sindicato;
     modulo_sindicato.puerto = restaurante_config->puerto_sindicato;
-
 
     int handshake_app_r = handshake(&modulo_app);
 
@@ -31,7 +30,6 @@ int main(void){
     }
 
     //1.2 Handshake con el modulo sindicato
-
 
     int handshake_sindicato_r = handshake(&modulo_sindicato);
 
@@ -43,15 +41,14 @@ int main(void){
         handle_obtener_restaurante(enviar_mensaje_obtener_restaurante(&modulo_sindicato, restaurante_config->nombre_restaurante));
     }
 
-   data_restaurante();
+    data_restaurante();
 
-   iniciar_servidor("127.0.0.1", "5002", handle_client);
+    // iniciar_servidor("127.0.0.1", "5002", handle_client);
 
     //2. Creacion/inicializacion de colas de planificacion
     inicializar_colas();
 
     // casos_uso();
-
 
     restaurante_finally(restaurante_config, logger);
     return 0;
@@ -60,7 +57,6 @@ int main(void){
 
 void casos_uso(){
 
-    
     t_pcb* pcb1 = malloc(sizeof(t_pcb));
     pcb1->estado = NEW;
     pcb1->pid = 1;
@@ -77,7 +73,6 @@ void casos_uso(){
     pcb5->estado = NEW;
     pcb5->pid = 5;
 
-
     t_paso* paso_horno = malloc(sizeof(t_paso));
     paso_horno->nombre_paso = "HORNEAR";
     paso_horno->ciclo_cpu = 5;
@@ -93,8 +88,6 @@ void casos_uso(){
     t_paso* paso_amasar = malloc(sizeof(t_paso));
     paso_amasar->nombre_paso = "AMASAR";
     paso_amasar->ciclo_cpu = 4;
-
-
 
     t_plato* fideos_tuco = malloc(sizeof(t_plato));
     fideos_tuco->nombre = "Fideos con tuco";
@@ -154,7 +147,6 @@ void casos_uso(){
     pushbacklist((empanadas->pasos),paso_frito);
     pushbacklist((empanadas->pasos),paso_horno);
 
-
     t_pedido* pedido1 = malloc(sizeof(t_pedido));
     pedido1->id = 1;
     
@@ -172,14 +164,12 @@ void casos_uso(){
     pushbacklist(&(pedido2->platos), pizza);
     pushbacklist(&(pedido2->platos), fideos_tuco);
 
+    List lista_pedidos;
 
-     List lista_pedidos;
+    pushbacklist(&lista_pedidos,pedido1);
+    pushbacklist(&lista_pedidos,pedido2);
 
-     pushbacklist(&lista_pedidos,pedido1);
-     pushbacklist(&lista_pedidos,pedido2);
-
-
-     ver_info_pedido(&lista_pedidos);
+    ver_info_pedido(&lista_pedidos);
    
 }
 
@@ -244,6 +234,15 @@ void data_restaurante(){
 
     printf("<< RESTAURANTE >> Iniciado con cantidad de hornos = %d\n", cantidad_hornos);
     printf("<< RESTAURANTE >> Iniciado con cantidad de cocineros = %d\n", cantidad_cocineros);
+    
+    int i = 0;
+    for(IteratorList iterator_cocineros = beginlist(l_cocineros); iterator_cocineros != NULL; iterator_cocineros = nextlist(iterator_cocineros))
+    {
+        i++;
+        t_cocinero* cocinero = iterator_cocineros->data;
+        printf("<< RESTAURANTE >> Cocinero %d con afinidad = %s\n",i, cocinero->afinidad);
+
+    }
     printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %i\n", cantidad_pedidos);
 
 }
@@ -413,7 +412,8 @@ void escuchar_mensajes_socket(t_parameter* parametro){
 
 
 
-void handle_obtener_restaurante(r_obtener_restaurante* respuesta){
+void handle_obtener_restaurante(r_obtener_restaurante* respuesta)
+{
 inicializar(respuesta->afinidades,respuesta->pos_x,respuesta->pos_y,respuesta->recetas,respuesta->cantidad_hornos,atoi(respuesta->cantidad_pedidos),respuesta->cantidad_cocineros);
 }
 
@@ -457,16 +457,29 @@ void inicializacion_default(){
     pushbacklist(afinidades_default, "Milanesas");
     pushbacklist(afinidades_default, "Empanadas");
 
-    inicializar(afinidades_default,"4","5",recetas,"2",3,"2");
+    inicializar(afinidades_default,"4","5",recetas,"2",3,"3");
 
 }
 
 void inicializar(List* afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,int cantidad_pedidos_f,char* cantidad_cocineros_f){
     
-    for(IteratorList iterator_afinidades = beginlist(*afinidades_f); iterator_afinidades != NULL; iterator_afinidades = nextlist(iterator_afinidades))
+    for(int i=0;i < atoi(cantidad_cocineros_f) ;i++)
     {
         
-        pushbacklist(&afinidades, iterator_afinidades->data);
+        t_cocinero* cocinero = malloc(sizeof(t_cocinero));
+
+        if(!isemptylist(*afinidades_f))
+        {
+            cocinero->afinidad = popfrontlist(afinidades_f);
+        }
+        else
+        {
+            cocinero->afinidad = NULL;
+        }
+
+        cocinero->plato_en_ejecucion = NULL;
+
+        pushbacklist(&l_cocineros,cocinero);
      
     }
 
@@ -496,9 +509,6 @@ int len_array(char** arrayInput)
         
     return cont;
 }
-
-
-
 
 
 int handshake_app(t_modulo modulo_app)

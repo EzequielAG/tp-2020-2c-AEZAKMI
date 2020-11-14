@@ -4,7 +4,8 @@
 
 
 void inicializar_colas();
-
+int inicializar_colas_ready();
+void inicializar_colas_io();
 
 typedef enum estado_proceso{
     NEW = 0,
@@ -31,6 +32,11 @@ typedef struct {
 }
 t_plato;
 
+typedef struct {
+char* afinidad;
+t_plato* plato_en_ejecucion;
+} t_cocinero;
+
 typedef struct{
     char* nombre;
     int ciclos_cpu;
@@ -50,8 +56,7 @@ int paso_io(t_plato* plato);
 int paso_new(t_plato* plato);
 
 List cola_new;
-List cola_ready_mas;
-List cola_ready;
+List** cola_ready;
 List cola_exec;
 List cola_io;
 List cola_block;

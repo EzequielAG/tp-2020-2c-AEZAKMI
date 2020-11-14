@@ -6,11 +6,14 @@
 //VARIABLES GLOBALES
 List afinidades;
 List l_pedidos;
+List l_cocineros;
 
 typedef struct {
 int id;
 List platos;
 } t_pedido;
+
+
 
 
 char* pos_x;

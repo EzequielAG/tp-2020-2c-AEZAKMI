@@ -28,7 +28,7 @@ typedef enum tipo_mensaje{
 typedef struct {
     char* ip;
     char* puerto;
-    char* nombre;
+    char* identificacion;
 } t_modulo;
 
 typedef struct{
@@ -55,7 +55,8 @@ typedef struct{
 
 typedef struct{
     char* nombre_paso;
-    char* ciclo_cpu;
+    int ciclo_cpu;
+    int se_ejecuto;
 }t_paso;
 
 typedef struct {
@@ -88,6 +89,7 @@ char** obtener_array_mensajes(char* array_mensaje);
 List* obtener_list_mensajes(char* array_mensaje);
 char ** list_a_char(List lista);
 List* separar_por_comillas_lista(char** string_separado_por_espacios);
+
 char** enviar_mensaje_consultar_restaurantes(t_modulo* modulo);
 char* enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* cliente, char* restaurante);
 r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char* restaurante);
@@ -103,6 +105,7 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
 char* enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 char* enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 char* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
+
 char ** separar_por_comillas(char** string_separado_por_espacios);
 
 r_obtener_pedido2* enviar_mensaje_obtener_pedido2(t_modulo* modulo, char* id_pedido,char* restaurante);

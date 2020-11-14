@@ -10,12 +10,6 @@ int main(int argc, char *argv[]){
         printf("%s\n", argv[i]);
     }
 
-    if (argc < 2){
-        printf("%s\n", "Debe indicar a qué modulo quiere conectarse");
-        cliente_finally(cliente_config, logger);
-        return -1;
-    }
-
     t_modulo* modulo = get_modulo_config();
 
     if (modulo == NULL){
@@ -25,6 +19,8 @@ int main(int argc, char *argv[]){
     }
 
     int resultado = handshake(modulo);
+
+    printf("HANDSHAKE %d",resultado);
 
     if (resultado != 0){
         printf("%s\n", "No se pudo realizar la conexion con el cliente");
@@ -61,8 +57,8 @@ t_cliente_config* cliente_config_loader(char* path_config_file) {
 }
 
 void cliente_config_parser(t_config* config, t_cliente_config* cliente_config) {
-    cliente_config->ip = strdup(config_get_string_value(config, "IP_APP"));
-    cliente_config->puerto = strdup(config_get_string_value(config, "PUERTO_APP"));
+    cliente_config->ip = strdup(config_get_string_value(config, "IP"));
+    cliente_config->puerto = strdup(config_get_string_value(config, "PUERTO"));
     cliente_config->ruta_log = strdup(config_get_string_value(config, "ARCHIVO_LOG"));
     cliente_config->posicion_x = config_get_int_value(config, "POCISION_X");
     cliente_config->posicion_y = config_get_int_value(config, "POCISION_Y");
@@ -86,6 +82,7 @@ t_modulo * crear_modulo(char* ip, char* puerto){
     t_modulo* modulo = malloc(sizeof(t_modulo));
     modulo->ip = ip;
     modulo->puerto = puerto;
+    modulo->identificacion = cliente_config->id_cliente;
     return modulo;
 }
 
@@ -93,7 +90,7 @@ int handshake(t_modulo* modulo){
 
     char* mensajes[2] = {string_itoa(handshake_cliente), cliente_config->id_cliente};
 
-    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, mensajes, 2);
+    int socket = send_messages_and_return_socket(modulo->identificacion, modulo->ip, modulo->puerto, mensajes, 2);
 
     if (socket == -1){
         return -1;

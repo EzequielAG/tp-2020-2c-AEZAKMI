@@ -4,11 +4,7 @@
 
 
 void inicializar_colas();
-void inicializar_colas_ready();
-void inicializar_colas_io();
-void inicializar_colas_exec();
-void inicializar_colas_block();
-void inicializar_colas_exit();
+
 
 typedef enum estado_proceso{
     NEW = 0,
@@ -29,7 +25,7 @@ t_pcb;
 typedef struct {
     t_pcb* pcb;
     char* nombre;
-    List pasos;
+    List* pasos;
     int cantidad_total;
     int cantidad_listo;
 }

@@ -10,20 +10,7 @@ void handle_client(t_result* result){
     pthread_t plato_listo_thread;
     pthread_t obtener_pedido_thread;
     pthread_t finalizar_pedido_thread;
-   
-    IteratorList iterador = NULL;
-
-    l_proceso *resto = NULL;
-
-
-    printf("La tabla de restaurante contiene los siguientes datos \n");
-    for(iterador = beginlist(tablaRestaurantes);iterador!=NULL;iterador = nextlist(iterador)){
-        resto = dataiterlist(iterador);
-
-        printf("Restaurante: %s | Direccion %p \n", resto->nombreResto,resto->punteroTablaSegmentos);
-    }printf("------------- \n");
-
-
+    
 
     int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
     if (tipo_mensaje == guardar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
@@ -91,6 +78,7 @@ void handle_guardar_plato(t_result* result){
     char* respuesta[1];
 
     if (guardar_plato_en_memoria(result->mensajes->mensajes[1],result->mensajes->mensajes[2],result->mensajes->mensajes[4],result->mensajes->mensajes[3])){
+        imprimirTodo();
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
@@ -107,6 +95,7 @@ void handle_guardar_pedidos(t_result* result){
     char* respuesta[1];
 
     if (guardar_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
+        imprimirTodo();
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
@@ -124,6 +113,7 @@ void handle_confirmar_pedido(t_result* result){
     char* respuesta[1];
 
     if (confirmar_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
+        imprimirTodo();
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
@@ -139,6 +129,7 @@ void handle_plato_listo(t_result* result){
     char* respuesta[1];
 
     if (plato_listo_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3])){
+        imprimirTodo();
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
@@ -149,20 +140,48 @@ void handle_plato_listo(t_result* result){
 
 }
 
-//COORDINAR CON APP PARA EL FORMATE DE RESPUESTA
 void handle_obtener_pedido(t_result* result){
+
+    IteratorList iterator = NULL;
+    int i = 2;
+    int length;
 
     l_segmento* segmento = obtener_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 
     if(segmento != NULL){
-        send_message_socket(result->socket, segmento->idPedido);
+
+        length = (sizelist(*segmento->punteroTablaPaginas)*3)+2;
+        char* arrayReturn[length];
+        strcpy(arrayReturn[0], result->mensajes->mensajes[1]);
+        strcpy(arrayReturn[1], string_itoa(segmento->estadoPedido));
+
+        for(iterator = beginlist(*segmento->punteroTablaPaginas); iterator != NULL; iterator = nextlist(iterator)){
+            l_pagina* pagina = (l_pagina*) dataiterlist(iterator);
+            l_frame* frame = pagina->swap;
+
+            char* cantidad = string_itoa(frame->cantidadPlato);
+            char* cantidadLista = string_itoa(frame->cantidadLista);
+
+            strcpy(arrayReturn[i], frame->plato);
+            strcpy(arrayReturn[i+1], cantidad);
+            strcpy(arrayReturn[i+2], cantidadLista);
+
+            free(cantidad);
+            free(cantidadLista);
+
+            i += 3;
+
+        }
+        
+        send_messages_socket(result->socket, arrayReturn, length);
     }else{
-        send_message_socket(result->socket, "No se encuentra el pedido");
+        char* arrayReturn[1];
+        arrayReturn[0] = "Fail";
+        send_messages_socket(result->socket, arrayReturn, 1);
     }
 
     liberar_conexion(result->socket);
    
-
 }
 
 void handle_finalizar_pedido(t_result* result){
@@ -170,6 +189,7 @@ void handle_finalizar_pedido(t_result* result){
     char* respuesta[1];
 
     if (finalizar_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
+        imprimirTodo();
         respuesta[0] = "Ok";
     } else {
         respuesta[0] = "Fail";
@@ -298,11 +318,11 @@ int plato_listo_en_memoria(char* nombreResto, char* idPedido, char* plato){
     modificarPagina(pagina_plato);
 
     terminarPlatoPagina(pagina_plato);
-
+    /*
     if(platos_listos(segmento)){
         terminar_pedido_segmento(segmento); 
     };
-
+    */
     return 1;
 }
 

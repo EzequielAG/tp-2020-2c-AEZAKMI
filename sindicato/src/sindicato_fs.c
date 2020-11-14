@@ -58,10 +58,8 @@ t_estado_pedido config_get_estado_pedido(t_config* config, char* key){
 		return PENDIENTE;
 	} else if (strcmp(value, "Confirmado")){
 		return CONFIRMADO;
-	} else if (strcmp(value, "Terminado")){
+	} else {//if (strcmp(valloc, "Terminado")){
 		return TERMINADO;
-	} else {
-		return EXIT_FAILURE;
 	}
 }
 /* -- END REFACTOR -- */
@@ -79,12 +77,12 @@ void info_file_parser(t_config* config, t_info* info_config){
 	char** platos_str = config_get_array_value(config, "PLATOS");
 	char** precio_platos_str = config_get_array_value(config, "PRECIO_PLATOS");
 
-	info_config->cantidad_cocineros = strdup(config_get_int_value(config, "CANTIDAD_COCINEROS"));
+	info_config->cantidad_cocineros = config_get_int_value(config, "CANTIDAD_COCINEROS");
 	info_config->posicion = get_position_from_config(config, "POSICION");
 	info_config->afinidad_cocineros = strings_to_list(afinidad_cocineros_str);
 	info_config->platos = strings_to_list(platos_str);
 	info_config->precio_platos = strings_to_list(precio_platos_str);
-	info_config->cantidad_hornos = strdup(config_get_int_value(config, "CANTIDAD_COCINEROS"));
+	info_config->cantidad_hornos = config_get_int_value(config, "CANTIDAD_COCINEROS");
 }
 
 t_info* create_info_config(char* restaurante){

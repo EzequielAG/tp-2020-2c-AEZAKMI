@@ -24,9 +24,9 @@ void iniciarMemoriaSwap(){
 
     while(puntero + tamanioSwap > puntero_memoria_swap){
 		
-		puntero_memoria_swap += 32;
-		
 		pushbacklist(&tablaSwap, puntero_memoria_swap);
+
+        puntero_memoria_swap += 32;
 
 	}
 

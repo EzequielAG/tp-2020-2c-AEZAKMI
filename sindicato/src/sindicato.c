@@ -80,10 +80,25 @@ void handle_client(t_result* result){
 }
 
 int guardar_pedido_en_afip(char* restaurante, char* id_pedido){
-	//TODO: Guardar pedido en afip, 1 OK 0 FAIL
-	return 1;
+	//TODO: Guardar pedido en afip, 0 OK 1 FAIL
+	char* path_pedido_file = get_path_pedido_file(restaurante, id_pedido);
+	FILE* pedido = fopen(path_pedido_file, "w");
+	if (pedido == NULL){
+		return EXIT_FAILURE;
+	}
+
+	t_config* config = config_create(path_pedido_file);
+	config_set_value(config, "ESTADO_PEDIDO", "PENDIENTE");
+	config_set_value(config, "LISTA_PLATOS", "[]");
+	config_set_value(config, "CANTIDAD_PLATOS", "[]");
+	config_set_value(config, "CANTIDAD_LISTA", "[]");
+	config_save_in_file(config, path_pedido_file);
+
+	fclose(pedido);
+	return EXIT_SUCCESS;
 }
 
+/* --- SUITES DE HANDLES --- */
 void handle_consultar_platos(int socket, char* restaurante){
 	//Verificar si el Restaurante existe dentro del File System. 
 	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
@@ -93,7 +108,7 @@ void handle_consultar_platos(int socket, char* restaurante){
 	}
 
 	//Obtener los platos que puede preparar dicho Restaurante del archivo info.AFIP.
-	List* platos = obtener_platos(restaurante);
+	t_list* platos = get_platos(restaurante);
 
 	//Responder el mensaje indicando los platos que puede preparar el Restaurante.
 
@@ -119,7 +134,7 @@ void handle_guardar_pedido(int socket, char* restaurante, char* id_pedido){
 	//Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
 	char* respuesta[1];
 
-	if (resultado_operacion){
+	if (resultado_operacion == EXIT_SUCCESS){
 		respuesta[0] = "Ok";
 	} else {
 		respuesta[0] = "Fail";
@@ -142,15 +157,36 @@ void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* 
 		// TODO: En caso de no existir se deberá informar dicha situación.
 	}
 
-	t_pedido_file* pedido = create_pedido_config(restaurante, id_pedido);
+	t_pedido* pedido = create_pedido_config(restaurante, id_pedido);
 	//Verificar que el pedido esté en estado “Pendiente”. En caso contrario se deberá informar dicha situación.
 	if (pedido->estado_pedido != PENDIENTE){
 		// TODO: En caso contrario se deberá informar dicha situación.
 	}
 
-	//Verificar si ese plato ya existe dentro del archivo. 
+	//Verificar si ese plato ya existe dentro del archivo.
 	//En caso de existir, se deberán agregar la cantidad pasada por parámetro a la actual. 
 	//En caso de no existir se deberá agregar el plato a la lista de Platos y anexar la cantidad que se tiene que cocinar de dicho plato y aumentar el precio total del pedido.
+	bool platos_iguales(char* plato){
+		if(strcmp(plato, comida)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	if (list_any_satisfy(pedido->lista_platos, &platos_iguales)){
+		int i, posicion;
+		int cant_platos = list_size(pedido->lista_platos);
+		for (i=0; i<=cant_platos; i++){
+			char* plato_existente = list_get(pedido->lista_platos, i);
+			if (strcmp(plato_existente, comida)){
+				posicion = i;
+			}
+		}
+		list_replace(pedido->cantidad_platos, posicion, cantidad);
+	} else {
+		list_add(pedido->lista_platos, comida);
+		list_add(pedido->cantidad_platos, cantidad);
+	}
 
 	//Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
 	char* respuesta[1];
@@ -193,29 +229,43 @@ void handle_confirmar_pedido(int socket, char* id_pedido, char* restaurante){
 }
 
 void handle_obtener_pedido(int socket, char* restaurante, char* id_pedido){
-	//Verificar si el Restaurante existe dentro del File System. 
-	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
-	//En caso de no existir se deberá informar dicha situación.
-	bool resultado_operacion = existe_restaurante(restaurante);
+	if (ES_TEST){
+		char* respuesta[4];
+		respuesta[0] = "confirmado";
+		respuesta[1] = "plato1,plato2";
+		respuesta[2] = "1,1";
+		respuesta[3] = "1,0";
+		send_messages_socket(socket, respuesta, 4);
+	} else {
+		//Verificar si el Restaurante existe dentro del File System. 
+		//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
+		//En caso de no existir se deberá informar dicha situación.
+		if (!existe_restaurante(restaurante)){
+			// TODO: En caso de no existir se deberá informar dicha situación.
+		}
 
-	//Verificar si el Pedido existe dentro del File System. 
-	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
-	//En caso de no existir se deberá informar dicha situación.
-	if (resultado_operacion){
-		resultado_operacion = existe_pedido(restaurante, id_pedido);
+		//Verificar si el Pedido existe dentro del File System. 
+		//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
+		//En caso de no existir se deberá informar dicha situación.
+		if (!existe_pedido(restaurante, id_pedido)){
+			// TODO: En caso de no existir se deberá informar dicha situación.
+		}
+
+		t_pedido* get_pedido(restaurante, id_pedido);
+		//Responder el mensaje indicando si se pudo realizar en conjunto con la información del pedido si correspondiera.
 	}
-
-	//Responder el mensaje indicando si se pudo realizar en conjunto con la información del pedido si correspondiera.
-
 }
 
 void handle_obtener_restaurante(int socket, char* restaurante){
 	//Verificar si el Restaurante existe dentro del File System. 
 	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
 	//En caso de no existir se deberá informar dicha situación.
-	bool resultado_operacion = existe_restaurante(restaurante);
+	if (!existe_restaurante(restaurante)){
+		// TODO: En caso de no existir se deberá informar dicha situación.
+	}
 
 	//Obtener todo los datos del archivo info.AFIP.
+	t_info* info = get_restaurante(restaurante);
 
 	//Responder el mensaje indicando los datos del Restaurante.
 
@@ -251,15 +301,27 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* co
 		respuesta[0] = "Fail";
 	}
 	send_messages_socket(socket, respuesta, 1);
-
 }
 
 void handle_obtener_receta(int socket, char* comida){
-	//Verificar si existe el plato dado dentro del directorio de recetas.
-	//En caso de no existir, se deberá informar dicha situación.
+	if (ES_TEST){
+		// return ['amasar,2', 'batir,1']
+		char* respuesta[3];
+		respuesta[0] = "batir,5";
+		respuesta[1] = "amasar,10";
+		respuesta[2] = "hornear,60";
+		send_messages_socket(socket, respuesta, 3);
+	} else {
+		//Verificar si existe el plato dado dentro del directorio de recetas.
+		//En caso de no existir, se deberá informar dicha situación.
+		if (!existe_receta(comida)){
+			// TODO: En caso de no existir, se deberá informar dicha situación.
+		}
 
-	//Responder el mensaje con la receta solicitada.
+		t_receta* get_receta(comida);
 
+		//Responder el mensaje con la receta solicitada.
+	}
 }
 
 void handle_terminar_pedido(int socket, char* id_pedido, char* restaurante){
@@ -296,6 +358,82 @@ void handle_error(int socket){
 	respuesta[0] = "ERROR";
 	send_messages_socket(socket, respuesta, 1);
 }
+
+void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posicion,
+	char* afinidad_cocineros, char* platos, char* precio_platos, char* cantidad_hornos){
+
+	//CHECK PARAMETROS
+	if (nombre == NULL){
+		printf("El nombre es obligatorio. \n");
+		return;
+	}
+
+	if (cantidad_cocineros == NULL){
+		printf("La cantidad de cocineros es obligatoria. \n");
+		return;
+	}
+
+	if (posicion == NULL){
+		printf("La posicion es obligatoria. \n");
+		return;
+	}
+
+	if (afinidad_cocineros == NULL){
+		printf("La afinidad de los cocineros es obligatoria. \n");
+		return;
+	}
+
+	if (platos == NULL){
+		printf("Los platos son obligatorios. \n");
+		return;
+	}
+
+	if (precio_platos == NULL){
+		printf("Los precios de los platos son obligatorios. \n");
+		return;
+	}
+
+	if (cantidad_hornos == NULL){
+		printf("La cantidad de hornos es obligatoria. \n");
+		return;
+	}
+
+	//VERIFICAR QUE NO EXISTE EL RESTAURANTE
+	if (existe_restaurante(nombre)){
+		printf("Ya existe un restaurante con el nombre: %s \n", nombre);
+		return;
+	}
+
+	//CREAR RESTAURANTE
+}
+
+void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos){
+
+	//CHECK PARAMETROS
+	if (nombre == NULL){
+		printf("El nombre de la receta es obligatorio. \n");
+		return;
+	}
+
+	if (pasos == NULL){
+		printf("Los pasos de la receta son obligatorios. \n");
+		return;
+	}
+
+	if (tiempo_pasos == NULL){
+		printf("El tiempo de los pasos de la receta son obligatorios obligatoria. \n");
+		return;
+	}
+
+	//VERIFICAR QUE NO EXISTE LA RECETA
+	if (existe_receta(nombre)){
+		printf("Ya existe una receta con el nombre: %s \n", nombre);
+		return;
+	}
+
+	//CREAR RECETA
+}
+/* --- END SUITES DE HANDLES --- */
 
 void iniciar_consola(){
 	do {
@@ -374,78 +512,4 @@ char * getlinefromconsole(void) {
 	}
 	*line = '\0';
 	return linep;
-}
-
-void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posicion, char* afinidad_cocineros, char* platos, char* precio_platos, char* cantidad_hornos){
-
-	//CHECK PARAMETROS
-	if (nombre == NULL){
-		printf("El nombre es obligatorio. \n");
-		return;
-	}
-
-	if (cantidad_cocineros == NULL){
-		printf("La cantidad de cocineros es obligatoria. \n");
-		return;
-	}
-
-	if (posicion == NULL){
-		printf("La posicion es obligatoria. \n");
-		return;
-	}
-
-	if (afinidad_cocineros == NULL){
-		printf("La afinidad de los cocineros es obligatoria. \n");
-		return;
-	}
-
-	if (platos == NULL){
-		printf("Los platos son obligatorios. \n");
-		return;
-	}
-
-	if (precio_platos == NULL){
-		printf("Los precios de los platos son obligatorios. \n");
-		return;
-	}
-
-	if (cantidad_hornos == NULL){
-		printf("La cantidad de hornos es obligatoria. \n");
-		return;
-	}
-
-	//VERIFICAR QUE NO EXISTE EL RESTAURANTE
-	if (existe_restaurante(nombre)){
-		printf("Ya existe un restaurante con el nombre: %s \n", nombre);
-		return;
-	}
-
-	//CREAR RESTAURANTE
-}
-
-void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos){
-	
-	//CHECK PARAMETROS
-	if (nombre == NULL){
-		printf("El nombre de la receta es obligatorio. \n");
-		return;
-	}
-
-	if (pasos == NULL){
-		printf("Los pasos de la receta son obligatorios. \n");
-		return;
-	}
-
-	if (tiempo_pasos == NULL){
-		printf("El tiempo de los pasos de la receta son obligatorios obligatoria. \n");
-		return;
-	}
-
-	//VERIFICAR QUE NO EXISTE LA RECETA
-	if (existe_receta(nombre)){
-		printf("Ya existe una receta con el nombre: %s \n", nombre);
-		return;
-	}
-
-	//CREAR RECETA
 }

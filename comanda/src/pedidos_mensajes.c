@@ -153,14 +153,14 @@ void handle_obtener_pedido(t_result* result){
         length = (sizelist(*segmento->punteroTablaPaginas)*3)+2;
         char* arrayReturn[length];
         strcpy(arrayReturn[0], result->mensajes->mensajes[1]);
-        strcpy(arrayReturn[1], itoa(segmento->estadoPedido));
+        strcpy(arrayReturn[1], string_itoa(segmento->estadoPedido));
 
         for(iterator = beginlist(*segmento->punteroTablaPaginas); iterator != NULL; iterator = nextlist(iterator)){
             l_pagina* pagina = (l_pagina*) dataiterlist(iterator);
             l_frame* frame = pagina->swap;
 
-            char* cantidad = itoa(frame->cantidadPlato);
-            char* cantidadLista = itoa(frame->cantidadLista);
+            char* cantidad = string_itoa(frame->cantidadPlato);
+            char* cantidadLista = string_itoa(frame->cantidadLista);
 
             strcpy(arrayReturn[i], frame->plato);
             strcpy(arrayReturn[i+1], cantidad);
@@ -350,47 +350,4 @@ int finalizar_pedido_en_memoria(char* restaurante, char* id_pedido){
     eliminarSegmento(restoEnTabla, segmento);
 
     return 1;
-}
-
-int no_of_digits(int num)
-{
-    int digit_count = 0;
-    
-    while(num > 0)
-    {
-        digit_count++;
-        num /= 10;
-    }
-    
-    return digit_count;
-}
-
-
-char * itoa(int num)
-{
-    char *str;
-    int digit_count = 0;
-    
-    if(num < 0)
-    {
-        num = -1*num;
-        digit_count++;
-    }
-    
-    digit_count += no_of_digits(num);   
-    str = (char *)malloc(sizeof(char)*(digit_count+1));
-    
-    str[digit_count] = '\0';
-        
-    while(num > 0)
-    {
-        str[digit_count-1] = num%10 + '0';
-        num = num/10;
-        digit_count--;
-    }
-    
-    if(digit_count == 1)
-        str[0] = '-';
-    
-    return str;
 }

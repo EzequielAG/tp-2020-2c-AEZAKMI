@@ -38,4 +38,3 @@ int confirmar_pedido_en_memoria(char* restaurante, char* id_pedido);
 l_segmento* obtener_pedido_en_memoria(char* nombreResto, char* id_pedido);
 int plato_listo_en_memoria(char* restaurante, char* id_pedido, char* plato);
 int finalizar_pedido_en_memoria(char* restaurante, char* id_pedido);
-char* itoa(int);

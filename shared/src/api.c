@@ -1,72 +1,6 @@
 #include "api.h"
 
 
-int obtener_numero_mensaje(char* mensaje_tipo){
-
-    if(strcmp(mensaje_tipo, "guardar_pedido") == 0){
-        
-        return guardar_pedido;
-
-    } else if(strcmp(mensaje_tipo, "consultar_restaurantes") == 0){
-        
-        return consultar_restaurantes;
-
-    } else if(strcmp(mensaje_tipo, "seleccionar_restaurante") == 0){
-        
-        return seleccionar_restaurante;
-
-    } else if(strcmp(mensaje_tipo, "obtener_restaurante") == 0){
-        
-        return obtener_restaurante;
-
-    } else if(strcmp(mensaje_tipo, "consultar_platos") == 0){
-        
-        return consultar_platos;
-
-    } else if(strcmp(mensaje_tipo, "crear_pedido") == 0){
-        
-        return crear_pedido;
-
-    } else if(strcmp(mensaje_tipo, "anadir_plato") == 0){
-        
-        return anadir_plato;
-
-    } else if(strcmp(mensaje_tipo, "guardar_plato") == 0){
-        
-        return guardar_plato;
-
-    } else if(strcmp(mensaje_tipo, "confirmar_pedido") == 0){
-        
-        return confirmar_pedido;
-
-    } else if(strcmp(mensaje_tipo, "plato_listo") == 0){
-        
-        return plato_listo;
-
-    } else if(strcmp(mensaje_tipo, "consultar_pedido") == 0){
-        
-        return consultar_pedido;
-
-    } else if(strcmp(mensaje_tipo, "obtener_pedido") == 0){
-        
-        return obtener_pedido;
-
-    } else if(strcmp(mensaje_tipo, "finalizar_pedido") == 0){
-        
-        return finalizar_pedido;
-
-    } else if(strcmp(mensaje_tipo, "terminar_pedido") == 0){
-        
-        return terminar_pedido;
-
-    } else if(strcmp(mensaje_tipo, "obtener_receta") == 0){
-        
-        return obtener_receta;
-
-    } 
-    return -1;
-};
-
 
 
 char* enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* id_pedido){
@@ -79,7 +13,7 @@ char* enviar_mensaje_guardar_pedido(t_modulo* modulo, char* restaurante, char* i
     char* tipo_mensaje = string_itoa(guardar_pedido);
 
     char* guardad_pedido_mensajes[3] = {tipo_mensaje, restaurante, id_pedido};
-    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, guardad_pedido_mensajes, 3);
+    int socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, guardad_pedido_mensajes, 3);
 
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -98,7 +32,7 @@ char** enviar_mensaje_consultar_restaurantes(t_modulo* modulo){
     
     char* tipo_mensaje = string_itoa(consultar_restaurantes);
     char* get_restaurantes[1] = {tipo_mensaje};
-    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, get_restaurantes, 1);
+    int socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, get_restaurantes, 1);
 
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -127,7 +61,7 @@ char* enviar_mensaje_seleccionar_restaurante(t_modulo* modulo, char* id_cliente,
 
     //TODO: Definir como se elige el ID del cliente
     char* seleccionar_restaurantes[3] = {tipo_mensaje, id_cliente, nombre_restaurante};
-    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, seleccionar_restaurantes, 3);
+    int socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, seleccionar_restaurantes, 3);
 
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -147,7 +81,7 @@ char* enviar_mensaje_crear_pedido(t_modulo* modulo){
 
     char* tipo_mensaje = string_itoa(crear_pedido);
     char* crear_pedido_mensajes[1] = {tipo_mensaje};
-    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, crear_pedido_mensajes, 1);
+    int socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, crear_pedido_mensajes, 1);
 
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -168,7 +102,7 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
     
     char* tipo_mensaje = string_itoa(obtener_restaurante);
     char* obtener_restaurante[2] ={tipo_mensaje,restaurante};
-    int socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, obtener_restaurante, 2);
+    int socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, obtener_restaurante, 2);
 
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -238,11 +172,11 @@ List* enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
     char* tipo_mensaje = string_itoa(consultar_platos);
     int socket ;
 
-    if(!strcmp((modulo->nombre),"sindicato")){
+    if(!strcmp((modulo->identificacion),"sindicato")){
         char* consulta_platos[2] ={tipo_mensaje,restaurante};
-        socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, consulta_platos, 2);
+        socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, consulta_platos, 2);
     }else{
-        socket = send_message_and_return_socket(modulo->ip, modulo->puerto, tipo_mensaje);
+        socket = send_message_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, tipo_mensaje);
     }
 
     t_mensajes* respuesta = receive_simple_messages(socket);
@@ -268,7 +202,7 @@ char* enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido
     int socket;
 
     char* anadir_plato[3] ={tipo_mensaje,plato, id_pedido};
-    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, anadir_plato, 3);
+    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, anadir_plato, 3);
     
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -293,7 +227,7 @@ char* enviar_mensaje_guardar_plato(t_modulo* modulo, char* restaurante, char* id
     int socket;
 
     char* guardar_plato[5] ={tipo_mensaje,restaurante, id_pedido, comida, cantidad};
-    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, guardar_plato, 5);
+    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, guardar_plato, 5);
     
    t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -316,7 +250,7 @@ char* enviar_mensaje_confirmar_pedido(t_modulo* modulo,char* id_pedido, char* re
     int socket;
 
     char* confirmar_pedido[3] ={tipo_mensaje, id_pedido, restaurante};
-    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, confirmar_pedido, 3);
+    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, confirmar_pedido, 3);
     
    t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -339,7 +273,7 @@ char* enviar_mensaje_plato_listo(t_modulo* modulo, char* restaurante, char* id_p
     int socket;
 
     char* plato_listo[4] ={tipo_mensaje, restaurante, id_pedido, comida};
-    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, plato_listo, 4);
+    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, plato_listo, 4);
     
    t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -361,7 +295,7 @@ r_consultar_pedido* enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_p
     int socket;
 
     char* consultar_pedido[2] ={tipo_mensaje, id_pedido};
-    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, consultar_pedido, 2);
+    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, consultar_pedido, 2);
     
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -441,7 +375,7 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
     int socket;
 
     char* obtener_pedido[3] ={tipo_mensaje, id_pedido, restaurante};
-    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, obtener_pedido, 3);
+    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, obtener_pedido, 3);
 
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -472,7 +406,7 @@ r_obtener_pedido2* enviar_mensaje_obtener_pedido2(t_modulo* modulo, char* id_ped
     int socket;
 
     char* obtener_pedido[3] ={tipo_mensaje, id_pedido, restaurante};
-    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, obtener_pedido, 3);
+    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, obtener_pedido, 3);
 
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -501,7 +435,7 @@ char* enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* re
     int socket;
 
     char* finalizar_pedido[3] ={tipo_mensaje, id_pedido, restaurante};
-    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, finalizar_pedido, 3);
+    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, finalizar_pedido, 3);
 
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -523,7 +457,7 @@ char* enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* res
     int socket;
 
     char* terminar_pedido[3] ={tipo_mensaje, id_pedido, restaurante};
-    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, terminar_pedido, 3);
+    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, terminar_pedido, 3);
     
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -546,7 +480,7 @@ char* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
     int socket;
 
     char* obtener_receta[2] ={tipo_mensaje, nombre_plato};
-    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, obtener_receta, 2);
+    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, obtener_receta, 2);
     
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -570,7 +504,7 @@ List* enviar_mensaje_obtener_receta2(t_modulo* modulo, char* nombre_plato){
     List* lista_pasos_receta = malloc(sizeof(List));
 
     char* obtener_receta[2] ={tipo_mensaje, nombre_plato};
-    socket = send_messages_and_return_socket(modulo->ip, modulo->puerto, obtener_receta, 2);
+    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, obtener_receta, 2);
     
     t_mensajes* respuesta = receive_simple_messages(socket);
 

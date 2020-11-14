@@ -200,11 +200,17 @@ int crear_conexion(char *ip, char* puerto, char* identificador)
 
 	if (socket_cliente == -1) {
 		printf("Error al crear el socket del cliente %s:%s \n", ip, puerto);
+		
+		return socket_cliente;
+
 	} else {
 		if(connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen) == -1){
 			liberar_conexion(socket_cliente);
 			socket_cliente = -1;
 			printf("Error al conectarse al cliente %s:%s \n", ip, puerto);
+
+			return socket_cliente;
+			
 		} else {
 			printf("Conexion establecida con %s:%s en el socket %d \n", ip, puerto, socket_cliente);
 		}

@@ -20,6 +20,8 @@ int main(int argc, char *argv[]){
 
     int resultado = handshake(modulo);
 
+    printf("HANDSHAKE %d",resultado);
+
     if (resultado != 0){
         printf("%s\n", "No se pudo realizar la conexion con el cliente");
         cliente_finally(cliente_config, logger);
@@ -55,8 +57,8 @@ t_cliente_config* cliente_config_loader(char* path_config_file) {
 }
 
 void cliente_config_parser(t_config* config, t_cliente_config* cliente_config) {
-    cliente_config->ip = strdup(config_get_string_value(config, "IP_APP"));
-    cliente_config->puerto = strdup(config_get_string_value(config, "PUERTO_APP"));
+    cliente_config->ip = strdup(config_get_string_value(config, "IP"));
+    cliente_config->puerto = strdup(config_get_string_value(config, "PUERTO"));
     cliente_config->ruta_log = strdup(config_get_string_value(config, "ARCHIVO_LOG"));
     cliente_config->posicion_x = config_get_int_value(config, "POCISION_X");
     cliente_config->posicion_y = config_get_int_value(config, "POCISION_Y");

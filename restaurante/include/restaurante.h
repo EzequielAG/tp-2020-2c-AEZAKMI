@@ -52,7 +52,10 @@ void consultar_platos_f();
 void handle_crear_pedido(int socket);
 void handle_anadir_plato(t_result* result);
 void handle_confirmar_pedido(t_result* result);
-
+void data_restaurante();
+void casos_uso();
+void ver_info_pedido(List* lista_pedidos);
+int es_paso_io(t_paso* paso);
 sem_t* sem_id;
 
 #endif

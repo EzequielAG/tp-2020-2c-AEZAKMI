@@ -55,7 +55,7 @@ typedef struct{
 
 typedef struct{
     char* nombre_paso;
-    char* ciclo_cpu;
+    int ciclo_cpu;
 }t_paso;
 
 typedef struct {

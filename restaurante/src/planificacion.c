@@ -40,16 +40,16 @@ void inicializar_colas_io(){
 
 int paso_new_a_ready(){
 
-        for(IteratorList iter_pedido = beginlist(lista_pedidos); iter_pedido != NULL; iter_pedido = nextlist(iter_pedido)){
-            t_pedido* pedido = iter_pedido -> data;
+    for(IteratorList iter_pedido = beginlist(lista_pedidos); iter_pedido != NULL; iter_pedido = nextlist(iter_pedido)){
+        t_pedido* pedido = iter_pedido -> data;
 
-            for(IteratorList iter_plato = beginlist(pedido->platos); iter_plato != NULL; iter_plato = nextlist(iter_plato)){
-                t_plato* plato = iter_plato->data;
-                paso_ready(plato);
-            }
+        for(IteratorList iter_plato = beginlist(pedido->platos); iter_plato != NULL; iter_plato = nextlist(iter_plato)){
+            t_plato* plato = iter_plato->data;
+            paso_ready(plato);
         }
+    }
 
- return 0;
+    return 0;
 }
 
 int paso_ready(t_plato* plato){   
@@ -66,6 +66,8 @@ int paso_ready(t_plato* plato){
     }
     
     for(int i=0; i<cantidad_cocineros;i++){
+        
+        //[TODO] OBTENER LA COLA READY SIN AFINIDAD PERO CON MENOS PLATOS EN ESPERA (ahora entra siempre en la primera)
 
         if(cola_ready[i]->afinidad == NULL){
             pushbacklist(cola_ready[i]->platos_espera, plato);
@@ -101,9 +103,4 @@ int paso_block(t_plato* plato)
     return 1;
 }
 
-int paso_new(t_plato* plato)
-{
-    
-    return 1;
-}
 

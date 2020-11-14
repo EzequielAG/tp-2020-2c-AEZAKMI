@@ -43,12 +43,13 @@ int main(void){
         handle_obtener_restaurante(enviar_mensaje_obtener_restaurante(&modulo_sindicato, restaurante_config->nombre_restaurante));
     }
 
-    data_restaurante();
-
-    // iniciar_servidor("127.0.0.1", "5002", handle_client);
-
+    // data_restaurante();
     //2. Creacion/inicializacion de colas de planificacion
     inicializar_colas();
+
+    iniciar_servidor("127.0.0.1", "5002", handle_client);
+
+    
 
     // casos_uso();
 
@@ -330,7 +331,6 @@ void handle_confirmar_pedido(t_result* result){
     t_pedido* pedido_restaurante = malloc(sizeof(t_pedido));
     pedido_restaurante->id = atoi(result->mensajes->mensajes[1]);
     
-    
     if(strcmp(pedido->estado,"LISTO"))
     {
         for(IteratorList iter = beginlist(*(pedido->info_comidas)); iter != NULL; iter = nextlist(iter))
@@ -363,14 +363,14 @@ void handle_confirmar_pedido(t_result* result){
                 
             }
             pushbacklist(&pedido_restaurante->platos,plato);
-            paso_new(plato);
         }
-        pushbacklist(&l_pedidos,pedido_restaurante);
-    
+
+        pushbacklist(&l_pedidos,pedido_restaurante); //aca tenemos que usar lista_pedidos
     
         send_message_socket(result->socket,"OK");
     }
 
+    paso_new_a_ready();
 }
 
 int handshake(t_modulo* modulo){
@@ -457,8 +457,8 @@ void inicializacion_default(){
 
     List* afinidades_default = malloc(sizeof(List));
     initlist(afinidades_default);
-    pushbacklist(afinidades_default, "Milanesas");
-    pushbacklist(afinidades_default, "Empanadas");
+    pushbacklist(&afinidades, "Milanesas");
+    pushbacklist(&afinidades, "Empanadas");
 
     inicializar(afinidades_default,"4","5",recetas,"2",3,"3");
 
@@ -472,7 +472,6 @@ void inicializar(List* afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** 
        
      
     }
-
     strcpy(pos_x,pos_x_f);
     strcpy(pos_y,pos_y_f);
     cantidad_hornos = atoi(cantidad_hornos_f);

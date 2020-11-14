@@ -30,7 +30,7 @@ typedef struct {
 } t_plato;
 
 typedef struct {
-    char* afinidad;
+    void* afinidad;
     t_plato* plato_en_ejecucion;
 
 } t_cocinero;
@@ -70,7 +70,7 @@ typedef struct{
 }t_io;
 
 
-
+int paso_new_a_ready();
 int paso_ready(t_plato* plato);
 int paso_block(t_plato* plato);
 int paso_io(t_plato* plato);

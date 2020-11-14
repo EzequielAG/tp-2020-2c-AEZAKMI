@@ -9,6 +9,7 @@
 #include "sindicato_config.h"
 
 #define BIT_SIZE(x,y) ((x - 1) / y + 1);
+#define	ES_TEST true
 
 // VARIABLES Y ESTRUCTURAS
 typedef enum {

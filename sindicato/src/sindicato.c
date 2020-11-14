@@ -229,24 +229,31 @@ void handle_confirmar_pedido(int socket, char* id_pedido, char* restaurante){
 }
 
 void handle_obtener_pedido(int socket, char* restaurante, char* id_pedido){
-	//Verificar si el Restaurante existe dentro del File System. 
-	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
-	//En caso de no existir se deberá informar dicha situación.
-	if (!existe_restaurante(restaurante)){
-		// TODO: En caso de no existir se deberá informar dicha situación.
+	if (ES_TEST){
+		char* respuesta[4];
+		respuesta[0] = "confirmado";
+		respuesta[1] = "plato1,plato2";
+		respuesta[2] = "1,1";
+		respuesta[3] = "1,0";
+		send_messages_socket(socket, respuesta, 4);
+	} else {
+		//Verificar si el Restaurante existe dentro del File System. 
+		//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
+		//En caso de no existir se deberá informar dicha situación.
+		if (!existe_restaurante(restaurante)){
+			// TODO: En caso de no existir se deberá informar dicha situación.
+		}
+
+		//Verificar si el Pedido existe dentro del File System. 
+		//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
+		//En caso de no existir se deberá informar dicha situación.
+		if (!existe_pedido(restaurante, id_pedido)){
+			// TODO: En caso de no existir se deberá informar dicha situación.
+		}
+
+		t_pedido* get_pedido(restaurante, id_pedido);
+		//Responder el mensaje indicando si se pudo realizar en conjunto con la información del pedido si correspondiera.
 	}
-
-	//Verificar si el Pedido existe dentro del File System. 
-	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
-	//En caso de no existir se deberá informar dicha situación.
-	if (!existe_pedido(restaurante, id_pedido)){
-		// TODO: En caso de no existir se deberá informar dicha situación.
-	}
-
-	t_pedido* get_pedido(restaurante, id_pedido);
-	//Responder el mensaje indicando si se pudo realizar en conjunto con la información del pedido si correspondiera.
-
-	// return ['estado_pedido', 'plato1,plato2', '1,1', '1,0']
 }
 
 void handle_obtener_restaurante(int socket, char* restaurante){
@@ -294,21 +301,27 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* co
 		respuesta[0] = "Fail";
 	}
 	send_messages_socket(socket, respuesta, 1);
-
 }
 
 void handle_obtener_receta(int socket, char* comida){
-	//Verificar si existe el plato dado dentro del directorio de recetas.
-	//En caso de no existir, se deberá informar dicha situación.
-	if (!existe_receta(comida)){
-		// TODO: En caso de no existir, se deberá informar dicha situación.
+	if (ES_TEST){
+		// return ['amasar,2', 'batir,1']
+		char* respuesta[3];
+		respuesta[0] = "batir,5";
+		respuesta[1] = "amasar,10";
+		respuesta[2] = "hornear,60";
+		send_messages_socket(socket, respuesta, 3);
+	} else {
+		//Verificar si existe el plato dado dentro del directorio de recetas.
+		//En caso de no existir, se deberá informar dicha situación.
+		if (!existe_receta(comida)){
+			// TODO: En caso de no existir, se deberá informar dicha situación.
+		}
+
+		t_receta* get_receta(comida);
+
+		//Responder el mensaje con la receta solicitada.
 	}
-
-	t_receta* get_receta(comida);
-
-	//Responder el mensaje con la receta solicitada.
-	// return ['amasar,2', 'batir,1']
-
 }
 
 void handle_terminar_pedido(int socket, char* id_pedido, char* restaurante){

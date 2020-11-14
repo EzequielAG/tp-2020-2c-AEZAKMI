@@ -4,6 +4,7 @@
 #include <commons/string.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <stdlib.h>
 #include "shared_utils.h"
 #include "server.h"
 #include "tests.h"

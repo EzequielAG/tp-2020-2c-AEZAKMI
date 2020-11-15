@@ -46,7 +46,6 @@ void handle_anadir_plato(t_result* result);
 void handle_confirmar_pedido(t_result* result);
 void data_restaurante();
 void ver_info_pedido(List* lista_pedidos);
-int es_paso_io(t_paso* paso);
 void caso_uso();
 void ver_estado_pcb();
 void* escuchar_servidor(void* handle_client);

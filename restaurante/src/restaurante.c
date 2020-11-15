@@ -24,8 +24,11 @@ int main(void){
   
     // iniciar_servidor("127.0.0.1", "5002", handle_client);
     
-
     caso_uso();
+
+    planificacion_fifo();
+
+    ver_estado_pcb();
 
     return 0;
 }
@@ -173,16 +176,19 @@ void caso_uso(){
     t_plato* milanesa = crear_plato("Milanesa",&lista_pasos_milanesa,10,1,0);
     t_plato* pizza = crear_plato("Pizza",&lista_pasos_pizza,10,1,0);
     t_plato* empanada = crear_plato("Empanada", &lista_pasos_empanada,10,1,0);
+   // t_plato* guiso = crear_plato("Guiso",&lista_pasos_empanada,10,1,0);
 
     pushbacklist(&lista_platos, milanesa);
     pushbacklist(&lista_platos, pizza);
     pushbacklist(&lista_platos, empanada);
+  //  pushbacklist(&lista_platos, guiso);
+
+    
 
     creacion_pedido(10,&lista_platos);
 
     ver_estado_pcb();
     
-    modificar_pcb();
 
 
 
@@ -193,7 +199,7 @@ void modificar_pcb(){
     printf("Despues de modificar el pcb \n");
 
     for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
-        paso_ready(iter_pcb->data);
+        paso_exec(iter_pcb->data);
         
     }
     ver_estado_pcb();
@@ -478,12 +484,4 @@ char* conveRecetasString(receta_precio** recetas)
 	}
 
     return a;
-}
-int es_paso_io(t_paso* paso){
-
-    if( !strcmp((paso->nombre_paso),"HORNEAR") || !strcmp((paso->nombre_paso),"Hornear")){
-        return 1;
-    }
-
-   return 0;
 }

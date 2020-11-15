@@ -11,10 +11,8 @@ int inicializar_colas_ready_exec(){
     for(int i=0;i<cantidad_cocineros;i++){
 
         t_ready* cola_ready = malloc(sizeof(t_ready));
-        t_exec* exec = malloc(sizeof(t_exec));
-        exec->ocupado = 0;
-        exec->plato = NULL;
-
+       
+       
         if(!isemptylist(afinidades)){
             char* afinidad = popfrontlist(&afinidades);
             cola_ready->afinidad = afinidad;
@@ -22,14 +20,25 @@ int inicializar_colas_ready_exec(){
             cola_ready->afinidad = "GENERAL";
         }
 
-        initlist(cola_ready->platos_espera);
-        cola_ready->puntero_exec = exec;
+       
+        initlist(&cola_ready->platos_espera);
+        cola_ready->puntero_exec = crear_exec();
 
         pushbacklist(&colas_ready,cola_ready);
 
     }
 
     return 1;
+}
+
+
+t_exec* crear_exec(){
+
+    t_exec* exec = malloc(sizeof(t_exec));
+    exec->ocupado = 0;
+    exec->plato = NULL;
+
+    return exec;
 }
 
 void inicializar_colas_io(){
@@ -40,7 +49,7 @@ void inicializar_colas_io(){
         horno->ocupado = 0;
         horno->plato = NULL;
 
-        pushbacklist(cola_io->hornos,horno);
+        pushbacklist(&cola_io->hornos,horno);
 
     }
 
@@ -48,7 +57,7 @@ void inicializar_colas_io(){
 
 int paso_block(t_pcb* pcb){
 
-    for(IteratorList iter_horno = beginlist(*cola_io->hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
+    for(IteratorList iter_horno = beginlist(cola_io->hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
 
         t_horno* horno = iter_horno->data;
 
@@ -62,7 +71,7 @@ int paso_block(t_pcb* pcb){
 
     }
 
-    pushbacklist(cola_io->platos_espera,pcb->plato);
+    pushbacklist(&cola_io->platos_espera,pcb->plato);
     pcb->estado = BLOCKED;
 
     return 0;
@@ -73,14 +82,15 @@ int paso_block(t_pcb* pcb){
 
 int paso_exec(t_pcb* pcb){
 
-    t_exec* puntero_exec = pcb->cola_ready_perteneciente->puntero_exec;
+    t_ready* cola_ready = pcb->cola_ready_perteneciente;
 
-    if(puntero_exec->plato == NULL){
-        puntero_exec->plato = pcb->plato;
-        pcb-> estado = EXEC;
+    if(cola_ready->puntero_exec->ocupado == 0){
+        cola_ready->puntero_exec->plato = pcb->plato;
+        cola_ready->puntero_exec->ocupado = 1;
+        pcb->estado = EXEC;
         return 1;
     }
-
+       
     return 0;
 
 }
@@ -88,7 +98,7 @@ int paso_exec(t_pcb* pcb){
 
 int paso_ready(t_pcb* pcb){   
 
-    pushbacklist(pcb->cola_ready_perteneciente->platos_espera,pcb->plato);
+    pushbacklist(&pcb->cola_ready_perteneciente->platos_espera,pcb->plato);
     pcb->estado = READY;
     
    return 1;
@@ -128,7 +138,7 @@ t_ready* asignar_cola_ready(t_plato* plato){
         t_ready* ready = iter_ready->data;
 
         if(!strcmp(plato->nombre, ready->afinidad)){
-            pushbacklist(ready->platos_espera,plato);
+            pushbacklist(&ready->platos_espera,plato);
             return ready;
 
         }
@@ -139,7 +149,7 @@ t_ready* asignar_cola_ready(t_plato* plato){
         t_ready* ready2 = iter_ready2->data;
 
         if(!strcmp(ready2->afinidad,"GENERAL")){
-            pushbacklist(ready2->platos_espera,plato);
+            pushbacklist(&ready2->platos_espera,plato);
             return ready2;
 
         }

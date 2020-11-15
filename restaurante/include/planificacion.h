@@ -76,16 +76,15 @@ typedef struct{
 
 typedef struct{
     char* afinidad;
-    List* platos_espera;
+    List platos_espera;
     t_exec* puntero_exec;
 
 }t_ready;
 
 
 typedef struct{
-    List* hornos;
-    List* platos_espera;
-
+    List hornos;
+    List platos_espera;
 }t_io;
 
 typedef struct{
@@ -115,6 +114,8 @@ int paso_block(t_pcb* pcb);
 int paso_exec(t_pcb* pcb);
 
 t_ready* asignar_cola_ready(t_plato* plato);
+
+t_exec* crear_exec();
 
 int termino_pedido(int id_pedido);
 

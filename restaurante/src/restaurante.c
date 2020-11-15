@@ -21,7 +21,7 @@ int main(void){
    
     inicializar_colas();
 
-//  iniciar_servidor("127.0.0.1", "5002", handle_client);
+    iniciar_servidor("127.0.0.1", "5002", handle_client);
 
     
 
@@ -278,8 +278,13 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     initlist(&colas_exit);
     initlist(&colas_block);
     initlist(&colas_pcb);
-    initlist(cola_io->hornos);
-    initlist(cola_io->platos_espera);
+
+    cola_io = malloc(sizeof(t_io));
+
+
+
+    initlist(&cola_io->hornos);
+    initlist(&cola_io->platos_espera);
    
 
 }

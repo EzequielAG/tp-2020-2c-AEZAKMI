@@ -22,14 +22,10 @@ int main(void){
     inicializar_colas();
 
   
-iniciar_servidor("127.0.0.1", "5002", handle_client);
-    // pthread_t hilo_servidor;
-
-    // pthread_create(&hilo_servidor,NULL,(void*)escuchar_servidor, handle_client);
-	// pthread_join(hilo_servidor,NULL);
+    // iniciar_servidor("127.0.0.1", "5002", handle_client);
     
 
-    
+    caso_uso();
 
     return 0;
 }
@@ -109,11 +105,12 @@ void handle_anadir_plato(t_result* result){
 };
 
 
-void handle_confirmar_pedido(t_result* result){
+void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS 
 
     r_obtener_pedido* pedido = enviar_mensaje_obtener_pedido(&modulo_sindicato, result->mensajes->mensajes[1],restaurante_config->nombre_restaurante);
 
-    List* lista_platos_confirmados = malloc(sizeof(List));
+    List lista_platos_confirmados;
+    initlist(&lista_platos_confirmados);
 
     int pedido_id = asignar_pedido_id();
 
@@ -121,14 +118,15 @@ void handle_confirmar_pedido(t_result* result){
 
         informacion_comidas* info_comida = iter_plato -> data;
 
-        List* lista_pasos = enviar_mensaje_obtener_receta(&modulo_sindicato, info_comida->comida);
+        List lista_pasos;
+        initlist(&lista_pasos);
 
-        t_plato* plato_creado = crear_plato(info_comida->comida, lista_pasos, pedido_id, atoi(info_comida->cantidad_total), atoi(info_comida->cantidad_lista));
+        t_plato* plato_creado = crear_plato(info_comida->comida, &lista_pasos, pedido_id, atoi(info_comida->cantidad_total), atoi(info_comida->cantidad_lista));
 
-        pushbacklist(lista_platos_confirmados,plato_creado);
+        pushbacklist(&lista_platos_confirmados,plato_creado);
     }
 
-    t_pedido* pedido_creado = creacion_pedido(pedido_id,lista_platos_confirmados);
+    t_pedido* pedido_creado = creacion_pedido(pedido_id,&lista_platos_confirmados);
 
     pushbacklist(&lista_pedidos,pedido_creado);
 
@@ -145,6 +143,60 @@ void handle_obtener_restaurante(r_obtener_restaurante* respuesta){
     cantidad_cocineros = atoi(respuesta->cantidad_cocineros);
     recetas = respuesta->recetas_precio; // REVISAR ESTO
 
+}
+void caso_uso(){
+    List lista_pasos_milanesa;
+    List lista_pasos_pizza;
+    List lista_pasos_empanada;
+    List lista_platos;
+    initlist(&lista_pasos_milanesa);
+    initlist(&lista_pasos_pizza);
+    initlist(&lista_pasos_empanada);
+    initlist(&lista_platos);
+  
+    t_paso* paso_rebozar = crear_paso("REBOZAR",5);
+    t_paso* paso_hornear = crear_paso("HORNEAR",3);
+    t_paso* paso_freir = crear_paso("FREI",6);
+    t_paso* paso_asar = crear_paso("ASAR",4);
+
+    pushbacklist(&lista_pasos_milanesa, paso_rebozar);
+    pushbacklist(&lista_pasos_milanesa, paso_hornear);
+    pushbacklist(&lista_pasos_milanesa, paso_asar);
+
+    pushbacklist(&lista_pasos_pizza, paso_hornear);
+    pushbacklist(&lista_pasos_pizza, paso_asar);
+    pushbacklist(&lista_pasos_empanada, paso_rebozar);
+    pushbacklist(&lista_pasos_empanada, paso_hornear);
+    pushbacklist(&lista_pasos_empanada, paso_freir);
+
+
+    t_plato* milanesa = crear_plato("Milanesa",&lista_pasos_milanesa,10,1,0);
+    t_plato* pizza = crear_plato("Pizza",&lista_pasos_pizza,10,1,0);
+    t_plato* empanada = crear_plato("Empanada", &lista_pasos_empanada,10,1,0);
+
+    pushbacklist(&lista_platos, milanesa);
+    pushbacklist(&lista_platos, pizza);
+    pushbacklist(&lista_platos, empanada);
+
+    creacion_pedido(10,&lista_platos);
+
+    ver_estado_pcb();
+    
+    modificar_pcb();
+
+
+
+}
+
+void modificar_pcb(){
+
+    printf("Despues de modificar el pcb \n");
+
+    for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
+        paso_ready(iter_pcb->data);
+        
+    }
+    ver_estado_pcb();
 }
 
 
@@ -176,6 +228,24 @@ void inicializacion_default(){
 // Finalizo handles
 
 // Comienzo visuales
+
+void ver_estado_pcb(){
+
+    for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
+        t_pcb* pcb = iter_pcb->data;
+
+        printf("- El id del pedido del PCB es: %i \n",pcb->id_pedido);
+        printf("- El plato que contiene es: %s \n", pcb->plato->nombre);
+        printf("- El plato se encuentra en estado: %i \n",pcb->estado);
+        printf("- Pertenece a la cola ready: %s \n", pcb->cola_ready_perteneciente->afinidad);
+
+        printf("--------\n");
+
+    }
+}
+
+
+
 void ver_info_pedido(List* lista_pedidos){
  
      for(IteratorList iter_pedido = beginlist(*lista_pedidos); iter_pedido != NULL; iter_pedido = nextlist(iter_pedido))
@@ -187,7 +257,7 @@ void ver_info_pedido(List* lista_pedidos){
             t_plato* plato = iter_platos->data;
             printf(" - Nombre plato: %s \n", plato->nombre);
             printf("Pasos sin ejecutar: \n");
-              for(IteratorList iter_pasos = beginlist(*(plato->pasos)); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
+              for(IteratorList iter_pasos = beginlist((plato->pasos)); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
                  t_paso* paso_plato = iter_pasos->data;
                 
                  if(paso_plato->se_ejecuto){

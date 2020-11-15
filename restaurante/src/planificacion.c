@@ -72,7 +72,7 @@ int paso_block(t_pcb* pcb){
     }
 
     pushbacklist(&cola_io->platos_espera,pcb->plato);
-    pcb->estado = BLOCKED;
+    pcb->estado = BLOCKED_SUSPENDED;
 
     return 0;
 
@@ -161,6 +161,26 @@ t_ready* asignar_cola_ready(t_plato* plato){
 
 }
 
+int ejecutar_ciclo(t_pcb* pcb){
+
+    for(IteratorList iter_paso = beginlist(pcb->plato->pasos); iter_paso != NULL; iter_paso = nextlist(iter_paso)){
+        t_paso* paso = iter_paso->data;
+
+        if(paso->se_ejecuto == 0){
+
+            sleep((paso->ciclo_cpu)*1); //REVISAR
+            paso->se_ejecuto = 1;
+
+            return 1;
+
+        }
+
+    }
+
+    return 0;
+
+}
+
 
 
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu){
@@ -182,7 +202,7 @@ t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_tota
     t_plato* plato = malloc(sizeof(t_plato));
 
     plato->nombre = nombre;
-    plato->pasos = pasos;
+    plato->pasos = *pasos;
     plato->cantidad_total = cantidad_total;
     plato->cantidad_listo = cantidad_listo;
 
@@ -203,7 +223,6 @@ t_pcb* crear_pcb(int id_pedido, int estado,t_plato* plato){
     pcb->cola_ready_perteneciente = asignar_cola_ready(plato);
 
     pushfrontlist(&colas_pcb,pcb);
-
 
     return pcb;
 }

@@ -37,21 +37,18 @@ typedef enum estado_proceso{
     READY = 1,
     EXEC = 2,
     BLOCKED = 3,
-    EXIT = 4
+    BLOCKED_SUSPENDED = 4,
+    EXIT = 5
 } estado_proceso_t;
-
-
-
 
 
 typedef struct {
     
     char* nombre;
-    List* pasos;
+    List pasos;
     int cantidad_total;
     int cantidad_listo;
  
-
 } t_plato;
 
 typedef struct{
@@ -112,7 +109,7 @@ int paso_ready(t_pcb* pcb);
 int paso_exit(t_pcb* pcb);
 int paso_block(t_pcb* pcb);
 int paso_exec(t_pcb* pcb);
-
+int ejecutar_ciclo(t_pcb* pcb);
 t_ready* asignar_cola_ready(t_plato* plato);
 
 t_exec* crear_exec();

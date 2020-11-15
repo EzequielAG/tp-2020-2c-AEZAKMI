@@ -42,19 +42,25 @@ typedef enum estado_proceso{
 
 
 
+
+
 typedef struct {
+    
     char* nombre;
     List* pasos;
     int cantidad_total;
     int cantidad_listo;
+ 
 
 } t_plato;
 
 typedef struct{
-    int id_pedido;
-    estado_proceso_t estado;
+    int ocupado;
     t_plato* plato;
-} t_pcb;
+
+}t_exec;
+
+
 
 
 typedef struct {
@@ -67,12 +73,6 @@ typedef struct{
     t_plato* plato;
 
 } t_horno;
-
-typedef struct{
-    int ocupado;
-    t_plato* plato;
-
-}t_exec;
 
 typedef struct{
     char* afinidad;
@@ -88,10 +88,20 @@ typedef struct{
 
 }t_io;
 
+typedef struct{
+    int id_pedido;
+    estado_proceso_t estado;
+    t_plato* plato;
+    t_ready* cola_ready_perteneciente;
+} t_pcb;
+
+
+
 
 List colas_ready;
 List colas_exit;
 List colas_block;
+List colas_hornos;
 
 
 int inicializar_colas_ready_exec();
@@ -102,11 +112,14 @@ int paso_block(t_pcb* pcb);
 int paso_exec(t_pcb* pcb);
 int paso_exit(t_pcb* pcb);
 
+int ocupar_horno(t_pcb* pcb);
+int ocupar_exec(t_pcb* pcb);
 
+t_ready* asignar_cola_ready(t_plato* plato);
 
 
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu);
-t_plato* crear_plato(char* nombre, t_pcb* pcb, List* pasos, int cantidad_total, int cantidad_listo);
+t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo);
 t_pedido* creacion_pedido(int id, List* platos);
 t_pcb* crear_pcb(int id_pedido, int estado,t_plato* plato);
 

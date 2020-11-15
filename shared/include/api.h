@@ -99,12 +99,12 @@ r_consultar_pedido* enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_p
 r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 char* enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 char* enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
-char* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
+
 
 char ** separar_por_comillas(char** string_separado_por_espacios);
 
 
 List* obtener_informacion_comidas(char* platos,char* cantidades_listas, char* cantidades_totales);
-List* enviar_mensaje_obtener_receta2(t_modulo* modulo, char* nombre_plato);
+List* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
 
 #endif

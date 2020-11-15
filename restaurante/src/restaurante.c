@@ -19,7 +19,7 @@ int main(void){
 
     data_restaurante();
    
-   inicializar_colas();
+    inicializar_colas();
 
 //  iniciar_servidor("127.0.0.1", "5002", handle_client);
 
@@ -95,6 +95,27 @@ void handle_anadir_plato(t_result* result){
 
 
 void handle_confirmar_pedido(t_result* result){
+
+    r_obtener_pedido* pedido = enviar_mensaje_obtener_pedido(&modulo_sindicato, result->mensajes->mensajes[1],restaurante_config->nombre_restaurante);
+
+    List* lista_platos_confirmados = malloc(sizeof(List));
+
+    int pedido_id = asignar_pedido_id();
+
+    for(IteratorList iter_plato = beginlist(*pedido->info_comidas); iter_plato != NULL; iter_plato = nextlist(iter_plato)){
+
+        informacion_comidas* info_comida = iter_plato -> data;
+
+        List* lista_pasos = enviar_mensaje_obtener_receta(&modulo_sindicato, info_comida->comida);
+
+        t_plato* plato_creado = crear_plato(info_comida->comida, lista_pasos, pedido_id, atoi(info_comida->cantidad_total), atoi(info_comida->cantidad_lista));
+
+        pushbacklist(lista_platos_confirmados,plato_creado);
+    }
+
+    t_pedido* pedido_creado = creacion_pedido(pedido_id,lista_platos_confirmados);
+
+    pushbacklist(&lista_pedidos,pedido_creado);
 
 
 }
@@ -256,6 +277,7 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     initlist(&colas_ready);
     initlist(&colas_exit);
     initlist(&colas_block);
+    initlist(&colas_hornos);
    
 
 }

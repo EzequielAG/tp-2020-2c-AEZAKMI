@@ -435,30 +435,8 @@ char* enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* res
     
 }
 
-char* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
 
-    if(nombre_plato == NULL){
-        printf("Faltan parametros \n");
-        return NULL;
-    }
-
-    char* tipo_mensaje = string_itoa(obtener_receta);
-    int socket;
-
-    char* obtener_receta[2] ={tipo_mensaje, nombre_plato};
-    socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, obtener_receta, 2);
-    
-    t_mensajes* respuesta = receive_simple_messages(socket);
-
-    printf("%s \n" , respuesta->mensajes[0]);
-
-    liberar_conexion(socket);
-    
-    return respuesta->mensajes[0];
-}
-
-
-List* enviar_mensaje_obtener_receta2(t_modulo* modulo, char* nombre_plato){
+List* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
 
     if(nombre_plato == NULL){
         printf("Faltan parametros \n");

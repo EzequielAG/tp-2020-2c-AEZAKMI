@@ -37,24 +37,27 @@ typedef enum estado_proceso{
     READY = 1,
     EXEC = 2,
     BLOCKED = 3,
-    EXIT = 4
+    BLOCKED_SUSPENDED = 4,
+    EXIT = 5
 } estado_proceso_t;
 
 
-
 typedef struct {
+    
     char* nombre;
-    List* pasos;
+    List pasos;
     int cantidad_total;
     int cantidad_listo;
-
+ 
 } t_plato;
 
 typedef struct{
-    int id_pedido;
-    estado_proceso_t estado;
+    int ocupado;
     t_plato* plato;
-} t_pcb;
+
+}t_exec;
+
+
 
 
 typedef struct {
@@ -69,44 +72,52 @@ typedef struct{
 } t_horno;
 
 typedef struct{
-    int ocupado;
-    t_plato* plato;
-
-}t_exec;
-
-typedef struct{
     char* afinidad;
-    List* platos_espera;
+    List platos_espera;
     t_exec* puntero_exec;
 
 }t_ready;
 
 
 typedef struct{
-    List* hornos;
-    List* platos_espera;
-
+    List hornos;
+    List platos_espera;
 }t_io;
+
+typedef struct{
+    int id_pedido;
+    estado_proceso_t estado;
+    t_plato* plato;
+    t_ready* cola_ready_perteneciente;
+} t_pcb;
+
+
 
 
 List colas_ready;
 List colas_exit;
-List colas_block;
+List colas_pcb;
+t_io* cola_io;
 
+void planificacion_fifo();
 
 int inicializar_colas_ready_exec();
 
-
+int horno_libre();
 int paso_ready(t_pcb* pcb);
-int paso_block(t_pcb* pcb);
-int paso_exec(t_pcb* pcb);
 int paso_exit(t_pcb* pcb);
-
-
-
+t_horno* paso_block(t_pcb* pcb);
+int paso_exec(t_pcb* pcb);
+int ejecutar_ciclo(t_pcb* pcb);
+t_ready* asignar_cola_ready(t_plato* plato);
+int es_paso_io(t_paso* paso);
+t_exec* crear_exec();
+int pasos_ejecutados(t_pcb* pcb);
+int termino_pedido(int id_pedido);
+char* obtener_estado(int estado);
 
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu);
-t_plato* crear_plato(char* nombre, t_pcb* pcb, List* pasos, int cantidad_total, int cantidad_listo);
+t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo);
 t_pedido* creacion_pedido(int id, List* platos);
 t_pcb* crear_pcb(int id_pedido, int estado,t_plato* plato);
 

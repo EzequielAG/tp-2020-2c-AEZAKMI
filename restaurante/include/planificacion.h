@@ -101,22 +101,22 @@ typedef struct{
 List colas_ready;
 List colas_exit;
 List colas_block;
-List colas_hornos;
+List colas_pcb;
+t_io* cola_io;
+
 
 
 int inicializar_colas_ready_exec();
 
 
 int paso_ready(t_pcb* pcb);
+int paso_exit(t_pcb* pcb);
 int paso_block(t_pcb* pcb);
 int paso_exec(t_pcb* pcb);
-int paso_exit(t_pcb* pcb);
-
-int ocupar_horno(t_pcb* pcb);
-int ocupar_exec(t_pcb* pcb);
 
 t_ready* asignar_cola_ready(t_plato* plato);
 
+int termino_pedido(int id_pedido);
 
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu);
 t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo);

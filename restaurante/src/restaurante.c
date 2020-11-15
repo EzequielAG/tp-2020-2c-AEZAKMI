@@ -277,7 +277,9 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     initlist(&colas_ready);
     initlist(&colas_exit);
     initlist(&colas_block);
-    initlist(&colas_hornos);
+    initlist(&colas_pcb);
+    initlist(cola_io->hornos);
+    initlist(cola_io->platos_espera);
    
 
 }

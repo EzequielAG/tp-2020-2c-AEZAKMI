@@ -467,6 +467,7 @@ List* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
 
         paso->nombre_paso = respuesta_pasos[i];
         paso->ciclo_cpu = atoi(respuesta_pasos[i+1]);
+        paso->se_ejecuto = 0;
 
         pushbacklist(lista_pasos_receta,paso);
 

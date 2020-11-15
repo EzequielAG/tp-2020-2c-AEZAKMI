@@ -65,6 +65,7 @@ int paso_block(t_pcb* pcb){
             horno->ocupado = 1;
             horno->plato = pcb->plato;
             pcb->estado = BLOCKED;
+            printf(" - El plato %s esta en el horno, su estado es: %s \n",pcb->plato->nombre,obtener_estado(pcb->estado));
          
             return 1;
 
@@ -74,6 +75,8 @@ int paso_block(t_pcb* pcb){
 
     pushbacklist(&cola_io->platos_espera,pcb->plato);
     pcb->estado = BLOCKED_SUSPENDED;
+    printf(" - El plato %s esta en lista de espera para horno, su estado es: %s \n",pcb->plato->nombre,obtener_estado(pcb->estado));
+   
 
     return 0;
 
@@ -89,13 +92,34 @@ int paso_exec(t_pcb* pcb){
         cola_ready->puntero_exec->plato = pcb->plato;
         cola_ready->puntero_exec->ocupado = 1;
         pcb->estado = EXEC;
+        printf(" - El plato %s esta ejecutandose por un cocinero de afinidad %s, su estado es: %s \n",pcb->plato->nombre, cola_ready->afinidad,obtener_estado(pcb->estado));
         return 1;
     }
-       
-    return 0;
+
+       printf(" - El plato %s no pudo ser ejecutado, su estado es: %s \n",pcb->plato->nombre,obtener_estado(pcb->estado));
+       sleep(10);
+       return 0;
 
 }
 
+char* obtener_estado(int estado){
+
+    if(estado == EXEC){
+        return "EXEC";
+    } else if(estado == BLOCKED){
+        return "BLOCKED";
+    } else if(estado == BLOCKED_SUSPENDED){
+        return "BLOCKED_SUSPENDED";
+    } else if(estado == EXIT){
+        return "EXIT";
+    } else if(estado == READY){
+        return "READY";
+    }
+
+    return NULL;
+
+
+}
 
 int paso_ready(t_pcb* pcb){   
 
@@ -137,13 +161,13 @@ int pasos_ejecutados(t_pcb* pcb){
     for(IteratorList iter_pasos = beginlist(pcb->plato->pasos); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
         t_paso* paso = iter_pasos->data;
 
-        if(paso->se_ejecuto == 1){
-            return 1;
+        if(paso->se_ejecuto == 0){
+            return 0;
         }
         
     }
 
-    return 0;
+    return 1;
 }
 
 
@@ -190,6 +214,7 @@ int ejecutar_ciclo(t_pcb* pcb){
                     if(respuesta_block){
                         sleep((paso->ciclo_cpu)*1); //REVISAR
                         paso->se_ejecuto = 1; 
+                        paso_ready(pcb);
                     }
                     
                 }else{
@@ -197,7 +222,9 @@ int ejecutar_ciclo(t_pcb* pcb){
                     
                     if(respuesta_paso){
                         sleep((paso->ciclo_cpu)*1);
-                        paso->se_ejecuto = 1; 
+                        paso->se_ejecuto = 1;
+                        pcb->cola_ready_perteneciente->puntero_exec->ocupado = 0; 
+                        paso_ready(pcb);
                     }
                 }
            
@@ -210,21 +237,18 @@ int ejecutar_ciclo(t_pcb* pcb){
                         paso->se_ejecuto = 1; 
                     }
            }
+
            
         }
 
-    }
-
-    if(pcb->estado == READY){
-        ejecutar_ciclo(pcb);
     }
 
     if(pasos_ejecutados(pcb)){
         paso_exit(pcb);
         return 1;
     };
-
-    return 0;
+    
+    return ejecutar_ciclo(pcb);
 
 }
 
@@ -234,10 +258,9 @@ void planificacion_fifo(){
     for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
         t_pcb* pcb = iter_pcb->data;
         
-        if(!termino_pedido(pcb->id_pedido)){
+        if(pcb->estado != EXIT){
             ejecutar_ciclo(pcb);
-        }
-
+       }
     }
 
       

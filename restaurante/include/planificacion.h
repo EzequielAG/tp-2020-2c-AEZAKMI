@@ -115,7 +115,7 @@ int es_paso_io(t_paso* paso);
 t_exec* crear_exec();
 int pasos_ejecutados(t_pcb* pcb);
 int termino_pedido(int id_pedido);
-
+char* obtener_estado(int estado);
 
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu);
 t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo);

@@ -96,7 +96,6 @@ typedef struct{
 
 List colas_ready;
 List colas_exit;
-List colas_block;
 List colas_pcb;
 t_io* cola_io;
 
@@ -104,10 +103,10 @@ void planificacion_fifo();
 
 int inicializar_colas_ready_exec();
 
-
+int horno_libre();
 int paso_ready(t_pcb* pcb);
 int paso_exit(t_pcb* pcb);
-int paso_block(t_pcb* pcb);
+t_horno* paso_block(t_pcb* pcb);
 int paso_exec(t_pcb* pcb);
 int ejecutar_ciclo(t_pcb* pcb);
 t_ready* asignar_cola_ready(t_plato* plato);

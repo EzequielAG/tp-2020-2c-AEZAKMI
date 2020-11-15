@@ -367,7 +367,6 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     initlist(&lista_pedidos);
     initlist(&colas_ready);
     initlist(&colas_exit);
-    initlist(&colas_block);
     initlist(&colas_pcb);
 
     cola_io = malloc(sizeof(t_io));

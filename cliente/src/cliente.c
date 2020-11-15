@@ -82,6 +82,7 @@ t_modulo * crear_modulo(char* ip, char* puerto){
     t_modulo* modulo = malloc(sizeof(t_modulo));
     modulo->ip = ip;
     modulo->puerto = puerto;
+    modulo->socket = 0;
     modulo->identificacion = cliente_config->id_cliente;
     return modulo;
 }

@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "shared_utils.h"
+#include "api.h"
+#include <commons/log.h>
 #include <string.h>
 
 typedef struct {
@@ -26,9 +28,10 @@ typedef struct {
 } t_app_config;
 
 t_app_config* app_config;
+t_modulo modulo_comanda;
 t_log* logger;
 
-t_app_config* app_config_loader(char* path_config_file);
+t_app_config* app_config_loader(char* path_config_file, t_log**);
 void app_config_parser(t_config* config, t_app_config* app_config);
 void app_destroy(t_app_config* app_config);
 

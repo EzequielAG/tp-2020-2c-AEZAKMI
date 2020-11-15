@@ -17,11 +17,12 @@ int main(void){
     cantidad_platos = 0;
     initlist(&l_pedidos);
 
-  
+    
+    initlist(&lista_pedidos);
+
     t_modulo modulo_app = {restaurante_config->ip_app, restaurante_config->puerto_app, "app"};
     modulo_sindicato.ip = restaurante_config->ip_sindicato;
     modulo_sindicato.puerto = restaurante_config->puerto_sindicato;
-
 
     int handshake_app_r = handshake(&modulo_app);
 
@@ -31,7 +32,6 @@ int main(void){
     }
 
     //1.2 Handshake con el modulo sindicato
-
 
     int handshake_sindicato_r = handshake(&modulo_sindicato);
 
@@ -43,15 +43,15 @@ int main(void){
         handle_obtener_restaurante(enviar_mensaje_obtener_restaurante(&modulo_sindicato, restaurante_config->nombre_restaurante));
     }
 
-   data_restaurante();
-
-   iniciar_servidor("127.0.0.1", "5002", handle_client);
-
+    // data_restaurante();
     //2. Creacion/inicializacion de colas de planificacion
     inicializar_colas();
 
-    // casos_uso();
+    iniciar_servidor("127.0.0.1", "5002", handle_client);
 
+    
+
+    // casos_uso();
 
     restaurante_finally(restaurante_config, logger);
     return 0;
@@ -60,7 +60,6 @@ int main(void){
 
 void casos_uso(){
 
-    
     t_pcb* pcb1 = malloc(sizeof(t_pcb));
     pcb1->estado = NEW;
     pcb1->pid = 1;
@@ -76,7 +75,6 @@ void casos_uso(){
     t_pcb* pcb5 = malloc(sizeof(t_pcb));
     pcb5->estado = NEW;
     pcb5->pid = 5;
-
 
     t_paso* paso_horno = malloc(sizeof(t_paso));
     paso_horno->nombre_paso = "HORNEAR";
@@ -94,8 +92,6 @@ void casos_uso(){
     paso_amasar->nombre_paso = "AMASAR";
     paso_amasar->ciclo_cpu = 4;
 
-
-
     t_plato* fideos_tuco = malloc(sizeof(t_plato));
     fideos_tuco->nombre = "Fideos con tuco";
     fideos_tuco->cantidad_total = 2;
@@ -112,7 +108,7 @@ void casos_uso(){
     pizza->nombre = "pizza";
     pizza->cantidad_total = 3;
     pizza->cantidad_listo = 0;
-    pizza->pcb = pcb2;
+    pizza->pcb = NULL;
     pizza->pasos = malloc(sizeof(List));
     initlist(pizza->pasos);
     pushbacklist((pizza->pasos),paso_cortar);
@@ -122,7 +118,7 @@ void casos_uso(){
     carne->nombre = "carne";
     carne->cantidad_total = 5;
     carne->cantidad_listo = 6;
-    carne->pcb = pcb3;
+    carne->pcb = NULL;
     carne->pasos = malloc(sizeof(List));
     initlist(carne->pasos);
     pushbacklist((carne->pasos),paso_cortar);
@@ -134,7 +130,7 @@ void casos_uso(){
     guiso->nombre = "guiso";
     guiso->cantidad_total = 2;
     guiso->cantidad_listo = 0;
-    guiso->pcb = pcb4;
+    guiso->pcb = NULL;
     guiso->pasos = malloc(sizeof(List));
     initlist(guiso->pasos);
     pushbacklist((guiso->pasos),paso_amasar);
@@ -146,14 +142,13 @@ void casos_uso(){
     empanadas->nombre = "empanadas";
     empanadas->cantidad_total = 2;
     empanadas->cantidad_listo = 0;
-    empanadas->pcb = pcb5;
+    empanadas->pcb = NULL;
     empanadas->pasos = malloc(sizeof(List));
     initlist(empanadas->pasos);
     pushbacklist((empanadas->pasos),paso_amasar);
     pushbacklist((empanadas->pasos),paso_horno);
     pushbacklist((empanadas->pasos),paso_frito);
     pushbacklist((empanadas->pasos),paso_horno);
-
 
     t_pedido* pedido1 = malloc(sizeof(t_pedido));
     pedido1->id = 1;
@@ -172,14 +167,12 @@ void casos_uso(){
     pushbacklist(&(pedido2->platos), pizza);
     pushbacklist(&(pedido2->platos), fideos_tuco);
 
+    
 
-     List lista_pedidos;
+    pushbacklist(&lista_pedidos,pedido1);
+    pushbacklist(&lista_pedidos,pedido2);
 
-     pushbacklist(&lista_pedidos,pedido1);
-     pushbacklist(&lista_pedidos,pedido2);
-
-
-     ver_info_pedido(&lista_pedidos);
+    ver_info_pedido(&lista_pedidos);
    
 }
 
@@ -194,6 +187,7 @@ void ver_info_pedido(List* lista_pedidos){
             t_plato* plato = iter_platos->data;
             printf(" - Nombre plato: %s \n", plato->nombre);
             printf(" - El estado en su pcb es: %i \n", plato->pcb->estado);
+            printf(" - Pertenece al pedido: %i \n", plato->pcb->id_pedido);
             
             printf("Pasos sin ejecutar: \n");
               for(IteratorList iter_pasos = beginlist(*(plato->pasos)); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
@@ -244,6 +238,15 @@ void data_restaurante(){
 
     printf("<< RESTAURANTE >> Iniciado con cantidad de hornos = %d\n", cantidad_hornos);
     printf("<< RESTAURANTE >> Iniciado con cantidad de cocineros = %d\n", cantidad_cocineros);
+    
+    // int i = 0;
+    // for(IteratorList iterator_cocineros = beginlist(l_cocineros); iterator_cocineros != NULL; iterator_cocineros = nextlist(iterator_cocineros))
+    // {
+    //     i++;
+    //     t_cocinero* cocinero = iterator_cocineros->data;
+    //     printf("<< RESTAURANTE >> Cocinero %d con afinidad = %s\n",i, cocinero->afinidad);
+
+    // }
     printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %i\n", cantidad_pedidos);
 
 }
@@ -328,7 +331,6 @@ void handle_confirmar_pedido(t_result* result){
     t_pedido* pedido_restaurante = malloc(sizeof(t_pedido));
     pedido_restaurante->id = atoi(result->mensajes->mensajes[1]);
     
-    
     if(strcmp(pedido->estado,"LISTO"))
     {
         for(IteratorList iter = beginlist(*(pedido->info_comidas)); iter != NULL; iter = nextlist(iter))
@@ -361,14 +363,14 @@ void handle_confirmar_pedido(t_result* result){
                 
             }
             pushbacklist(&pedido_restaurante->platos,plato);
-            paso_new(plato);
         }
-        pushbacklist(&l_pedidos,pedido_restaurante);
-    
+
+        pushbacklist(&l_pedidos,pedido_restaurante); //aca tenemos que usar lista_pedidos
     
         send_message_socket(result->socket,"OK");
     }
 
+    paso_new_a_ready();
 }
 
 int handshake(t_modulo* modulo){
@@ -413,7 +415,8 @@ void escuchar_mensajes_socket(t_parameter* parametro){
 
 
 
-void handle_obtener_restaurante(r_obtener_restaurante* respuesta){
+void handle_obtener_restaurante(r_obtener_restaurante* respuesta)
+{
 inicializar(respuesta->afinidades,respuesta->pos_x,respuesta->pos_y,respuesta->recetas,respuesta->cantidad_hornos,atoi(respuesta->cantidad_pedidos),respuesta->cantidad_cocineros);
 }
 
@@ -454,22 +457,21 @@ void inicializacion_default(){
 
     List* afinidades_default = malloc(sizeof(List));
     initlist(afinidades_default);
-    pushbacklist(afinidades_default, "Milanesas");
-    pushbacklist(afinidades_default, "Empanadas");
+    pushbacklist(&afinidades, "Milanesas");
+    pushbacklist(&afinidades, "Empanadas");
 
-    inicializar(afinidades_default,"4","5",recetas,"2",3,"2");
+    inicializar(afinidades_default,"4","5",recetas,"2",3,"3");
 
 }
 
 void inicializar(List* afinidades_f,char* pos_x_f,char* pos_y_f,receta_precio** recetas_f,char* cantidad_hornos_f,int cantidad_pedidos_f,char* cantidad_cocineros_f){
     
-    for(IteratorList iterator_afinidades = beginlist(*afinidades_f); iterator_afinidades != NULL; iterator_afinidades = nextlist(iterator_afinidades))
+    for(int i=0;i < atoi(cantidad_cocineros_f) ;i++)
     {
         
-        pushbacklist(&afinidades, iterator_afinidades->data);
+       
      
     }
-
     strcpy(pos_x,pos_x_f);
     strcpy(pos_y,pos_y_f);
     cantidad_hornos = atoi(cantidad_hornos_f);
@@ -496,9 +498,6 @@ int len_array(char** arrayInput)
         
     return cont;
 }
-
-
-
 
 
 int handshake_app(t_modulo modulo_app)

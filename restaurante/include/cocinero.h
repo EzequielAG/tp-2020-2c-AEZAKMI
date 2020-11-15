@@ -7,10 +7,13 @@
 List afinidades;
 List l_pedidos;
 
+
 typedef struct {
 int id;
 List platos;
 } t_pedido;
+
+
 
 
 char* pos_x;
@@ -24,5 +27,7 @@ int socket_sindicato;
 t_modulo modulo_sindicato;
 
 void cocineroMain();
+List lista_pedidos;
+
 
 #endif

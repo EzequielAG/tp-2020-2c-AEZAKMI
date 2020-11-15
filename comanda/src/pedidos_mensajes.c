@@ -48,8 +48,13 @@ void handle_client(t_result* result){
         send_message_socket(result->socket, "OK");
         liberar_conexion(result->socket);
         printf("Se conecto el cliente con el id: %s \n", result->mensajes->mensajes[1]);
+    }/*
+    else if (!strcmp(result->identificador_cliente, "APP")){
+        send_message_socket(result->socket, "OK");
+        liberar_conexion(result->socket);
+        printf("Se conecto el cliente con el id: %s \n", result->mensajes->mensajes[1]);
     }
- 
+    */
 
 
     return;
@@ -79,9 +84,9 @@ void handle_guardar_plato(t_result* result){
 
     if (guardar_plato_en_memoria(result->mensajes->mensajes[1],result->mensajes->mensajes[2],result->mensajes->mensajes[4],result->mensajes->mensajes[3])){
         imprimirTodo();
-        respuesta[0] = "Ok";
+        respuesta[0] = "OK";
     } else {
-        respuesta[0] = "Fail";
+        respuesta[0] = "FAIL";
     }
 
     send_messages_socket(result->socket, respuesta, 1);
@@ -96,9 +101,9 @@ void handle_guardar_pedidos(t_result* result){
 
     if (guardar_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
         imprimirTodo();
-        respuesta[0] = "Ok";
+        respuesta[0] = "OK";
     } else {
-        respuesta[0] = "Fail";
+        respuesta[0] = "FAIL";
     }
 
     send_messages_socket(result->socket, respuesta, 1);
@@ -114,9 +119,9 @@ void handle_confirmar_pedido(t_result* result){
 
     if (confirmar_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
         imprimirTodo();
-        respuesta[0] = "Ok";
+        respuesta[0] = "OK";
     } else {
-        respuesta[0] = "Fail";
+        respuesta[0] = "FAIL";
     }
 
     send_messages_socket(result->socket, respuesta, 1);
@@ -130,9 +135,9 @@ void handle_plato_listo(t_result* result){
 
     if (plato_listo_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3])){
         imprimirTodo();
-        respuesta[0] = "Ok";
+        respuesta[0] = "OK";
     } else {
-        respuesta[0] = "Fail";
+        respuesta[0] = "FAIL";
     }
 
     send_messages_socket(result->socket, respuesta, 1);
@@ -143,17 +148,13 @@ void handle_plato_listo(t_result* result){
 void handle_obtener_pedido(t_result* result){
 
     IteratorList iterator = NULL;
-    int i = 2;
-    int length;
 
     l_segmento* segmento = obtener_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 
     if(segmento != NULL){
 
-        length = (sizelist(*segmento->punteroTablaPaginas)*3)+2;
-        char* arrayReturn[length];
-        strcpy(arrayReturn[0], result->mensajes->mensajes[1]);
-        strcpy(arrayReturn[1], string_itoa(segmento->estadoPedido));
+        char* arrayReturn[4];
+        strcpy(arrayReturn[0], string_itoa(segmento->estadoPedido));
 
         for(iterator = beginlist(*segmento->punteroTablaPaginas); iterator != NULL; iterator = nextlist(iterator)){
             l_pagina* pagina = (l_pagina*) dataiterlist(iterator);
@@ -162,21 +163,22 @@ void handle_obtener_pedido(t_result* result){
             char* cantidad = string_itoa(frame->cantidadPlato);
             char* cantidadLista = string_itoa(frame->cantidadLista);
 
-            strcpy(arrayReturn[i], frame->plato);
-            strcpy(arrayReturn[i+1], cantidad);
-            strcpy(arrayReturn[i+2], cantidadLista);
+            string_append(&arrayReturn[1], frame->plato);
+            string_append(&arrayReturn[1], ",");
+            string_append(&arrayReturn[2], cantidad);
+            string_append(&arrayReturn[2], ",");
+            string_append(&arrayReturn[3], cantidadLista);
+            string_append(&arrayReturn[3], ",");    
 
             free(cantidad);
             free(cantidadLista);
 
-            i += 3;
-
         }
         
-        send_messages_socket(result->socket, arrayReturn, length);
+        send_messages_socket(result->socket, arrayReturn, 4);
     }else{
         char* arrayReturn[1];
-        arrayReturn[0] = "Fail";
+        arrayReturn[0] = "FAIL";
         send_messages_socket(result->socket, arrayReturn, 1);
     }
 
@@ -190,9 +192,9 @@ void handle_finalizar_pedido(t_result* result){
 
     if (finalizar_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2])){
         imprimirTodo();
-        respuesta[0] = "Ok";
+        respuesta[0] = "OK";
     } else {
-        respuesta[0] = "Fail";
+        respuesta[0] = "FAIL";
     }
 
     send_messages_socket(result->socket, respuesta, 1);

@@ -19,8 +19,10 @@ void app_init(t_app_config** app_config, t_log** logger){
     t_restaurante* restaurante = nuevo_restaurante(0, "Resto Default");
     pushbacklist(&lista_restaurantes, restaurante);
 
-    *app_config = app_config_loader("./cfg/app.config");
-    *logger = init_logger((*app_config)->ruta_log, "APP", LOG_LEVEL_INFO);
+    *app_config = app_config_loader("./cfg/app.config", logger);
+    //*logger = init_logger((*app_config)->ruta_log, "APP", LOG_LEVEL_INFO);
+
+
 }
 
 void app_finally(t_app_config* app_config, t_log* logger) {

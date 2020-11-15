@@ -38,7 +38,7 @@ char** enviar_mensaje_consultar_restaurantes(t_modulo* modulo){
 
     t_mensajes* respuesta = receive_simple_messages(socket);
 
-    char** respuesta_restaurantes = malloc(sizeof(char*) * *respuesta->size);
+    char** respuesta_restaurantes = malloc(sizeof(char*) * (*respuesta->size));
 
     for (int i= 0; i < *respuesta->size; i++){
         printf("%s ", respuesta->mensajes[i]);
@@ -111,10 +111,10 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
 
     r_obtener_restaurante* respuesta_obtener_restaurante = malloc (sizeof(r_obtener_restaurante));
 
-    respuesta_obtener_restaurante->afinidades = obtener_list_mensajes(respuesta->mensajes[0]);;
+    respuesta_obtener_restaurante->afinidades = obtener_list_mensajes(respuesta->mensajes[0]);
     respuesta_obtener_restaurante->pos_x = respuesta->mensajes[1];
     respuesta_obtener_restaurante->pos_y = respuesta->mensajes[2];
-    respuesta_obtener_restaurante->recetas_precio = obtener_receta_precios(respuesta->mensajes[3]) ;
+    respuesta_obtener_restaurante->recetas_precio = obtener_receta_precios(respuesta->mensajes[3]);
     respuesta_obtener_restaurante->cantidad_hornos = respuesta->mensajes[4];
     respuesta_obtener_restaurante->cantidad_pedidos = respuesta->mensajes[5];
     respuesta_obtener_restaurante->cantidad_cocineros = respuesta->mensajes[6];
@@ -212,7 +212,7 @@ char* enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido
     char* anadir_plato[3] ={tipo_mensaje,plato, id_pedido};
     socket = enviar_mensaje_modulo(modulo, anadir_plato, 3);
     
-     if(socket == -1){
+    if(socket == -1){
         return "FAIL";
     }
 
@@ -357,12 +357,12 @@ List* obtener_informacion_comidas(char* platos,char* cantidades_listas, char* ca
 
 };
 
-r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* restaurante){
+r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido, char* restaurante){
     
     if(restaurante == NULL || id_pedido == NULL){
-            printf("Faltan parametros \n");
-            return NULL;
-        }
+        printf("Faltan parametros \n");
+        return NULL;
+    }
 
     char* tipo_mensaje = string_itoa(obtener_pedido);
 

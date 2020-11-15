@@ -13,8 +13,6 @@
 #include "app_messages.h"
 #include "config_app.h"
 
-t_log* logger;
-
 // FUNCIONES
 void app_init(t_app_config** app_config, t_log** logger);
 void app_finally(t_app_config* app_config, t_log* logger);

@@ -6,6 +6,12 @@ void iniciar_planificador(){
     initlist(&repartidores_libres);
     initlist(&pcb_new);
     initlist(&pcb_ready);
+
+    sem_entrenador_libre = malloc(sizeof(sem_t));
+    sem_init(sem_entrenador_libre, 0, 0);
+
+    sem_pcb_new =  malloc(sizeof(sem_t));
+    sem_init(sem_pcb_new, 0, 0);
     
     iniciar_repartidores();
 
@@ -15,6 +21,26 @@ void iniciar_planificador(){
 
     iniciar_planificador_corto_plazo();
 
+    iniciar_clock();
+
+}
+
+void iniciar_clock(){
+    pthread_t thread;
+    pthread_create(&thread,NULL,(void*)clock, NULL);
+	pthread_detach(thread);
+}
+
+void clock_cpu(){
+    
+    while(true){
+        sleep(app_config->retardo_ciclo_cpu);
+
+        for (IteratorList il = beginlist(suscriptores_cpu); il != NULL; il = nextlist(il)){
+            sem_t* suscriptor = (sem_t*) dataiterlist(il);
+            sem_post(suscriptor);
+        }
+    }
 }
 
 void iniciar_repartidores(){
@@ -37,25 +63,68 @@ void iniciar_repartidores(){
         repartidor_actual->nuevo_pedido = malloc(sizeof(sem_t));
         sem_init(repartidor_actual->nuevo_pedido, 0, 0);
 
+        pthread_t thread;
+        pthread_create(&thread,NULL,(void*)repartir_pedidos, repartidor_actual);
+        pthread_detach(thread);
+
         pushbacklist(&repartidores_libres, repartidor_actual);
+        sem_post(sem_entrenador_libre);
         
     }
     
 }
 
 void iniciar_planificador_largo_plazo(){
-
+    pthread_t thread;
+    pthread_create(&thread,NULL,(void*)planificar_largo_plazo, NULL);
+	pthread_detach(thread);
 }
 
 void iniciar_planificador_corto_plazo(){
+    if (!strcmp(app_config->algoritmo_planificacion, "FIFO")){
+        planificar_corto_plazo_FIFO();
+    }
 
+    //TODO: SJF Y HRRN
+}
+
+void planificar_largo_plazo(){
+    while (true){
+        sem_wait(sem_pcb_new);
+        sem_wait(sem_entrenador_libre);
+
+        t_pcb* pcb = popfrontlist(&pcb_new);
+        t_repartidor* repartidor = popfrontlist(&repartidores_libres);
+
+        repartidor->pcb_actual = pcb;
+        pcb->repartidor_actual = repartidor;
+
+        sem_post(repartidor->nuevo_pedido);
+
+        pushbacklist(&pcb_ready, pcb);
+        sem_post(sem_pcb_ready);
+    }
+}
+
+void planificar_corto_plazo_FIFO(){
+    while (true){
+        sem_wait(sem_pcb_ready);
+
+        t_pcb* pcb = popfrontlist(&pcb_ready);
+        
+        pushbacklist(&suscriptores_cpu, pcb->repartidor_actual->ciclo_cpu);
+
+    }
 }
 
 void pcb_prueba(){
-
+    
     pushbacklist(&pcb_new, crear_pcb("Resto Default", 1));
+    sem_post(sem_pcb_new);
     pushbacklist(&pcb_new, crear_pcb("Resto Default", 2));
+    sem_post(sem_pcb_new);
     pushbacklist(&pcb_new, crear_pcb("Resto Default", 3));
+    sem_post(sem_pcb_new);
 }
 
 t_pcb* crear_pcb(char* restaurante, int id_pedido){

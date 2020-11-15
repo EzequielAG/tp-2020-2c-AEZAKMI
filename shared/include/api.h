@@ -36,12 +36,11 @@ typedef struct{
     char* precio;
 } receta_precio;
 
-
 typedef struct {
     List* afinidades;
     char* pos_x;
     char* pos_y;
-    receta_precio** recetas;
+    receta_precio** recetas_precio;
     char* cantidad_hornos;
     char* cantidad_pedidos;
     char* cantidad_cocineros;
@@ -62,19 +61,15 @@ typedef struct{
 typedef struct {
     char* restaurante;
     char* estado;
-    informacion_comidas** info_comidas;
+    List* info_comidas;
 } r_consultar_pedido;
 
 
 typedef struct {
     char* estado;
-    informacion_comidas** info_comidas;
+    List* info_comidas;
 } r_obtener_pedido;
 
-typedef struct {
-    char* estado;
-    List* info_comidas;
-} r_obtener_pedido2;
 
 
 
@@ -83,7 +78,7 @@ typedef struct {
 int obtener_numero_mensaje(char* mensaje_tipo);
 
 receta_precio** obtener_receta_precios(char* array_mensajes);
-informacion_comidas** obtener_informacion_comidas(char* mensaje);
+
 
 char** obtener_array_mensajes(char* array_mensaje);
 List* obtener_list_mensajes(char* array_mensaje);
@@ -108,8 +103,8 @@ char* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato);
 
 char ** separar_por_comillas(char** string_separado_por_espacios);
 
-r_obtener_pedido2* enviar_mensaje_obtener_pedido2(t_modulo* modulo, char* id_pedido,char* restaurante);
-List* obtener_informacion_comidas2(char* array_mensajes);
+
+List* obtener_informacion_comidas(char* platos,char* cantidades_listas, char* cantidades_totales);
 List* enviar_mensaje_obtener_receta2(t_modulo* modulo, char* nombre_plato);
 
 #endif

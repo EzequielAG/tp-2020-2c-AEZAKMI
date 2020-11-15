@@ -231,8 +231,8 @@ void handle_confirmar_pedido(int socket, char* id_pedido, char* restaurante){
 void handle_obtener_pedido(int socket, char* restaurante, char* id_pedido){
 	if (ES_TEST){
 		char* respuesta[4];
-		respuesta[0] = "confirmado";
-		respuesta[1] = "plato1,plato2";
+		respuesta[0] = "CONFIRMADO";
+		respuesta[1] = "PLATO1,PLATO2";
 		respuesta[2] = "1,1";
 		respuesta[3] = "1,0";
 		send_messages_socket(socket, respuesta, 4);
@@ -306,11 +306,10 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* co
 void handle_obtener_receta(int socket, char* comida){
 	if (ES_TEST){
 		// return ['amasar,2', 'batir,1']
-		char* respuesta[3];
-		respuesta[0] = "batir,5";
-		respuesta[1] = "amasar,10";
-		respuesta[2] = "hornear,60";
-		send_messages_socket(socket, respuesta, 3);
+		char* respuesta[1];
+		respuesta[0] = "batir,5,amasar,3,hornear,6";
+	
+		send_messages_socket(socket, respuesta, 1);
 	} else {
 		//Verificar si existe el plato dado dentro del directorio de recetas.
 		//En caso de no existir, se deberá informar dicha situación.

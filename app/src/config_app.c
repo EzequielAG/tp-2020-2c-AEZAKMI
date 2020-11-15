@@ -26,6 +26,7 @@ void app_config_parser(t_config* config, t_app_config* app_config) {
     app_config->platos_default = config_get_int_value(config, "PLATOS_DEFAULT");
     app_config->posicion_rest_default_x = config_get_int_value(config, "POSICION_REST_DEFAULT_X");
     app_config->posicion_rest_default_y = config_get_int_value(config, "POSICION_REST_DEFAULT_Y");
+    app_config->retardo_ciclo_cpu = config_get_int_value(config, "RETARDO_CICLO_CPU");
 }
 
 void app_destroy(t_app_config* app_config) {

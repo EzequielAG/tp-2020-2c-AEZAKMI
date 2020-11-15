@@ -7,15 +7,8 @@
 #include <stdlib.h>
 #include "shared_utils.h"
 #include "repartidor.h"
-
-typedef struct {
-    int id_pedido;
-    char* restaurante;
-} t_pcb;
-
-List suscriptores_cpu;
-List pcb_new;
-List pcb_ready;
+#include <pthread.h>
+#include <unistd.h>
 
 void iniciar_planificador();
 void iniciar_repartidores();
@@ -23,4 +16,8 @@ t_pcb* crear_pcb(char* restaurante, int id_pedido);
 void pcb_prueba();
 void iniciar_planificador_corto_plazo();
 void iniciar_planificador_largo_plazo();
+void planificar_largo_plazo();
+void iniciar_clock();
+void clock_cpu();
+void planificar_corto_plazo_FIFO();
 #endif

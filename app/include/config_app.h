@@ -22,6 +22,7 @@ typedef struct {
     int platos_default;
     int posicion_rest_default_x;
     int posicion_rest_default_y;
+    int retardo_ciclo_cpu;
 } t_app_config;
 
 t_app_config* app_config;

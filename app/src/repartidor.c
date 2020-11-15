@@ -9,6 +9,8 @@ void repartir_pedidos(t_repartidor* repartidor){
 
 void repartir_pedido(t_repartidor* repartidor){
 
+    buscar_datos_pedido(repartidor);
+    
     ir_hacia_restaurante(repartidor);
 
     esperar_pedido(repartidor);
@@ -19,31 +21,40 @@ void repartir_pedido(t_repartidor* repartidor){
 
 }
 
+void buscar_datos_pedido(t_repartidor* repartidor){
+    //TODO: Buscar la posicion del cliente y del restaurante
+}
+
 void ir_hacia_restaurante(t_repartidor* repartidor){
     t_pedido* pedido = repartidor->pedido;
 
     while(!misma_posicion(repartidor->posicion, pedido->posicion_restaurante)){
-        //sem_post(cpu)
+        
+        sem_wait(repartidor->ciclo_cpu);
+
         avanzar_hacia(repartidor, pedido->posicion_restaurante);
     }
 }
 
 void esperar_pedido(t_repartidor* repartidor){
-
+   //TODO: Consultar el estado del pedido, si esta listo, llevarselo. Si no esta listo, esperar que me avisen que esta listo
 }
 
 void ir_hacia_cliente(t_repartidor* repartidor){
     t_pedido* pedido = repartidor->pedido;
 
     while(!misma_posicion(repartidor->posicion, pedido->posicion_cliente)){
-        //sem_post(cpu)
+        
+        sem_wait(repartidor->ciclo_cpu);
+
         avanzar_hacia(repartidor, pedido->posicion_cliente);
+
     }
 
 }
 
 void entregar_pedido(t_repartidor* repartidor){
-
+    //TODO: No se si debo hacer algo acá
 }
 
 bool misma_posicion(t_posicion posicion1, t_posicion posicion2){
@@ -100,7 +111,11 @@ bool esta_cansado(t_repartidor* repartidor){
 }
 
 void descansar(t_repartidor* repartidor){
+    //TODO: TENGO QUE PASARLO A BLOCKED
+
     for (int i = 0; i < repartidor->tiempo_de_descanso; i++){
-        //sem_wait(cpu)
+        sem_wait(repartidor->ciclo_cpu);
     }
+
+    //TODO: TENGO QUE PASARLO A READY OTRA VEZ
 }

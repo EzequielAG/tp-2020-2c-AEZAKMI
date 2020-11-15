@@ -19,6 +19,7 @@ int main(void){
 
     data_restaurante();
    
+   
     inicializar_colas();
 
   
@@ -26,7 +27,7 @@ int main(void){
     
     caso_uso();
 
-    planificacion_fifo();
+    // planificacion_fifo();
 
     ver_estado_pcb();
 
@@ -120,6 +121,7 @@ void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS
     for(IteratorList iter_plato = beginlist(*pedido->info_comidas); iter_plato != NULL; iter_plato = nextlist(iter_plato)){
 
         informacion_comidas* info_comida = iter_plato -> data;
+        //TODO: AGREGAR LISTA PASOS
 
         List lista_pasos;
         initlist(&lista_pasos);

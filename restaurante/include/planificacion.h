@@ -58,8 +58,6 @@ typedef struct{
 }t_exec;
 
 
-
-
 typedef struct {
     int id_pedido;
     List platos;
@@ -75,7 +73,7 @@ typedef struct{
     char* afinidad;
     List platos_espera;
     t_exec* puntero_exec;
-
+    
 }t_ready;
 
 
@@ -108,13 +106,14 @@ int paso_ready(t_pcb* pcb);
 int paso_exit(t_pcb* pcb);
 t_horno* paso_block(t_pcb* pcb);
 int paso_exec(t_pcb* pcb);
-int ejecutar_ciclo(t_pcb* pcb);
+int ejecutar_ciclo(t_pcb* pcb,t_paso* paso);
 t_ready* asignar_cola_ready(t_plato* plato);
 int es_paso_io(t_paso* paso);
 t_exec* crear_exec();
 int pasos_ejecutados(t_pcb* pcb);
 int termino_pedido(int id_pedido);
 char* obtener_estado(int estado);
+List* hilos_ready();
 
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu);
 t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo);

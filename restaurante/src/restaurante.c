@@ -21,11 +21,24 @@ int main(void){
    
     inicializar_colas();
 
-    iniciar_servidor("127.0.0.1", "5002", handle_client);
+  
+iniciar_servidor("127.0.0.1", "5002", handle_client);
+    // pthread_t hilo_servidor;
+
+    // pthread_create(&hilo_servidor,NULL,(void*)escuchar_servidor, handle_client);
+	// pthread_join(hilo_servidor,NULL);
+    
 
     
 
     return 0;
+}
+
+void* escuchar_servidor(void* handle_client){
+    
+    // iniciar_servidor("127.0.0.1", "5002", handle_client);
+
+    return NULL;
 }
 
 // Comienzo handles
@@ -70,6 +83,8 @@ void handle_client(t_result* result){
                 // TODO : FALTA LOGICA CONSULTAR_PEDIDO
             }
     }
+
+    
 }
 
 void handle_crear_pedido(int socket){
@@ -251,10 +266,10 @@ void escuchar_mensajes_socket_desacoplado(int socket){
     t_parameter* parametro = malloc(sizeof(t_parameter));
 
 	parametro->socket = socket;
-	parametro->f = handle_client;
+	parametro->f = (void*) handle_client;
 
 	pthread_create(&thread,NULL,(void*)escuchar_mensajes_socket, parametro);
-	pthread_detach(thread);
+	pthread_join(thread,NULL);
 
 }
 

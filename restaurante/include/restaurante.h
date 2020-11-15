@@ -47,6 +47,8 @@ void handle_confirmar_pedido(t_result* result);
 void data_restaurante();
 void ver_info_pedido(List* lista_pedidos);
 int es_paso_io(t_paso* paso);
+
+void* escuchar_servidor(void* handle_client);
 sem_t* sem_id;
 
 

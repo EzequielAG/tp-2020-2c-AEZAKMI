@@ -20,7 +20,7 @@ void handle_client(t_result* result){
                 handle_consultar_platos(result->socket, result->identificador_cliente);
             break;
             case crear_pedido:
-                handle_crear_pedido(result->socket);
+                handle_crear_pedido(result->socket, result->identificador_cliente);
             break;
             case anadir_plato:
                 // TODO: FALTA LOGICA DE ANADIR_PLATO
@@ -107,28 +107,42 @@ t_cliente* buscar_cliente_lista(char* id_cliente){
 
 }
 
-void handle_crear_pedido(int socket){
+void handle_crear_pedido(int socket, char* id_cliente){
 
-    int id_pedido = obtener_id_pedido();
+    char* id_pedido;
     
     t_modulo modulo_comanda;
-    modulo_comanda.ip = ip_comanda;
-    modulo_comanda.puerto = puerto_comanda;
+    modulo_comanda.ip = app_config->ip_comanda;
+    modulo_comanda.puerto = app_config->puerto_comanda;
+    modulo_comanda.socket = 0;
     modulo_comanda.identificacion = "APP";
 
     char* respuesta[1];
-    respuesta[0] = string_itoa(id_pedido);
 
-    //TODO: De donde saco el restaurante?
-    enviar_mensaje_guardar_pedido(&modulo_comanda, "Restaurante1", respuesta[0]);
+    t_cliente* cliente = buscar_cliente_lista(id_cliente);
+
+    t_restaurante* restaurante = cliente->restaurante;
+
+    id_pedido = obtener_id_pedido(restaurante);
+
+    respuesta[0] = id_pedido;
+
+    enviar_mensaje_guardar_pedido(&modulo_comanda, restaurante->nombre_restaurante, respuesta[0]);
 
     send_messages_socket(socket, respuesta, 1);
     liberar_conexion(socket);
 }
 
-int obtener_id_pedido(){
-    //TODO: Obtener un id de pedido, enviando un mensaje al restaurante
-    int id_pedido = 435;
+char* obtener_id_pedido(t_restaurante* restaurante){
+
+    t_modulo modulo_restaurante;
+    modulo_restaurante.ip = NULL;
+    modulo_restaurante.puerto = NULL;
+    modulo_restaurante.socket = restaurante->socket;
+    modulo_restaurante.identificacion = "APP";
+
+    char* id_pedido = enviar_mensaje_crear_pedido(&modulo_restaurante);
+
     return id_pedido;
 }
 
@@ -197,16 +211,48 @@ char* obtener_restaurantes(){
     return restaurantes;
 }
 
-handle_consultar_platos(int socket, char* idCliente){
+void handle_consultar_platos(int socket, char* idCliente){
 
-    //char* respuesta[1];
+    List lista_platos;
+    initlist(&lista_platos);
+
+    t_modulo modulo_restaurante;
+    modulo_restaurante.ip = NULL;
+    modulo_restaurante.puerto = NULL;
+    modulo_restaurante.socket = 0;
+    modulo_restaurante.identificacion = "APP";
 
     t_cliente* cliente = buscar_cliente_lista(idCliente);
+
     t_restaurante* restaurante = cliente->restaurante;
 
-    //enviar_mensaje_consultar_platos(w, NULL);
+    modulo_restaurante.socket = restaurante->socket;
 
-    //send_messages_socket(socket, respuesta, 1);
+    lista_platos = *enviar_mensaje_consultar_platos(&modulo_restaurante, NULL);
+    
+    send_message_socket(socket, obtener_platos(lista_platos));
     liberar_conexion(socket);
 
+}
+
+char* obtener_platos(List lista){
+
+    char * platos = string_new();
+
+    string_append(&platos, "[");
+    int primero = 1;
+    for (IteratorList iter = beginlist(lista); iter != NULL; iter = nextlist(iter)){
+        if (primero == 1){
+            primero = 0;
+        } else {
+            string_append(&platos, ",");
+        }
+        char* nombrePlato = (char*) iter->data;
+        string_append(&platos, nombrePlato);
+
+    }
+
+    string_append(&platos, "]");
+
+    return platos;
 }

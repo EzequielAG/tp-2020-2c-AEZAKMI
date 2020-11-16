@@ -163,27 +163,30 @@ void caso_uso(){
   
     t_paso* paso_rebozar = crear_paso("REBOZAR",5);
     t_paso* paso_hornear = crear_paso("HORNEAR",3);
+    t_paso* paso_hornear2 = crear_paso("HORNEAR",3);
     t_paso* paso_freir = crear_paso("FREI",6);
+    t_paso* paso_freir2 = crear_paso("Freir",6);
     t_paso* paso_asar = crear_paso("ASAR",4);
 
     pushbacklist(&lista_pasos_milanesa, paso_rebozar);
     pushbacklist(&lista_pasos_milanesa, paso_hornear);
     pushbacklist(&lista_pasos_milanesa, paso_asar);
 
-    pushbacklist(&lista_pasos_pizza, paso_hornear);
-    pushbacklist(&lista_pasos_pizza, paso_asar);
-    pushbacklist(&lista_pasos_empanada, paso_rebozar);
+    pushbacklist(&lista_pasos_pizza, paso_freir);
+    pushbacklist(&lista_pasos_pizza, paso_hornear2);
+    pushbacklist(&lista_pasos_pizza, paso_freir2);
+   
     pushbacklist(&lista_pasos_empanada, paso_hornear);
     pushbacklist(&lista_pasos_empanada, paso_freir);
 
 
     t_plato* milanesa = crear_plato("Milanesa",&lista_pasos_milanesa,10,1,0,asignar_pid());
-    // t_plato* pizza = crear_plato("Pizza",&lista_pasos_pizza,10,1,0,asignar_pid());
+    t_plato* pizza = crear_plato("Pizza",&lista_pasos_pizza,10,1,0,asignar_pid());
     // t_plato* empanada = crear_plato("Empanada", &lista_pasos_empanada,10,1,0,asignar_pid());
    // t_plato* guiso = crear_plato("Guiso",&lista_pasos_empanada,10,1,0);
 
     pushbacklist(&lista_platos, milanesa);
-    // pushbacklist(&lista_platos, pizza);
+    pushbacklist(&lista_platos, pizza);
     // pushbacklist(&lista_platos, empanada);
   //  pushbacklist(&lista_platos, guiso);
 

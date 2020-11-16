@@ -100,9 +100,9 @@ List colas_pcb;
 t_io* cola_io;
 
 void planificacion_fifo();
-
+int ultimo_paso(t_pcb* pcb);
 int inicializar_colas_ready_exec();
-
+void ocupar_horno_libre();
 int horno_libre();
 int paso_ready(t_pcb* pcb);
 int paso_exit(t_pcb* pcb);

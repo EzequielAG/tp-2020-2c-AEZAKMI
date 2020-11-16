@@ -26,7 +26,7 @@ int socket_sindicato;
 t_modulo modulo_sindicato;
 t_modulo modulo_app;
 receta_precio** recetas;
-
+sem_t* sem_exec;
 
 
 void inicializar_colas();
@@ -125,5 +125,5 @@ t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_tota
 t_pedido* creacion_pedido(int id, List* platos);
 t_pcb* crear_pcb(int id_pedido,int pid, int estado,t_plato* plato);
 
-
+int ejecutar_ciclos_fifo(t_pcb* pcb);
 #endif

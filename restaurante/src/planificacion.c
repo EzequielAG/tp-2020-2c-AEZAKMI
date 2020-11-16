@@ -212,90 +212,70 @@ char* obtener_estado(int estado){
 }
 
 
-int ejecutar_ciclo(t_pcb* pcb, t_paso* paso){
+int ejecutar_ciclos_fifo(t_pcb* pcb){
 
-    if(paso->se_ejecuto == 0){
+    for(IteratorList iter_pasos = beginlist(pcb->plato->pasos); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
+        t_paso* paso = iter_pasos->data;
 
-        if(pcb->estado == READY){
-        
-            if(es_paso_io(paso)){
-                t_horno* respuesta_block = paso_block(pcb); 
-                
-                if(respuesta_block != NULL){
-                    sleep((paso->ciclo_cpu)*1); //REVISAR
-                    paso->se_ejecuto = 1; 
-                    respuesta_block->ocupado = 0;
+        if(paso->se_ejecuto == 0){
 
-                    //CHEQUEAR SI HAY ALGO EN LA COLA DE ESPERA DE HORNO, EN CASO QUE HAYA ASIGNARLO
-                    paso_ready(pcb);
-                }
-                
-            }else{
-                int respuesta_paso = paso_exec(pcb);
-                
-                if(respuesta_paso){
-                    sleep((paso->ciclo_cpu)*1);
+            if(pcb->estado==READY){
+                sem_wait(sem_exec);
+                paso_exec(pcb);
+                sem_post(sem_exec);
+                sleep(paso->ciclo_cpu);
+                paso->se_ejecuto = 1;
+                sacar_exec(pcb);
+                return 1;
+
+            }else if(pcb->estado==EXEC){
+
+                t_horno* horno_block = paso_block(pcb);
+
+                if(horno_block != NULL){
+                    sleep(paso->ciclo_cpu);
                     paso->se_ejecuto = 1;
-                    pcb->cola_ready_perteneciente->puntero_exec->ocupado = 0; 
-                    paso_ready(pcb); //CHEQUEAR
+                    sacar_horno(pcb);
+                    return 1;
                 }
-            }
-        
-        }
-
-        if(pcb->estado == BLOCKED_SUSPENDED){
-
-            if(horno_libre()){
-
-            t_horno* respuesta_block_suspendido = paso_block(pcb);
                     
-                if(respuesta_block_suspendido != NULL){
-                    sleep((paso->ciclo_cpu)*1); //REVISAR
-                    paso->se_ejecuto = 1; 
-                    respuesta_block_suspendido->ocupado = 0;
+
+            }else if(pcb->estado==BLOCKED){
+                paso_ready(pcb);
+                
+                return 1;
+
                 }
+              
 
             }
+
         }
 
-        
-    }
-
-
-    if(pasos_ejecutados(pcb)){
-        paso_exit(pcb);
-        return 1;
-    };
     
-    return ejecutar_ciclo(pcb,paso);
+
+   
+    
+    return 1;
 
 }
 
 
 void planificacion_fifo(){ // REVISAR CANTIDAD TOTAL Y CANTIDAD LISTA
 
+    while(true){
 
     for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
         t_pcb* pcb = iter_pcb->data;
         
-        ejecutar_ciclo(pcb,NULL);
+        ejecutar_ciclos_fifo(pcb);
        
-    }
-
-      
-}
-
-t_paso* paso_a_ejecutar(t_pcb* pcb){
-
-    for(IteratorList iter_pasos = beginlist(pcb->plato->pasos); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
-        t_paso* paso = iter_pasos->data;
-        if(paso->se_ejecuto == 0){
-            return paso;
         }
-        
     }
 
-    return NULL;
+
+
+
 }
 
 
@@ -338,8 +318,7 @@ int es_paso_io(t_paso* paso){
 
 void sacar_exec(t_pcb* pcb){
     pcb->cola_ready_perteneciente->puntero_exec->ocupado=0;
-    free(pcb->cola_ready_perteneciente->puntero_exec->plato);
-    pcb->estado = -1;
+    pcb->cola_ready_perteneciente->puntero_exec->plato=NULL;
 
 }
 
@@ -349,7 +328,6 @@ void sacar_ready(t_pcb* pcb){
         t_pcb* pcb_espera = iter_ready->data;
         if(pcb_espera->pid == pcb->pid){
             popiterlist(&(pcb->cola_ready_perteneciente->platos_espera),iter_ready);
-            pcb->estado = -1;
         }
     }
 
@@ -359,10 +337,26 @@ void sacar_horno(t_pcb* pcb){
 
     for(IteratorList iter_horno = beginlist(cola_io->hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
         t_horno* horno = iter_horno->data;
-
+        if(horno->plato == NULL){
+            return;
+        }
         if(!strcmp(pcb->plato->nombre , horno->plato->nombre)){
-            free(horno->plato);
-            pcb->estado = -1;
+            horno->plato = NULL;
+
+            if(!isemptylist(cola_io->platos_espera)){
+                t_plato* plato = popfrontlist(&cola_io->platos_espera);
+                for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
+                    t_pcb* pcb = iter_pcb->data;
+                    if(!strcmp(pcb->plato->nombre,plato->nombre)){
+                        paso_block(pcb);
+                    }
+                }
+              
+            }
+          
+                
+                
+            
         }
     }
 

@@ -27,7 +27,7 @@ int main(void){
     
     caso_uso();
 
-    // planificacion_fifo();
+    planificacion_fifo();
 
     // ver_estado_pcb();
 
@@ -192,6 +192,8 @@ void caso_uso(){
     creacion_pedido(10,&lista_platos);
 
     ver_estado_pcb();
+
+
     
 
 
@@ -383,6 +385,11 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     initlist(&cola_io->platos_espera);
    
 
+    sem_id = malloc(sizeof(sem_t));
+    sem_init(sem_id, 0, 1);
+
+    sem_exec = malloc(sizeof(sem_t));
+    sem_init(sem_exec, 0, 1);
 }
 
 void restaurante_finally(t_restaurante_config* restaurante_config, t_log* logger) {

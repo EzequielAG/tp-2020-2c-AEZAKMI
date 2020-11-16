@@ -55,6 +55,52 @@ void inicializar_colas_io(){
 
 }
 
+int paso_ready(t_pcb* pcb){   
+
+    pushbacklist(&pcb->cola_ready_perteneciente->platos_espera,pcb->plato);
+    pcb->estado = READY;
+    printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
+    
+   return 1;
+
+}
+
+
+
+
+
+int paso_exec(t_pcb* pcb){
+
+    t_ready* cola_ready = pcb->cola_ready_perteneciente;
+
+    if(cola_ready->puntero_exec->ocupado == 0){
+        cola_ready->puntero_exec->plato = pcb->plato;
+        cola_ready->puntero_exec->ocupado = 1;
+        pcb->estado = EXEC;
+        printf(" - El plato %s esta ejecutandose por un cocinero de afinidad %s, su estado es: %s \n",pcb->plato->nombre, cola_ready->afinidad,obtener_estado(pcb->estado));
+        return 1;
+    }
+
+       printf(" - El plato %s no pudo ser ejecutado, su estado es: %s \n",pcb->plato->nombre,obtener_estado(pcb->estado));
+       return 0;
+
+}
+
+
+
+
+
+int paso_exit(t_pcb* pcb){
+
+    pushbacklist(&colas_exit,pcb->plato);
+    pcb->estado = EXIT;
+
+    printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
+     
+    return 1;
+};
+
+
 t_horno* paso_block(t_pcb* pcb){
 
     for(IteratorList iter_horno = beginlist(cola_io->hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
@@ -84,64 +130,6 @@ t_horno* paso_block(t_pcb* pcb){
 
 }
 
-
-
-int paso_exec(t_pcb* pcb){
-
-    t_ready* cola_ready = pcb->cola_ready_perteneciente;
-
-    if(cola_ready->puntero_exec->ocupado == 0){
-        cola_ready->puntero_exec->plato = pcb->plato;
-        cola_ready->puntero_exec->ocupado = 1;
-        pcb->estado = EXEC;
-        printf(" - El plato %s esta ejecutandose por un cocinero de afinidad %s, su estado es: %s \n",pcb->plato->nombre, cola_ready->afinidad,obtener_estado(pcb->estado));
-        return 1;
-    }
-
-       printf(" - El plato %s no pudo ser ejecutado, su estado es: %s \n",pcb->plato->nombre,obtener_estado(pcb->estado));
-       return 0;
-
-}
-
-char* obtener_estado(int estado){
-
-    if(estado == EXEC){
-        return "EXEC";
-    } else if(estado == BLOCKED){
-        return "BLOCKED";
-    } else if(estado == BLOCKED_SUSPENDED){
-        return "BLOCKED_SUSPENDED";
-    } else if(estado == EXIT){
-        return "EXIT";
-    } else if(estado == READY){
-        return "READY";
-    }
-
-    return NULL;
-
-
-}
-
-int paso_ready(t_pcb* pcb){   
-
-    pushbacklist(&pcb->cola_ready_perteneciente->platos_espera,pcb->plato);
-    pcb->estado = READY;
-    printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
-    
-   return 1;
-
-}
-
-
-int paso_exit(t_pcb* pcb){
-
-    pushbacklist(&colas_exit,pcb->plato);
-    pcb->estado = EXIT;
-
-    printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
-     
-    return 1;
-};
 
 
 int termino_pedido(int id_pedido){
@@ -181,7 +169,7 @@ t_ready* asignar_cola_ready(t_plato* plato){
         t_ready* ready = iter_ready->data;
 
         if(!strcmp(plato->nombre, ready->afinidad)){
-            pushbacklist(&ready->platos_espera,plato);
+
             return ready;
 
         }
@@ -192,7 +180,7 @@ t_ready* asignar_cola_ready(t_plato* plato){
         t_ready* ready2 = iter_ready2->data;
 
         if(!strcmp(ready2->afinidad,"GENERAL")){
-            pushbacklist(&ready2->platos_espera,plato);
+
             return ready2;
 
         }
@@ -203,6 +191,26 @@ t_ready* asignar_cola_ready(t_plato* plato){
     
 
 }
+
+char* obtener_estado(int estado){
+
+    if(estado == EXEC){
+        return "EXEC";
+    } else if(estado == BLOCKED){
+        return "BLOCKED";
+    } else if(estado == BLOCKED_SUSPENDED){
+        return "BLOCKED_SUSPENDED";
+    } else if(estado == EXIT){
+        return "EXIT";
+    } else if(estado == READY){
+        return "READY";
+    }
+
+    return NULL;
+
+
+}
+
 
 int ejecutar_ciclo(t_pcb* pcb, t_paso* paso){
 
@@ -328,6 +336,38 @@ int es_paso_io(t_paso* paso){
 }
 
 
+void sacar_exec(t_pcb* pcb){
+    pcb->cola_ready_perteneciente->puntero_exec->ocupado=0;
+    free(pcb->cola_ready_perteneciente->puntero_exec->plato);
+    pcb->estado = -1;
+
+}
+
+void sacar_ready(t_pcb* pcb){
+
+    for(IteratorList iter_ready = beginlist(pcb->cola_ready_perteneciente->platos_espera); iter_ready != NULL; iter_ready = nextlist(iter_ready)){
+        t_pcb* pcb_espera = iter_ready->data;
+        if(pcb_espera->pid == pcb->pid){
+            popiterlist(&(pcb->cola_ready_perteneciente->platos_espera),iter_ready);
+            pcb->estado = -1;
+        }
+    }
+
+}
+
+void sacar_horno(t_pcb* pcb){
+
+    for(IteratorList iter_horno = beginlist(cola_io->hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
+        t_horno* horno = iter_horno->data;
+
+        if(!strcmp(pcb->plato->nombre , horno->plato->nombre)){
+            free(horno->plato);
+            pcb->estado = -1;
+        }
+    }
+
+}
+
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu){
 
     t_paso* paso = malloc(sizeof(paso));
@@ -342,7 +382,7 @@ t_paso* crear_paso(char* nombre_paso, int ciclo_cpu){
 }
 
 
-t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo){
+t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo,int pid){
 
     t_plato* plato = malloc(sizeof(t_plato));
 
@@ -351,7 +391,7 @@ t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_tota
     plato->cantidad_total = cantidad_total;
     plato->cantidad_listo = cantidad_listo;
 
-    crear_pcb(pedido_id,READY,plato);
+    crear_pcb(pedido_id,pid,READY,plato);
 
 
     return plato;
@@ -359,14 +399,16 @@ t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_tota
 }
 
 
-t_pcb* crear_pcb(int id_pedido, int estado,t_plato* plato){ //AGREGAR PID
+t_pcb* crear_pcb(int id_pedido,int pid, int estado,t_plato* plato){ //AGREGAR PID
 
     t_pcb* pcb = malloc(sizeof(t_pcb));
- 
+    pcb->pid = pid;
     pcb->id_pedido = id_pedido;
     pcb->estado = estado;
     pcb->plato = plato;
     pcb->cola_ready_perteneciente = asignar_cola_ready(plato);
+
+    paso_ready(pcb);
 
     pushfrontlist(&colas_pcb,pcb);
 

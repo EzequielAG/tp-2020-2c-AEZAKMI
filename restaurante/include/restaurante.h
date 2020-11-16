@@ -33,6 +33,7 @@ void restaurante_destroy(t_restaurante_config* restaurante_config);
 void handshake_init(t_modulo, t_modulo);
 
 int asignar_pedido_id();
+int asignar_pid();
 int handshake(t_modulo* modulo);
 void escuchar_mensajes_socket_desacoplado(int socket);
 void escuchar_mensajes_socket(t_parameter* parametro);

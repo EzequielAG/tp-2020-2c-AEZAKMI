@@ -29,7 +29,7 @@ int main(void){
 
     // planificacion_fifo();
 
-    ver_estado_pcb();
+    // ver_estado_pcb();
 
     return 0;
 }
@@ -126,7 +126,7 @@ void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS
         List lista_pasos;
         initlist(&lista_pasos);
 
-        t_plato* plato_creado = crear_plato(info_comida->comida, &lista_pasos, pedido_id, atoi(info_comida->cantidad_total), atoi(info_comida->cantidad_lista));
+        t_plato* plato_creado = crear_plato(info_comida->comida ,&lista_pasos, pedido_id, atoi(info_comida->cantidad_total), atoi(info_comida->cantidad_lista),asignar_pid());
 
         pushbacklist(&lista_platos_confirmados,plato_creado);
     }
@@ -137,6 +137,8 @@ void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS
 
 
 }
+
+
 
 void handle_obtener_restaurante(r_obtener_restaurante* respuesta){
    
@@ -175,14 +177,14 @@ void caso_uso(){
     pushbacklist(&lista_pasos_empanada, paso_freir);
 
 
-    t_plato* milanesa = crear_plato("Milanesa",&lista_pasos_milanesa,10,1,0);
-    t_plato* pizza = crear_plato("Pizza",&lista_pasos_pizza,10,1,0);
-    t_plato* empanada = crear_plato("Empanada", &lista_pasos_empanada,10,1,0);
+    t_plato* milanesa = crear_plato("Milanesa",&lista_pasos_milanesa,10,1,0,asignar_pid());
+    // t_plato* pizza = crear_plato("Pizza",&lista_pasos_pizza,10,1,0,asignar_pid());
+    // t_plato* empanada = crear_plato("Empanada", &lista_pasos_empanada,10,1,0,asignar_pid());
    // t_plato* guiso = crear_plato("Guiso",&lista_pasos_empanada,10,1,0);
 
     pushbacklist(&lista_platos, milanesa);
-    pushbacklist(&lista_platos, pizza);
-    pushbacklist(&lista_platos, empanada);
+    // pushbacklist(&lista_platos, pizza);
+    // pushbacklist(&lista_platos, empanada);
   //  pushbacklist(&lista_platos, guiso);
 
     
@@ -243,6 +245,7 @@ void ver_estado_pcb(){
         t_pcb* pcb = iter_pcb->data;
 
         printf("- El id del pedido del PCB es: %i \n",pcb->id_pedido);
+         printf("- El PID del PCB es: %i \n",pcb->pid);
         printf("- El plato que contiene es: %s \n", pcb->plato->nombre);
         printf("- El plato se encuentra en estado: %i \n",pcb->estado);
         printf("- Pertenece a la cola ready: %s \n", pcb->cola_ready_perteneciente->afinidad);
@@ -366,6 +369,7 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     recetas = malloc(sizeof(receta_precio**));
     cantidad_pedidos = 0;
     cantidad_platos = 0;
+    pid = 0;
     initlist(&lista_pedidos);
     initlist(&colas_ready);
     initlist(&colas_exit);
@@ -458,7 +462,14 @@ int len_array(char** arrayInput)
     return cont;
 }
 
+int asignar_pid(){
 
+    sem_wait(sem_id);
+    pid = pid + 1;
+    sem_post(sem_id);
+        
+    return pid;
+}
 
 
 

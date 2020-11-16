@@ -20,6 +20,7 @@ char* pos_y;
 int cantidad_hornos;
 int cantidad_pedidos;
 int cantidad_platos;
+int pid;
 int cantidad_cocineros;
 int socket_sindicato;
 t_modulo modulo_sindicato;
@@ -84,6 +85,7 @@ typedef struct{
 
 typedef struct{
     int id_pedido;
+    int pid;
     estado_proceso_t estado;
     t_plato* plato;
     t_ready* cola_ready_perteneciente;
@@ -114,11 +116,14 @@ int pasos_ejecutados(t_pcb* pcb);
 int termino_pedido(int id_pedido);
 char* obtener_estado(int estado);
 List* hilos_ready();
+void sacar_exec(t_pcb* pcb);
+void sacar_ready(t_pcb* pcb);
+void sacar_horno(t_pcb* pcb);
 
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu);
-t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo);
+t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo, int pid);
 t_pedido* creacion_pedido(int id, List* platos);
-t_pcb* crear_pcb(int id_pedido, int estado,t_plato* plato);
+t_pcb* crear_pcb(int id_pedido,int pid, int estado,t_plato* plato);
 
 
 #endif

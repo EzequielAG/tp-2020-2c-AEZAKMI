@@ -23,7 +23,7 @@ int main(void){
     inicializar_colas();
 
   
-    // iniciar_servidor("127.0.0.1", "5002", handle_client);
+    iniciar_servidor("127.0.0.1", "5002", handle_client);
     
     caso_uso();
 
@@ -52,7 +52,7 @@ void handle_client(t_result* result){
     if (result->operacion == MENSAJES){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
 
-        if(tipo_mensaje == 16){
+        if(tipo_mensaje == handshake_cliente){
             send_message_socket(result->socket, "OK");
 
         }
@@ -355,7 +355,7 @@ void escuchar_mensajes_socket_desacoplado(int socket){
 	parametro->f = (void*) handle_client;
 
 	pthread_create(&thread,NULL,(void*)escuchar_mensajes_socket, parametro);
-	pthread_join(thread,NULL);
+	pthread_detach(thread);
 
 }
 
@@ -450,7 +450,8 @@ void handshake_init(t_modulo modulo1, t_modulo modulo2){
         inicializacion_default();
     }
     else{
-        handle_obtener_restaurante(enviar_mensaje_obtener_restaurante(&modulo2, restaurante_config->nombre_restaurante));
+        //handle_obtener_restaurante(enviar_mensaje_obtener_restaurante(&modulo2, restaurante_config->nombre_restaurante));
+        inicializacion_default();
     }
 
 }

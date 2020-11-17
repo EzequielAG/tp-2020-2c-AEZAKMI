@@ -31,52 +31,52 @@ void iniciar_servidor_sindicato(){
 
 void handle_client(t_result* result){
 
-	if (result->operacion == MENSAJE){
-		if (!strcmp(result->mensaje, "HANDSHAKE")){
-			send_message_socket(result->socket, "OK");
-			liberar_conexion(result->socket);
-		}
-	} else {
-		if (result->operacion == MENSAJES){
-			int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
-			switch(tipo_mensaje)
-			{
-				case consultar_platos:
-					handle_consultar_platos(result->socket, result->mensajes->mensajes[1]);
-					break;
-				case guardar_pedido:
-					handle_guardar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
-					break;
-				case guardar_plato:
-					handle_guardar_plato(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3], result->mensajes->mensajes[4]);
-					break;
-				case confirmar_pedido:
-					handle_confirmar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
-					break;
-				case obtener_pedido:
-					handle_obtener_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
-					break;
-				case obtener_restaurante:
-					handle_obtener_restaurante(result->socket, result->mensajes->mensajes[1]);
-					break;
-				case plato_listo:
-					handle_plato_listo(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3]);
-					break;
-				case obtener_receta:
-					handle_obtener_receta(result->socket, result->mensajes->mensajes[1]);
-					break;
-				case terminar_pedido:
-					handle_terminar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
-					break;
-				default:
-					handle_error(result->socket);
-					break;
-			}
+	if (result->operacion == MENSAJES){
+		int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
+		switch(tipo_mensaje)
+		{
+			case consultar_platos:
+				handle_consultar_platos(result->socket, result->mensajes->mensajes[1]);
+				break;
+			case guardar_pedido:
+				handle_guardar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
+				break;
+			case guardar_plato:
+				handle_guardar_plato(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3], result->mensajes->mensajes[4]);
+				break;
+			case confirmar_pedido:
+				handle_confirmar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
+				break;
+			case obtener_pedido:
+				handle_obtener_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
+				break;
+			case obtener_restaurante:
+				handle_obtener_restaurante(result->socket, result->mensajes->mensajes[1]);
+				break;
+			case plato_listo:
+				handle_plato_listo(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3]);
+				break;
+			case obtener_receta:
+				handle_obtener_receta(result->socket, result->mensajes->mensajes[1]);
+				break;
+			case terminar_pedido:
+				handle_terminar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
+				break;
+			case handshake_restaurante:
+				handle_handshake_restaurante(result->socket);
+				break;
+			default:
+				handle_error(result->socket);
+				break;
 		}
 	}
 
 	liberar_conexion(result->socket);
 	return;
+}
+
+void handle_handshake_restaurante(int socket){
+	send_message_socket(socket, "OK");
 }
 
 int guardar_pedido_en_afip(char* restaurante, char* id_pedido){
@@ -166,37 +166,39 @@ void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* 
 	//Verificar si ese plato ya existe dentro del archivo.
 	//En caso de existir, se deberán agregar la cantidad pasada por parámetro a la actual. 
 	//En caso de no existir se deberá agregar el plato a la lista de Platos y anexar la cantidad que se tiene que cocinar de dicho plato y aumentar el precio total del pedido.
-	bool platos_iguales(char* plato){
-		if(strcmp(plato, comida)){
-			return true;
-		} else {
-			return false;
-		}
-	}
-	if (list_any_satisfy(pedido->lista_platos, &platos_iguales)){
-		int i, posicion;
-		int cant_platos = list_size(pedido->lista_platos);
-		for (i=0; i<=cant_platos; i++){
-			char* plato_existente = list_get(pedido->lista_platos, i);
-			if (strcmp(plato_existente, comida)){
-				posicion = i;
-			}
-		}
-		list_replace(pedido->cantidad_platos, posicion, cantidad);
-	} else {
-		list_add(pedido->lista_platos, comida);
-		list_add(pedido->cantidad_platos, cantidad);
-	}
+	// bool platos_iguales(char* plato){
+	// 	if(strcmp(plato, comida)){
+	// 		return true;
+	// 	} else {
+	// 		return false;
+	// 	}
+	// }
+
+
+	// if (list_any_satisfy(pedido->lista_platos, &platos_iguales)){
+	// 	int i, posicion;
+	// 	int cant_platos = list_size(pedido->lista_platos);
+	// 	for (i=0; i<=cant_platos; i++){
+	// 		char* plato_existente = list_get(pedido->lista_platos, i);
+	// 		if (strcmp(plato_existente, comida)){
+	// 			posicion = i;
+	// 		}
+	// 	}
+	// 	list_replace(pedido->cantidad_platos, posicion, cantidad);
+	// } else {
+	// 	list_add(pedido->lista_platos, comida);
+	// 	list_add(pedido->cantidad_platos, cantidad);
+	// }
 
 	//Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
-	char* respuesta[1];
+	// char* respuesta[1];
 
-	if (true){
-		respuesta[0] = "Ok";
-	} else {
-		respuesta[0] = "Fail";
-	}
-	send_messages_socket(socket, respuesta, 1);
+	// if (true){
+	// 	respuesta[0] = "Ok";
+	// } else {
+	// 	respuesta[0] = "Fail";
+	// }
+	// send_messages_socket(socket, respuesta, 1);
 
 }
 
@@ -251,7 +253,8 @@ void handle_obtener_pedido(int socket, char* restaurante, char* id_pedido){
 			// TODO: En caso de no existir se deberá informar dicha situación.
 		}
 
-		t_pedido* get_pedido(restaurante, id_pedido);
+
+		get_pedido(restaurante, id_pedido);
 		//Responder el mensaje indicando si se pudo realizar en conjunto con la información del pedido si correspondiera.
 	}
 }
@@ -317,7 +320,7 @@ void handle_obtener_receta(int socket, char* comida){
 			// TODO: En caso de no existir, se deberá informar dicha situación.
 		}
 
-		t_receta* get_receta(comida);
+		get_receta(comida);
 
 		//Responder el mensaje con la receta solicitada.
 	}

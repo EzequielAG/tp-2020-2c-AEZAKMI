@@ -12,6 +12,9 @@ void iniciar_planificador(){
 
     sem_pcb_new =  malloc(sizeof(sem_t));
     sem_init(sem_pcb_new, 0, 0);
+
+    sem_grado_multiprocesamiento = malloc(sizeof(sem_t));
+    sem_init(sem_grado_multiprocesamiento, 0, app_config->grado_multiprocesamiento);
     
     iniciar_repartidores();
 
@@ -109,6 +112,7 @@ void planificar_largo_plazo(){
 void planificar_corto_plazo_FIFO(){
     while (true){
         sem_wait(sem_pcb_ready);
+        sem_wait(sem_grado_multiprocesamiento);
 
         t_pcb* pcb = popfrontlist(&pcb_ready);
         

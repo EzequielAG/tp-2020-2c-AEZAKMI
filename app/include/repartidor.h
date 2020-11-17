@@ -21,6 +21,7 @@ sem_t* sem_pcb_new;
 List pcb_new;
 sem_t* sem_pcb_ready;
 List pcb_ready;
+sem_t* sem_grado_multiprocesamiento;
 
 typedef struct {
     int posx;
@@ -64,5 +65,7 @@ void cansarse(t_repartidor* repartidor);
 bool esta_cansado(t_repartidor* repartidor);
 void descansar(t_repartidor* repartidor);
 void buscar_datos_pedido(t_repartidor* repartidor);
+void desuscribirse_clock(sem_t* ciclo_cpu);
+void pasar_a_ready(t_repartidor* repartidor);
 
 #endif

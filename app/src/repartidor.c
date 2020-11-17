@@ -111,11 +111,30 @@ bool esta_cansado(t_repartidor* repartidor){
 }
 
 void descansar(t_repartidor* repartidor){
-    //TODO: TENGO QUE PASARLO A BLOCKED
+
+
+    sem_post(sem_grado_multiprocesamiento);
 
     for (int i = 0; i < repartidor->tiempo_de_descanso; i++){
         sem_wait(repartidor->ciclo_cpu);
     }
 
-    //TODO: TENGO QUE PASARLO A READY OTRA VEZ
+    pasar_a_ready(repartidor);
+}
+
+void pasar_a_ready(t_repartidor* repartidor){
+    
+    desuscribirse_clock(repartidor->ciclo_cpu);
+    pushbacklist(&pcb_ready, repartidor->pcb_actual);
+    sem_post(sem_pcb_ready);
+}
+
+void desuscribirse_clock(sem_t* ciclo_cpu){
+
+    for (IteratorList it = beginlist(suscriptores_cpu); it != NULL ; it = nextlist(it)){
+        if ((sem_t*)dataiterlist(it) == ciclo_cpu){
+            popiterlist(&suscriptores_cpu, it);
+            break;
+        }
+    }
 }

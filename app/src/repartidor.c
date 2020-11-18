@@ -22,7 +22,25 @@ void repartir_pedido(t_repartidor* repartidor){
 }
 
 void buscar_datos_pedido(t_repartidor* repartidor){
-    //TODO: Buscar la posicion del cliente y del restaurante
+    t_posicion posicion_restaurante;
+    if (!strcmp(repartidor->pcb_actual->restaurante, "Resto Default")){
+        posicion_restaurante.posx = app_config->posicion_rest_default_x;
+        posicion_restaurante.posy = app_config->posicion_rest_default_y;
+    } else {
+        //TODO: OBTENER LA POSICION DEL RESTAURANTE POSTA
+    }
+    
+    t_posicion posicion_cliente;
+    
+    //TODO: CAMBIAR POR LAS POSICIONES REALES
+    posicion_cliente.posx = 3;
+    posicion_cliente.posy = 4;
+
+    t_pedido* pedido = malloc(sizeof(t_pedido));
+    pedido->posicion_cliente = posicion_cliente;
+    pedido->posicion_restaurante = posicion_restaurante;
+
+    repartidor->pedido = pedido;
 }
 
 void ir_hacia_restaurante(t_repartidor* repartidor){
@@ -54,7 +72,7 @@ void ir_hacia_cliente(t_repartidor* repartidor){
 }
 
 void entregar_pedido(t_repartidor* repartidor){
-    //TODO: No se si debo hacer algo acá
+    desuscribirse_clock(repartidor->ciclo_cpu);
 }
 
 bool misma_posicion(t_posicion posicion1, t_posicion posicion2){

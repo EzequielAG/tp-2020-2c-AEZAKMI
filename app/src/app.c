@@ -3,6 +3,8 @@ int main(void){
 
     app_init(&app_config, &logger);
 
+    //iniciar_planificador();
+
     iniciar_servidor("127.0.0.1", "5004", handle_client);
 
     app_finally(app_config, logger);

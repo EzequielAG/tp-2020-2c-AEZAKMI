@@ -13,6 +13,9 @@ void iniciar_planificador(){
     sem_pcb_new =  malloc(sizeof(sem_t));
     sem_init(sem_pcb_new, 0, 0);
 
+    sem_pcb_ready =  malloc(sizeof(sem_t));
+    sem_init(sem_pcb_ready, 0, 0);
+
     sem_grado_multiprocesamiento = malloc(sizeof(sem_t));
     sem_init(sem_grado_multiprocesamiento, 0, app_config->grado_multiprocesamiento);
     
@@ -65,6 +68,8 @@ void iniciar_repartidores(){
         repartidor_actual->cansancio = 0;
         repartidor_actual->nuevo_pedido = malloc(sizeof(sem_t));
         sem_init(repartidor_actual->nuevo_pedido, 0, 0);
+        repartidor_actual->ciclo_cpu = malloc(sizeof(sem_t));
+        sem_init(repartidor_actual->ciclo_cpu, 0, 0);
 
         pthread_t thread;
         pthread_create(&thread,NULL,(void*)repartir_pedidos, repartidor_actual);

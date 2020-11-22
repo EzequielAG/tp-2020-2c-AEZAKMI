@@ -27,14 +27,18 @@ void buscar_datos_pedido(t_repartidor* repartidor){
         posicion_restaurante.posx = app_config->posicion_rest_default_x;
         posicion_restaurante.posy = app_config->posicion_rest_default_y;
     } else {
-        //TODO: OBTENER LA POSICION DEL RESTAURANTE POSTA
+        t_restaurante *restaurante = buscar_restaurante_lista(repartidor->pcb_actual->restaurante);
+        posicion_restaurante.posx = restaurante->posicion.posx;
+        posicion_restaurante.posy = restaurante->posicion.posy;
     }
     
     t_posicion posicion_cliente;
+
+    t_cliente* cliente = buscar_cliente_lista(repartidor->pcb_actual->cliente);
     
     //TODO: CAMBIAR POR LAS POSICIONES REALES
-    posicion_cliente.posx = 3;
-    posicion_cliente.posy = 4;
+    posicion_cliente.posx = cliente->posicion.posx;
+    posicion_cliente.posy = cliente->posicion.posy;
 
     t_pedido* pedido = malloc(sizeof(t_pedido));
     pedido->posicion_cliente = posicion_cliente;
@@ -55,7 +59,30 @@ void ir_hacia_restaurante(t_repartidor* repartidor){
 }
 
 void esperar_pedido(t_repartidor* repartidor){
-   //TODO: Consultar el estado del pedido, si esta listo, llevarselo. Si no esta listo, esperar que me avisen que esta listo
+
+    if(pedido_terminado(repartidor->pcb_actual->id_pedido)){
+        return;
+    }
+
+    desuscribirse_clock(repartidor->ciclo_cpu);
+
+
+    if(pedido_terminado(repartidor->pcb_actual->id_pedido)){
+        pasar_a_ready(repartidor);
+    }
+
+}
+
+int pedido_terminado(int id_pedido){
+
+    for(IteratorList it = beginlist(pedidos_terminados); it != NULL; it = nextlist(it)){
+        if((int)dataiterlist(it) == id_pedido){
+            popiterlist(&pedidos_terminados, it);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 void ir_hacia_cliente(t_repartidor* repartidor){
@@ -73,6 +100,7 @@ void ir_hacia_cliente(t_repartidor* repartidor){
 
 void entregar_pedido(t_repartidor* repartidor){
     desuscribirse_clock(repartidor->ciclo_cpu);
+    enviar_final_pedido(repartidor->pcb_actual->restaurante, repartidor->pcb_actual->id_pedido);
 }
 
 bool misma_posicion(t_posicion posicion1, t_posicion posicion2){
@@ -130,19 +158,17 @@ bool esta_cansado(t_repartidor* repartidor){
 
 void descansar(t_repartidor* repartidor){
 
-
     sem_post(sem_grado_multiprocesamiento);
 
     for (int i = 0; i < repartidor->tiempo_de_descanso; i++){
         sem_wait(repartidor->ciclo_cpu);
     }
-
+    desuscribirse_clock(repartidor->ciclo_cpu);
     pasar_a_ready(repartidor);
 }
 
 void pasar_a_ready(t_repartidor* repartidor){
     
-    desuscribirse_clock(repartidor->ciclo_cpu);
     pushbacklist(&pcb_ready, repartidor->pcb_actual);
     sem_post(sem_pcb_ready);
 }

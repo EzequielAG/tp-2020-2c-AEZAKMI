@@ -34,7 +34,8 @@ void handshake_init(t_modulo, t_modulo);
 
 int asignar_pedido_id();
 int asignar_pid();
-int handshake(t_modulo* modulo);
+int handshake_app(t_modulo* modulo);
+int handshake_sindicato(t_modulo*);
 void escuchar_mensajes_socket_desacoplado(int socket);
 void escuchar_mensajes_socket(t_parameter* parametro);
 void handle_client(t_result* result);

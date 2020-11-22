@@ -12,7 +12,6 @@
 
 void iniciar_planificador();
 void iniciar_repartidores();
-t_pcb* crear_pcb(char* restaurante, int id_pedido);
 void pcb_prueba();
 void iniciar_planificador_corto_plazo();
 void iniciar_planificador_largo_plazo();

@@ -30,7 +30,9 @@ int abrir_socket_servidor(char* IP, char* PUERTO) {
 			continue;
 
 		int activado = 1;
+		//int desactivado = 0;
 		setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &activado, sizeof(activado));
+		//setsockopt(socket_servidor, SOL_SOCKET, SOCK_NONBLOCK, &desactivado, sizeof(desactivado));
 
 		if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
 			close(socket_servidor);
@@ -50,7 +52,14 @@ void escuchar_socket(int* socket_servidor, void (*f)(t_result*)){
 
 	printf("Estoy escuchando el socket %d:\n", *socket_servidor);
 
-	listen(*socket_servidor, SOMAXCONN);
+	int respuesta = listen(*socket_servidor, SOMAXCONN);
+
+	if(respuesta == -1){
+		//perror("ERROR DE ACCEPT:");
+		printf("ERROR DE LISTEN: %s | NUMERO DE ERRNO: %d\n", strerror(errno), errno);
+		printf("Listen falló estrepitosamente\n");
+		return;
+	}	
 
 	while(1)
 		esperar_cliente(*socket_servidor, f);
@@ -67,6 +76,8 @@ void esperar_cliente(int socket_servidor, void (*f)(t_result*))
 	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, (void*) &tam_direccion);
 
 	if (socket_cliente == -1){
+		//perror("ERROR DE ACCEPT:");
+		printf("ERROR DE ACCEPT: %s | NUMERO DE ERRNO: %d\n", strerror(errno), errno);
 		return;
 	}
 
@@ -395,7 +406,11 @@ void enviar_mensaje(char* mensaje, int socket_cliente)
 
 	void* a_enviar = serializar_paquete(paquete, bytes);
 
-	send(socket_cliente, a_enviar, bytes, 0);
+	int respuesta = send(socket_cliente, a_enviar, bytes, 0);
+
+	if (respuesta == -1){
+		printf("Error Al enviar el mensaje\n");
+	}
 
 	free(a_enviar);
 	free(paquete->buffer->stream);

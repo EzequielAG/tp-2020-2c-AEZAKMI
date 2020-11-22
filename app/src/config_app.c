@@ -11,9 +11,9 @@ t_app_config* app_config_loader(char* path_config_file, t_log** logger) {
     modulo_comanda.ip = app_config->ip_comanda;
     modulo_comanda.puerto = app_config->puerto_comanda;
     modulo_comanda.identificacion = "APP";
-    modulo_comanda.socket = 0;// crear_conexion(modulo_comanda.ip, modulo_comanda.puerto, modulo_comanda.identificacion);
+    modulo_comanda.socket = 0;
 
-    //*logger = init_logger(app_config->ruta_log, "APP", LOG_LEVEL_INFO);
+    *logger = init_logger(app_config->ruta_log, "APP", LOG_LEVEL_INFO);
 
     return app_config;
 }

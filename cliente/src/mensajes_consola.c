@@ -12,6 +12,7 @@ void leer_consola(t_log* logger,t_modulo* modulo) {
 	while(strncmp(leido, "", 1) != 0) {
 		log_info(logger, leido);
         t_parametro_mensajes->mensaje_completo = leido;
+        //MOVER EL HILO A PARALELO
         pthread_create(&thread_mensaje,NULL,(void*)enviar_mensajes_por_consola, t_parametro_mensajes);
 	    pthread_join(thread_mensaje,NULL);
 		free(leido);

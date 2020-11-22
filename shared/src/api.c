@@ -105,7 +105,7 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
     
     char* tipo_mensaje = string_itoa(obtener_restaurante);
     char* obtener_restaurante[2] ={tipo_mensaje,restaurante};
-    int socket = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, obtener_restaurante, 2);
+    int socket = enviar_mensaje_modulo(modulo, obtener_restaurante, 2);
 
     t_mensajes* respuesta = receive_simple_messages(socket);
 
@@ -487,6 +487,7 @@ int enviar_mensaje_modulo(t_modulo* modulo, char** mensaje, int cantidadMensajes
         socketReturn = send_messages_and_return_socket(modulo->identificacion,modulo->ip, modulo->puerto, mensaje, cantidadMensajes);
     } else {
         socketReturn = modulo->socket;
+        send_message_socket(modulo->socket, modulo->identificacion);
         send_messages_socket(modulo->socket, mensaje, cantidadMensajes);
     }
 

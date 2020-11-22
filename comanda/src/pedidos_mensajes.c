@@ -48,7 +48,12 @@ void handle_client(t_result* result){
         send_message_socket(result->socket, "OK");
         liberar_conexion(result->socket);
         printf("Se conecto el cliente con el id: %s \n", result->mensajes->mensajes[1]);
-    }/*
+    }else if (tipo_mensaje == 20){
+        printf("Llego el mensaje CREAR_MENSAJE\n");
+        send_message_socket(result->socket, "3");
+        liberar_conexion(result->socket);
+    }
+        /*
     else if (!strcmp(result->identificador_cliente, "APP")){
         send_message_socket(result->socket, "OK");
         liberar_conexion(result->socket);

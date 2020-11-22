@@ -23,6 +23,7 @@ int cantidad_platos;
 int pid;
 int cantidad_cocineros;
 int socket_sindicato;
+int socket_app;
 t_modulo modulo_sindicato;
 t_modulo modulo_app;
 receta_precio** recetas;

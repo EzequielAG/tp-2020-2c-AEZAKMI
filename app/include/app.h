@@ -12,7 +12,7 @@
 #include "tests.h"
 #include "app_messages.h"
 #include "config_app.h"
-#include "planificador.h"
+//#include "planificador.h"
 
 // FUNCIONES
 void app_init(t_app_config** app_config, t_log** logger);

@@ -21,7 +21,7 @@ void iniciar_planificador(){
     
     iniciar_repartidores();
 
-    pcb_prueba();
+    //pcb_prueba();
 
     iniciar_planificador_largo_plazo();
 
@@ -33,7 +33,7 @@ void iniciar_planificador(){
 
 void iniciar_clock(){
     pthread_t thread;
-    pthread_create(&thread,NULL,(void*)clock, NULL);
+    pthread_create(&thread,NULL,(void*)clock_cpu, NULL);
 	pthread_detach(thread);
 }
 
@@ -128,17 +128,12 @@ void planificar_corto_plazo_FIFO(){
 
 void pcb_prueba(){
     
-    pushbacklist(&pcb_new, crear_pcb("Resto Default", 1));
+    pushbacklist(&pcb_new, crear_pcb("Resto Default", 1, NULL));
     sem_post(sem_pcb_new);
-    pushbacklist(&pcb_new, crear_pcb("Resto Default", 2));
+    pushbacklist(&pcb_new, crear_pcb("Resto Default", 2, NULL));
     sem_post(sem_pcb_new);
-    pushbacklist(&pcb_new, crear_pcb("Resto Default", 3));
+    pushbacklist(&pcb_new, crear_pcb("Resto Default", 3, NULL));
     sem_post(sem_pcb_new);
 }
 
-t_pcb* crear_pcb(char* restaurante, int id_pedido){
-    t_pcb* pcb = malloc(sizeof(t_pcb));
-    pcb->restaurante = restaurante;
-    pcb->id_pedido = id_pedido;
-    return pcb;
-}
+

@@ -27,6 +27,8 @@ void descansar(t_repartidor* repartidor);
 void buscar_datos_pedido(t_repartidor* repartidor);
 void desuscribirse_clock(sem_t* ciclo_cpu);
 void pasar_a_ready(t_repartidor* repartidor);
+void pasar_a_block(t_repartidor* repartidor);
 int pedido_terminado(int id_pedido);
+void inicializar_pedido_semaforo(char* id_pedido);
 
 #endif

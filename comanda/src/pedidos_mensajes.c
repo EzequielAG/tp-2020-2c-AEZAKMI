@@ -230,7 +230,7 @@ int guardar_pedido_en_memoria(char* restaurante, char* id_pedido){
 
 int confirmar_pedido_en_memoria(char* id_pedido, char* restaurante){
 
-    l_segmento* segmento = obtener_pedido_en_memoria(restaurante, id_pedido);
+    l_segmento* segmento = obtener_pedido_en_memoria(id_pedido, restaurante);
 
     if(segmento == NULL){
         return 0;
@@ -243,7 +243,7 @@ int confirmar_pedido_en_memoria(char* id_pedido, char* restaurante){
 
 
 
-l_segmento* obtener_pedido_en_memoria(char* nombreResto, char* id_pedido){
+l_segmento* obtener_pedido_en_memoria(char* id_pedido, char* nombreResto){
 
     l_proceso *restoEnTabla = find_resto_lista(nombreResto);
 
@@ -298,8 +298,8 @@ int plato_listo_en_memoria(char* nombreResto, char* idPedido, char* plato){
     l_pagina* pagina_plato = plato_en_pagina(plato, segmento->punteroTablaPaginas);
 
     modificarPagina(pagina_plato);
-
-    terminarPlatoPagina(pagina_plato);
+ 
+    //terminarPlatoPagina(pagina_plato);
     /*
     if(platos_listos(segmento)){
         terminar_pedido_segmento(segmento); 
@@ -308,7 +308,7 @@ int plato_listo_en_memoria(char* nombreResto, char* idPedido, char* plato){
     return 1;
 }
 
-int finalizar_pedido_en_memoria(char* restaurante, char* id_pedido){
+int finalizar_pedido_en_memoria(char* id_pedido, char* restaurante){
 
     l_proceso *restoEnTabla = find_resto_lista(restaurante);
 

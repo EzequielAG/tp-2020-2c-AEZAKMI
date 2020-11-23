@@ -250,21 +250,20 @@ int necesita_recrearse(char * block_size, char * blocks, char * magic_number){
 
 }
 
+FILE * get_or_create_file(char* path_file, char * mode){
+	char * address = string_new();
+	string_append(&address, sindicato_config->punto_montaje);
+	string_append(&address, path_file);
 
-/* --- BITMAP --- */
-FILE * get_or_create_bitmap_file(char * mode){
-	char * bitmap_address = string_new();
-	string_append(&bitmap_address, sindicato_config->punto_montaje);
-	string_append(&bitmap_address, "/Metadata/Bitmap.bin");
+	FILE * file = fopen(address, mode);
+	free(address);
 
-	FILE * bitmap_file = fopen(bitmap_address, mode);
-	free(bitmap_address);
-
-	return bitmap_file;
+	return file;
 }
 
+/* --- BITMAP --- */
 void update_bitmap_file(t_bitarray * bitmap){
-	FILE * bitmap_file = get_or_create_bitmap_file("wb");
+	FILE * bitmap_file = get_or_create_file("/Metadata/Bitmap.bin", "wb");
 	if (bitmap_file == NULL)
 		log_error(logger, "No se pudo obtener 'bitmap file'");
 
@@ -276,7 +275,7 @@ void update_bitmap_file(t_bitarray * bitmap){
 }
 
 void crear_bitmap(){
-	FILE * bitmap_file = get_or_create_bitmap_file("rb");
+	FILE * bitmap_file = get_or_create_file("/Metadata/Bitmap.bin", "wb");
 	if (bitmap_file == NULL)
 		log_error(logger, "No se pudo obtener 'bitmap file'");
 
@@ -292,11 +291,11 @@ void crear_bitmap(){
 	}
 	update_bitmap_file(bitmap);
 
-	bitarray_destroy(bitmap);
+	// bitarray_destroy(bitmap);
 }
 
 t_bitarray * get_bitarray(){
-	FILE * bitmap_file = get_or_create_bitmap_file("rb");
+	FILE * bitmap_file = get_or_create_file("/Metadata/Bitmap.bin", "rb");
 	if (bitmap_file == NULL)
 		log_error(logger, "No se pudo obtener 'bitmap file'");
 
@@ -365,6 +364,17 @@ void crear_files(){
 	get_or_create_folder(restaurantes_adress);
 	get_or_create_folder(recetas_adress);
 	get_or_create_folder(bloques_adress);
+	create_blocks();
+}
+
+void create_blocks(){
+	int cantidad_bloques = atoi(sindicato_config->blocks);
+	for(int id=0; id < cantidad_bloques; id++){
+		char* ruta_archivo = string_from_format("/Blocks/%d.AFIP", id);
+		FILE * bloque = get_or_create_file(ruta_archivo, "w");
+		ruta_archivo = "";
+	}
+
 }
 
 bool existe_restaurante(char* restaurante){

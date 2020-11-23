@@ -375,10 +375,10 @@ t_mensajes* receive_simple_messages(int socket_cliente){
 	mensajes = malloc(sizeof(t_mensajes));
 	mensajes->size = malloc(sizeof(int));
 	recv(socket_cliente, mensajes->size, sizeof(int), MSG_WAITALL);
-	mensajes->mensajes = malloc(sizeof(char) * *mensajes->size);
+	mensajes->mensajes = calloc((*mensajes->size), sizeof(char*));
 	for(int i = 0; i < *mensajes->size; i++){
 		recv(socket_cliente, &size, sizeof(int), MSG_WAITALL);
-		mensajes->mensajes[i] = malloc(size * sizeof(char));
+		mensajes->mensajes[i] = calloc(size, sizeof(char));
 		recv(socket_cliente, mensajes->mensajes[i], size, MSG_WAITALL);
 	}
 

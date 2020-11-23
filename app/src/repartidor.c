@@ -62,21 +62,25 @@ void ir_hacia_restaurante(t_repartidor* repartidor){
 
 void esperar_pedido(t_repartidor* repartidor){
 
-    if(buscar_pedido_espera(string_itoa(repartidor->pcb_actual->id_pedido)) != NULL){
+    r_obtener_pedido* pedido;
+
+    pedido = enviar_mensaje_obtener_pedido(&modulo_comanda, string_itoa(repartidor->pcb_actual->id_pedido), repartidor->pcb_actual->restaurante);
+
+    if(pedido != NULL && comparar_platos(pedido)){
+
         return;
+
     }
 
-    t_pedido_espera* pedido_espera = malloc(sizeof(t_pedido_espera));
-    pedido_espera->id_pedido = string_itoa(repartidor->pcb_actual->id_pedido);
-    pedido_espera->semaforo = repartidor->espera_pedido;
+    t_pedido_espera* pedido_espera = buscar_pedido_espera(string_itoa(repartidor->pcb_actual->id_pedido));
 
     desuscribirse_clock(repartidor->ciclo_cpu);
 
-    pushfrontlist(&lista_semaforos_pedidos, pedido_espera);
+    pasar_a_block(repartidor);
 
     log_info(logger, "Repartidor espera el pedido");
 
-    sem_wait(repartidor->espera_pedido);
+    sem_wait(pedido_espera->semaforo);
 
     log_info(logger, "Pedido listo");
 
@@ -124,7 +128,7 @@ void avanzar_hacia(t_repartidor* repartidor, t_posicion destino){
         mover_hacia_arriba(repartidor);
     }
     
-    char* log_string = string_new();
+    char log_string[100];
     sprintf(log_string, "El repartidor %i se movió a la posición %i - %i", repartidor->id, repartidor->posicion.posx, repartidor->posicion.posy);
     log_info(logger, log_string);
 
@@ -145,7 +149,7 @@ void mover_hacia_abajo(t_repartidor* repartidor){
 }
 
 void mover_hacia_arriba(t_repartidor* repartidor){
-    repartidor->posicion.posx += 1;
+    repartidor->posicion.posy += 1;
 }
 
 void cansarse(t_repartidor* repartidor){
@@ -162,7 +166,7 @@ bool esta_cansado(t_repartidor* repartidor){
 
 void descansar(t_repartidor* repartidor){
 
-    sem_post(sem_grado_multiprocesamiento);
+    pasar_a_block(repartidor);
 
     log_info(logger, "Repartidor descansa");
 
@@ -180,6 +184,10 @@ void pasar_a_ready(t_repartidor* repartidor){
     sem_post(sem_pcb_ready);
 }
 
+void pasar_a_block(t_repartidor* repartidor){
+    sem_post(sem_grado_multiprocesamiento);
+}
+
 void desuscribirse_clock(sem_t* ciclo_cpu){
     log_info(logger, "Pasa a block");
     for (IteratorList it = beginlist(suscriptores_cpu); it != NULL ; it = nextlist(it)){
@@ -188,4 +196,17 @@ void desuscribirse_clock(sem_t* ciclo_cpu){
             break;
         }
     }
+}
+
+void inicializar_pedido_semaforo(char* id_pedido){
+    t_pedido_espera* pedido_espera = malloc(sizeof(t_pedido_espera));
+
+    sem_t* semaforo = malloc(sizeof(sem_t));
+    sem_init(semaforo, 0, 0);
+    
+    pedido_espera->id_pedido = id_pedido;
+    pedido_espera->semaforo = semaforo;
+
+    pushfrontlist(&lista_semaforos_pedidos, pedido_espera);
+
 }

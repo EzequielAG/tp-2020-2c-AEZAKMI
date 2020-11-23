@@ -375,8 +375,6 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
         return NULL;
     }
 
-    r_obtener_pedido* respuesta_obtener_pedido = NULL;
-
     char* tipo_mensaje = string_itoa(obtener_pedido);
 
     int socket = 0;
@@ -390,13 +388,21 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
     for (int i= 0; i < *respuesta->size; i++){
         printf("%s ", respuesta->mensajes[i]);
     } printf("\n");
-    if(strcmp(respuesta->mensajes[0],"FAIL")){
-        r_obtener_pedido* respuesta_obtener_pedido = malloc(sizeof(r_obtener_pedido));
+    if(!strcmp(respuesta->mensajes[0],"FAIL")){
 
-        respuesta_obtener_pedido->estado = respuesta->mensajes[0];
-        respuesta_obtener_pedido->info_comidas = obtener_informacion_comidas(respuesta->mensajes[1],respuesta->mensajes[2], respuesta->mensajes[3]);
+        r_obtener_pedido* respuesta_obtener_pedido = NULL;
+        
+        if(modulo->socket <= 0){
+            liberar_conexion(socket);
+        }
+
+        return respuesta_obtener_pedido;
     }
 
+    r_obtener_pedido* respuesta_obtener_pedido = malloc(sizeof(r_obtener_pedido));
+
+    respuesta_obtener_pedido->estado = respuesta->mensajes[0];
+    respuesta_obtener_pedido->info_comidas = obtener_informacion_comidas(respuesta->mensajes[1],respuesta->mensajes[2], respuesta->mensajes[3]);
 
     if(modulo->socket <= 0){
         liberar_conexion(socket);

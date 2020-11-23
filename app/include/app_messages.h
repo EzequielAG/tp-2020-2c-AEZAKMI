@@ -31,5 +31,4 @@ void handle_consultar_pedido(int,char*, char*);
 char* armar_string_consultar_pedido(r_consultar_pedido* );
 char* obtener_restaurantes();
 char* obtener_platos(List);
-int comparar_platos(r_obtener_pedido*);
 void handle_client(t_result* result);

@@ -25,9 +25,9 @@ void iniciar_planificador(){
 
     iniciar_planificador_largo_plazo();
 
-    iniciar_planificador_corto_plazo();
-
     iniciar_clock();
+
+    iniciar_planificador_corto_plazo();
 
 }
 
@@ -71,8 +71,8 @@ void iniciar_repartidores(){
         repartidor_actual->cansancio = 0;
         repartidor_actual->nuevo_pedido = malloc(sizeof(sem_t));
         sem_init(repartidor_actual->nuevo_pedido, 0, 0);
-        repartidor_actual->espera_pedido = malloc(sizeof(sem_t));
-        sem_init(repartidor_actual->espera_pedido, 0, 0);
+        // repartidor_actual->espera_pedido = malloc(sizeof(sem_t));
+        // sem_init(repartidor_actual->espera_pedido, 0, 0);
         repartidor_actual->ciclo_cpu = malloc(sizeof(sem_t));
         sem_init(repartidor_actual->ciclo_cpu, 0, 0);
 

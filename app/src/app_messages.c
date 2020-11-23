@@ -1,10 +1,6 @@
 #include "app_messages.h"
 
 void handle_client(t_result* result){
-    if(iniciador_de_planificacion == 1){
-        iniciador_de_planificacion = 0;
-        iniciar_planificador();
-    }
     if (result->operacion == MENSAJES){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
         switch(tipo_mensaje){
@@ -30,7 +26,7 @@ void handle_client(t_result* result){
                 handle_anadir_plato(result->socket, result->identificador_cliente, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
             break;
             case plato_listo:
-                handle_plato_listo(result->socket, result->identificador_cliente, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
+                handle_plato_listo(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3]);
             break;
             case confirmar_pedido:
                 handle_confirmar_pedido(result->socket, result->identificador_cliente, result->mensajes->mensajes[1]);
@@ -106,7 +102,7 @@ void handle_crear_pedido(int socket, char* id_cliente){
     if(strcmp(id_pedido, "FAIL")){
         enviar_mensaje_guardar_pedido(&modulo_comanda, restaurante->nombre_restaurante, respuesta[0]);
     }
-
+    inicializar_pedido_semaforo(id_pedido);
     send_messages_socket(socket, respuesta, 1);
     //liberar_conexion(socket);
 }
@@ -278,6 +274,7 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* pl
     if(pedido == NULL){
         respuesta[0] = "FAIL";
         send_messages_socket(socket, respuesta, 1);
+        return;
     }
 
     if(comparar_platos(pedido)){
@@ -287,28 +284,6 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* pl
 
     send_messages_socket(socket, respuesta, 1);
     //liberar_conexion(socket);
-
-}
-
-int comparar_platos(r_obtener_pedido *pedido){
-
-    IteratorList iterador;
-    informacion_comidas *info;
-
-    if(atoi(pedido->estado) == 2){
-        return 1;
-    }
-
-    for(iterador = beginlist(*pedido->info_comidas);iterador != NULL; iterador = nextlist(iterador)){
-        info = (informacion_comidas*)dataiterlist(iterador);
-
-        if(info->cantidad_lista != info->cantidad_total){
-            return 0;
-        }
-
-    }
-
-    return 1;
 
 }
 
@@ -335,6 +310,7 @@ void handle_confirmar_pedido(int socket, char* id_cliente, char* id_pedido){
     pedidoAux = enviar_mensaje_obtener_pedido(&modulo_comanda, id_pedido, restaurante->nombre_restaurante);
     
     if(pedidoAux != NULL){
+        pedido.restaurante = NULL;
         pedido.estado = pedidoAux->estado;
         pedido.info_comidas = pedidoAux->info_comidas;
 
@@ -386,8 +362,10 @@ char* armar_string_consultar_pedido(r_consultar_pedido* pedido){
     char* arrayReturn = string_new();
 
     string_append(&arrayReturn, "{");
-    string_append(&arrayReturn, pedido->restaurante);
-    string_append(&arrayReturn, ",");
+    if(pedido->restaurante != NULL){
+        string_append(&arrayReturn, pedido->restaurante);
+        string_append(&arrayReturn, ",");
+    }
     string_append(&arrayReturn, pedido->estado);
     string_append(&arrayReturn, ",");
 

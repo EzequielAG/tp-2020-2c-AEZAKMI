@@ -63,3 +63,25 @@ t_pcb* crear_pcb(char* restaurante, int id_pedido, char* id_cliente){
     sem_post(sem_pcb_new);
     return pcb;
 }
+
+int comparar_platos(r_obtener_pedido *pedido){
+
+    IteratorList iterador;
+    informacion_comidas *info;
+
+    if(atoi(pedido->estado) == 2){
+        return 1;
+    }
+
+    for(iterador = beginlist(*pedido->info_comidas);iterador != NULL; iterador = nextlist(iterador)){
+        info = (informacion_comidas*)dataiterlist(iterador);
+
+        if(info->cantidad_lista != info->cantidad_total){
+            return 1;
+        }
+
+    }
+
+    return 0;
+
+}

@@ -89,9 +89,9 @@ t_modulo * crear_modulo(char* ip, char* puerto){
 
 int handshake(t_modulo* modulo){
 
-    char* mensajes[2] = {string_itoa(handshake_cliente), cliente_config->id_cliente};
+    char* mensajes[4] = {string_itoa(handshake_cliente), cliente_config->id_cliente, string_itoa(cliente_config->posicion_x), string_itoa(cliente_config->posicion_y)};
 
-    int socket = send_messages_and_return_socket(modulo->identificacion, modulo->ip, modulo->puerto, mensajes, 2);
+    int socket = send_messages_and_return_socket(modulo->identificacion, modulo->ip, modulo->puerto, mensajes, 4);
 
     if (socket == -1){
         return -1;
@@ -106,7 +106,7 @@ int handshake(t_modulo* modulo){
     printf("El handshake con el modulo %s fue correcto\n", mensaje);
 
     escuchar_mensajes_socket_desacoplado(socket);
-
+ 
     return 0;
 }
 
@@ -124,7 +124,7 @@ void escuchar_mensajes_socket_desacoplado(int socket){
 }
 
 void escuchar_mensajes_socket(t_parameter* parametro){
-    escuchar_socket(&parametro->socket, parametro->f);
+    escuchar_socket_sin_conexion(&parametro->socket, parametro->f);
 }
 
 void handle_client(t_result* result){

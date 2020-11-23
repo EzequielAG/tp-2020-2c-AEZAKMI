@@ -22,7 +22,29 @@ void repartir_pedido(t_repartidor* repartidor){
 }
 
 void buscar_datos_pedido(t_repartidor* repartidor){
-    //TODO: Buscar la posicion del cliente y del restaurante
+    t_posicion posicion_restaurante;
+    if (!strcmp(repartidor->pcb_actual->restaurante, "Resto Default")){
+        posicion_restaurante.posx = app_config->posicion_rest_default_x;
+        posicion_restaurante.posy = app_config->posicion_rest_default_y;
+    } else {
+        t_restaurante *restaurante = buscar_restaurante_lista(repartidor->pcb_actual->restaurante);
+        posicion_restaurante.posx = restaurante->posicion.posx;
+        posicion_restaurante.posy = restaurante->posicion.posy;
+    }
+    
+    t_posicion posicion_cliente;
+
+    t_cliente* cliente = buscar_cliente_lista(repartidor->pcb_actual->cliente);
+    
+    //TODO: CAMBIAR POR LAS POSICIONES REALES
+    posicion_cliente.posx = cliente->posicion.posx;
+    posicion_cliente.posy = cliente->posicion.posy;
+
+    t_pedido* pedido = malloc(sizeof(t_pedido));
+    pedido->posicion_cliente = posicion_cliente;
+    pedido->posicion_restaurante = posicion_restaurante;
+
+    repartidor->pedido = pedido;
 }
 
 void ir_hacia_restaurante(t_repartidor* repartidor){
@@ -32,12 +54,36 @@ void ir_hacia_restaurante(t_repartidor* repartidor){
         
         sem_wait(repartidor->ciclo_cpu);
 
+        log_info(logger, "Repartidor se mueve hacia restaurante");
+
         avanzar_hacia(repartidor, pedido->posicion_restaurante);
     }
 }
 
 void esperar_pedido(t_repartidor* repartidor){
-   //TODO: Consultar el estado del pedido, si esta listo, llevarselo. Si no esta listo, esperar que me avisen que esta listo
+
+    if(buscar_pedido_espera(string_itoa(repartidor->pcb_actual->id_pedido)) != NULL){
+        return;
+    }
+
+    t_pedido_espera* pedido_espera = malloc(sizeof(t_pedido_espera));
+    pedido_espera->id_pedido = string_itoa(repartidor->pcb_actual->id_pedido);
+    pedido_espera->semaforo = repartidor->espera_pedido;
+
+    desuscribirse_clock(repartidor->ciclo_cpu);
+
+    pushfrontlist(&lista_semaforos_pedidos, pedido_espera);
+
+    log_info(logger, "Repartidor espera el pedido");
+
+    sem_wait(repartidor->espera_pedido);
+
+    log_info(logger, "Pedido listo");
+
+    free(pedido_espera);
+
+    pasar_a_ready(repartidor);
+
 }
 
 void ir_hacia_cliente(t_repartidor* repartidor){
@@ -47,6 +93,8 @@ void ir_hacia_cliente(t_repartidor* repartidor){
         
         sem_wait(repartidor->ciclo_cpu);
 
+        log_info(logger, "Repartidor avanza hacia el cliente");
+
         avanzar_hacia(repartidor, pedido->posicion_cliente);
 
     }
@@ -54,7 +102,9 @@ void ir_hacia_cliente(t_repartidor* repartidor){
 }
 
 void entregar_pedido(t_repartidor* repartidor){
-    //TODO: No se si debo hacer algo acá
+    desuscribirse_clock(repartidor->ciclo_cpu);
+    log_info(logger, "Pedido entregado");
+    enviar_final_pedido(repartidor->pcb_actual->restaurante, repartidor->pcb_actual->id_pedido);
 }
 
 bool misma_posicion(t_posicion posicion1, t_posicion posicion2){
@@ -111,11 +161,31 @@ bool esta_cansado(t_repartidor* repartidor){
 }
 
 void descansar(t_repartidor* repartidor){
-    //TODO: TENGO QUE PASARLO A BLOCKED
+
+    sem_post(sem_grado_multiprocesamiento);
+
+    log_info(logger, "Repartidor descansa");
 
     for (int i = 0; i < repartidor->tiempo_de_descanso; i++){
         sem_wait(repartidor->ciclo_cpu);
     }
+    desuscribirse_clock(repartidor->ciclo_cpu);
+    pasar_a_ready(repartidor);
+}
 
-    //TODO: TENGO QUE PASARLO A READY OTRA VEZ
+void pasar_a_ready(t_repartidor* repartidor){
+    
+    log_info(logger, "Pasa a ready");
+    pushbacklist(&pcb_ready, repartidor->pcb_actual);
+    sem_post(sem_pcb_ready);
+}
+
+void desuscribirse_clock(sem_t* ciclo_cpu){
+    log_info(logger, "Pasa a block");
+    for (IteratorList it = beginlist(suscriptores_cpu); it != NULL ; it = nextlist(it)){
+        if ((sem_t*)dataiterlist(it) == ciclo_cpu){
+            popiterlist(&suscriptores_cpu, it);
+            break;
+        }
+    }
 }

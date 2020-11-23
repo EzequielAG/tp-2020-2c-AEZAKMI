@@ -12,10 +12,16 @@ void iniciar_planificador(){
 
     sem_pcb_new =  malloc(sizeof(sem_t));
     sem_init(sem_pcb_new, 0, 0);
+
+    sem_pcb_ready =  malloc(sizeof(sem_t));
+    sem_init(sem_pcb_ready, 0, 0);
+
+    sem_grado_multiprocesamiento = malloc(sizeof(sem_t));
+    sem_init(sem_grado_multiprocesamiento, 0, app_config->grado_multiprocesamiento);
     
     iniciar_repartidores();
 
-    pcb_prueba();
+    //pcb_prueba();
 
     iniciar_planificador_largo_plazo();
 
@@ -27,7 +33,7 @@ void iniciar_planificador(){
 
 void iniciar_clock(){
     pthread_t thread;
-    pthread_create(&thread,NULL,(void*)clock, NULL);
+    pthread_create(&thread,NULL,(void*)clock_cpu, NULL);
 	pthread_detach(thread);
 }
 
@@ -35,6 +41,8 @@ void clock_cpu(){
     
     while(true){
         sleep(app_config->retardo_ciclo_cpu);
+
+        log_info(logger, "-----------CICLO-------------");
 
         for (IteratorList il = beginlist(suscriptores_cpu); il != NULL; il = nextlist(il)){
             sem_t* suscriptor = (sem_t*) dataiterlist(il);
@@ -51,7 +59,8 @@ void iniciar_repartidores(){
         char** posiciones_spliteadas = string_split(app_config->repartidores[i], "|");
 
         if (app_config->frecuencia_descanso[i] == NULL || app_config->tiempo_descanso[i] == NULL){
-            //FALLO
+            printf("Tiempo o frecuencia de descanso mal inicializada\n");
+            return;
         }
 
         repartidor_actual->id = i;
@@ -62,6 +71,10 @@ void iniciar_repartidores(){
         repartidor_actual->cansancio = 0;
         repartidor_actual->nuevo_pedido = malloc(sizeof(sem_t));
         sem_init(repartidor_actual->nuevo_pedido, 0, 0);
+        repartidor_actual->espera_pedido = malloc(sizeof(sem_t));
+        sem_init(repartidor_actual->espera_pedido, 0, 0);
+        repartidor_actual->ciclo_cpu = malloc(sizeof(sem_t));
+        sem_init(repartidor_actual->ciclo_cpu, 0, 0);
 
         pthread_t thread;
         pthread_create(&thread,NULL,(void*)repartir_pedidos, repartidor_actual);
@@ -69,6 +82,8 @@ void iniciar_repartidores(){
 
         pushbacklist(&repartidores_libres, repartidor_actual);
         sem_post(sem_entrenador_libre);
+
+        log_info(logger, "Se crea un repartidor");
         
     }
     
@@ -99,6 +114,8 @@ void planificar_largo_plazo(){
         repartidor->pcb_actual = pcb;
         pcb->repartidor_actual = repartidor;
 
+        log_info(logger, "Se asigna pcb a repartidor");
+
         sem_post(repartidor->nuevo_pedido);
 
         pushbacklist(&pcb_ready, pcb);
@@ -109,8 +126,11 @@ void planificar_largo_plazo(){
 void planificar_corto_plazo_FIFO(){
     while (true){
         sem_wait(sem_pcb_ready);
+        sem_wait(sem_grado_multiprocesamiento);
 
         t_pcb* pcb = popfrontlist(&pcb_ready);
+
+        log_info(logger, "Pasa a exec");
         
         pushbacklist(&suscriptores_cpu, pcb->repartidor_actual->ciclo_cpu);
 
@@ -119,14 +139,15 @@ void planificar_corto_plazo_FIFO(){
 
 void pcb_prueba(){
     
-    pushbacklist(&pcb_new, crear_pcb("Resto Default", 1));
+    pushbacklist(&pcb_new, crear_pcb("Resto Default", 1, NULL));
     sem_post(sem_pcb_new);
-    pushbacklist(&pcb_new, crear_pcb("Resto Default", 2));
+    pushbacklist(&pcb_new, crear_pcb("Resto Default", 2, NULL));
     sem_post(sem_pcb_new);
-    pushbacklist(&pcb_new, crear_pcb("Resto Default", 3));
+    pushbacklist(&pcb_new, crear_pcb("Resto Default", 3, NULL));
     sem_post(sem_pcb_new);
 }
 
+<<<<<<< HEAD
 t_pcb* crear_pcb(char* restaurante, int id_pedido){
 
     t_pcb* pcb = malloc(sizeof(t_pcb));
@@ -135,3 +156,6 @@ t_pcb* crear_pcb(char* restaurante, int id_pedido){
     
     return pcb;
 }
+=======
+
+>>>>>>> f93f143a96b2906ae41ea05ef2a8847547675181

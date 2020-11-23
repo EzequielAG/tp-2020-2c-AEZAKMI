@@ -13,8 +13,9 @@ void leer_consola(t_log* logger,t_modulo* modulo) {
 		log_info(logger, leido);
         t_parametro_mensajes->mensaje_completo = leido;
         pthread_create(&thread_mensaje,NULL,(void*)enviar_mensajes_por_consola, t_parametro_mensajes);
-	    pthread_join(thread_mensaje,NULL);
-		free(leido);
+	    pthread_detach(thread_mensaje);
+        //enviar_mensajes_por_consola(t_parametro_mensajes);
+		//free(leido);
 		leido = readline(">");
 	}
 

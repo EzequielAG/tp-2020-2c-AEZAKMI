@@ -1,14 +1,18 @@
 #include "app_messages.h"
 
 void handle_client(t_result* result){
+    if(iniciador_de_planificacion == 1){
+        iniciador_de_planificacion = 0;
+        iniciar_planificador();
+    }
     if (result->operacion == MENSAJES){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
         switch(tipo_mensaje){
             case handshake_cliente: 
-                handle_handshake_cliente(result->socket, result->mensajes->mensajes[1]);
+                handle_handshake_cliente(result->socket, result->mensajes->mensajes[1], atoi(result->mensajes->mensajes[2]), atoi(result->mensajes->mensajes[3]));
             break;
             case handshake_restaurante:
-                handle_handshake_restaurante(result->socket, result->mensajes->mensajes[1]);
+                handle_handshake_restaurante(result->socket, result->mensajes->mensajes[1], atoi(result->mensajes->mensajes[2]), atoi(result->mensajes->mensajes[3]));
             break;
             case consultar_restaurantes:
                 handle_consultar_restaurantes(result->socket);
@@ -23,15 +27,12 @@ void handle_client(t_result* result){
                 handle_crear_pedido(result->socket, result->identificador_cliente);
             break;
             case anadir_plato:
-                //QUEDA DUDA
                 handle_anadir_plato(result->socket, result->identificador_cliente, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
             break;
             case plato_listo:
-                //FALTA TRABAJO
                 handle_plato_listo(result->socket, result->identificador_cliente, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
             break;
             case confirmar_pedido:
-                //FALTA TRABAJO
                 handle_confirmar_pedido(result->socket, result->identificador_cliente, result->mensajes->mensajes[1]);
             break;
             case consultar_pedido:
@@ -45,11 +46,11 @@ void handle_client(t_result* result){
     return;
 }
 
-void handle_handshake_restaurante(int socket, char* nombre_restaurante){
+void handle_handshake_restaurante(int socket, char* nombre_restaurante, int pos_x, int pos_y){
     t_restaurante* restaurante = buscar_restaurante_lista(nombre_restaurante);
             
     if (restaurante == NULL){
-        restaurante = nuevo_restaurante(socket, nombre_restaurante);
+        restaurante = nuevo_restaurante(socket, nombre_restaurante, pos_x, pos_y);
         pushbacklist(&lista_restaurantes, restaurante);
     } else {
         restaurante->socket = socket;
@@ -58,31 +59,18 @@ void handle_handshake_restaurante(int socket, char* nombre_restaurante){
     send_message_socket(socket, "OK");
 }
 
-t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante){
+t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante, int pos_x, int pos_y){
     t_restaurante* restaurante = malloc(sizeof(t_restaurante));
     restaurante->socket = socket;
     restaurante->nombre_restaurante = string_new();
+    restaurante->posicion.posx = pos_x;
+    restaurante->posicion.posy = pos_y;
     string_append(&restaurante->nombre_restaurante, nombre_restaurante);
 
     return restaurante;
 }
 
-t_restaurante* buscar_restaurante_lista(char* nombre_restaurante){
-
-    for (IteratorList iter = beginlist(lista_restaurantes); iter != NULL; iter = nextlist(iter)){
-        t_restaurante* restaurante = (t_restaurante*) iter->data;
-
-        if (strcmp(restaurante->nombre_restaurante, nombre_restaurante) == 0){
-            return restaurante;
-        }
-
-    }
-
-    return NULL;
-
-}
-
-void handle_handshake_cliente(int socket, char* id_cliente){
+void handle_handshake_cliente(int socket, char* id_cliente, int pos_x, int pos_y){
     t_cliente* cliente = buscar_cliente_lista(id_cliente);
             
     if (cliente == NULL){
@@ -90,27 +78,14 @@ void handle_handshake_cliente(int socket, char* id_cliente){
         cliente->socket = socket;
         cliente->id_cliente = string_new();
         string_append(&cliente->id_cliente, id_cliente);
+        cliente->posicion.posx = pos_x;
+        cliente->posicion.posy = pos_y;
         pushbacklist(&lista_clientes, cliente);
     } else {
         cliente->socket = socket;
     }
     
     send_message_socket(socket, "OK");
-}
-
-t_cliente* buscar_cliente_lista(char* id_cliente){
-
-    for (IteratorList iter = beginlist(lista_clientes); iter != NULL; iter = nextlist(iter)){
-        t_cliente* cliente = (t_cliente*) iter->data;
-
-        if (strcmp(cliente->id_cliente, id_cliente) == 0){
-            return cliente;
-        }
-
-    }
-
-    return NULL;
-
 }
 
 void handle_crear_pedido(int socket, char* id_cliente){
@@ -126,8 +101,11 @@ void handle_crear_pedido(int socket, char* id_cliente){
     id_pedido = obtener_id_pedido(restaurante);
 
     respuesta[0] = id_pedido;
+    //respuesta[0] = "3";
 
-    enviar_mensaje_guardar_pedido(&modulo_comanda, restaurante->nombre_restaurante, respuesta[0]);
+    if(strcmp(id_pedido, "FAIL")){
+        enviar_mensaje_guardar_pedido(&modulo_comanda, restaurante->nombre_restaurante, respuesta[0]);
+    }
 
     send_messages_socket(socket, respuesta, 1);
     //liberar_conexion(socket);
@@ -148,7 +126,6 @@ char* obtener_id_pedido(t_restaurante* restaurante){
 
 void handle_seleccionar_restaurante(int socket, char* cliente, char* restaurante){
 
-    //TODO: Cambiar para leer los restaurantes reales
     char* respuesta[1];
 
     if (relacionar(restaurante, cliente) != -1){
@@ -182,7 +159,6 @@ int relacionar(char* nombre_restaurante, char* id_cliente){
 void handle_consultar_restaurantes(int socket){
 
     char* restaurantes = obtener_restaurantes();
-    //TODO: Cambiar para leer los restaurantes reales
     char* respuesta[1] = {restaurantes};
 
     send_messages_socket(socket, respuesta, 1);
@@ -279,8 +255,7 @@ void handle_anadir_plato(int socket, char* id_cliente, char* plato, char* id_ped
         return;
     }
     
-    //TODO: De donde choronga saco la cantidad?
-    //respuesta[0] = enviar_mensaje_guardar_plato(&modulo_comanda, restaurante->nombre_restaurante, id_pedido, plato, /*Cantidad*/);
+    respuesta[0] = enviar_mensaje_guardar_plato(&modulo_comanda, restaurante->nombre_restaurante, id_pedido, plato, "1");
     if(!strcmp(respuesta[0], "FAIL")){
         send_messages_socket(socket, respuesta, 1);
         return;
@@ -300,8 +275,14 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* pl
 
     pedido = enviar_mensaje_obtener_pedido(&modulo_comanda, id_pedido, restaurante);
 
+    if(pedido == NULL){
+        respuesta[0] = "FAIL";
+        send_messages_socket(socket, respuesta, 1);
+    }
+
     if(comparar_platos(pedido)){
-        //TODO: Logica repartidor puede retirar el pedido del restaurante
+        t_pedido_espera* pedido_espera = buscar_pedido_espera(id_pedido);
+        sem_post(pedido_espera->semaforo);
     }
 
     send_messages_socket(socket, respuesta, 1);
@@ -334,6 +315,10 @@ int comparar_platos(r_obtener_pedido *pedido){
 void handle_confirmar_pedido(int socket, char* id_cliente, char* id_pedido){
 
     char* respuesta[1];
+    char* arrayReturn[1];
+
+    r_consultar_pedido pedido;
+    r_obtener_pedido *pedidoAux;
 
     t_modulo modulo_restaurante;
     modulo_restaurante.ip = NULL;
@@ -346,21 +331,28 @@ void handle_confirmar_pedido(int socket, char* id_cliente, char* id_pedido){
     t_restaurante* restaurante = cliente->restaurante;
     modulo_restaurante.socket = restaurante->socket;
 
-    enviar_mensaje_obtener_pedido(&modulo_comanda, id_pedido, restaurante->nombre_restaurante);
 
-    respuesta[0] = enviar_mensaje_confirmar_pedido(&modulo_restaurante, id_pedido, NULL);
-    if(!strcmp(respuesta[0], "FAIL")){
-        send_messages_socket(socket, respuesta, 1);
-        return;
+    pedidoAux = enviar_mensaje_obtener_pedido(&modulo_comanda, id_pedido, restaurante->nombre_restaurante);
+    
+    if(pedidoAux != NULL){
+        pedido.estado = pedidoAux->estado;
+        pedido.info_comidas = pedidoAux->info_comidas;
+
+        arrayReturn[0] = armar_string_consultar_pedido(&pedido);
     }
 
-    //TODO: Generar PCB y dejarlo en ciclo de planificacion
+    // respuesta[0] = enviar_mensaje_confirmar_pedido(&modulo_restaurante, id_pedido, NULL);
+    // if(!strcmp(respuesta[0], "FAIL")){
+    //     send_messages_socket(socket, respuesta, 1);
+    //     return;
+    // }
+
+    crear_pcb(restaurante->nombre_restaurante, atoi(id_pedido), id_cliente);
 
     respuesta[0] = enviar_mensaje_confirmar_pedido(&modulo_comanda, id_pedido, restaurante->nombre_restaurante);
 
     send_messages_socket(socket, respuesta, 1);
     //liberar_conexion(socket);
-
 
 }
 

@@ -1,15 +1,18 @@
 #ifndef CONEXIONES_H_
 #define CONEXIONES_H_
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<sys/socket.h>
-#include<unistd.h>
-#include<commons/log.h>
-#include<commons/collections/list.h>
-#include<string.h>
-#include<netdb.h>
-#include<pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/select.h>
+#include <errno.h>
+#include <unistd.h>
+#include <commons/log.h>
+#include <commons/collections/list.h>
+#include <string.h>
+#include <netdb.h>
+#include <pthread.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 

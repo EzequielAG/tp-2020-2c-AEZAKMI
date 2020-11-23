@@ -3,37 +3,26 @@
 #include <commons/string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <semaphore.h>
 #include "shared_utils.h"
 #include "server.h"
 #include "list.h"
 #include "api.h"
 #include "tests.h"
-#include "config_app.h"
+//#include "config_app.h"
+//#include "config_handle.h"
+#include "planificador.h"
 
-typedef struct {
-    int socket;
-    char* nombre_restaurante;
-} t_restaurante;
-
-typedef struct {
-    int socket;
-    char* id_cliente;
-    t_restaurante* restaurante;
-} t_cliente;
-
-List lista_clientes;
-List lista_restaurantes;
+int iniciador_de_planificacion;
 
 void handle_consultar_restaurantes(int socket);
 int relacionar(char* restaurante, char* cliente);
 void handle_seleccionar_restaurante(int socket, char* restaurante, char* cliente);
 char* obtener_id_pedido(t_restaurante*);
 void  handle_crear_pedido(int, char*);
-t_cliente* buscar_cliente_lista(char* id_cliente);
-void handle_handshake_cliente(int socket, char* id_cliente);
-t_restaurante* buscar_restaurante_lista(char* nombre_restaurante);
-void handle_handshake_restaurante(int socket, char* nombre_restaurante);
-t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante);
+void handle_handshake_cliente(int socket, char* id_cliente, int, int);
+void handle_handshake_restaurante(int socket, char* nombre_restaurante, int, int);
+t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante, int, int);
 void handle_consultar_platos(int, char*);
 void handle_anadir_plato(int,char*, char*, char*);
 void handle_confirmar_pedido(int, char*, char*);

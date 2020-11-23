@@ -6,13 +6,13 @@
 #include <commons/string.h>
 #include <stdlib.h>
 #include "shared_utils.h"
+//#include "config_handle.h"
 #include "repartidor.h"
 #include <pthread.h>
 #include <unistd.h>
 
 void iniciar_planificador();
 void iniciar_repartidores();
-t_pcb* crear_pcb(char* restaurante, int id_pedido);
 void pcb_prueba();
 void iniciar_planificador_corto_plazo();
 void iniciar_planificador_largo_plazo();

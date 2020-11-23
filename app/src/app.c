@@ -3,7 +3,12 @@ int main(void){
 
     app_init(&app_config, &logger);
 
+    //INSERTO RESTAURANTE DEFAULT
+    t_restaurante* restaurante = nuevo_restaurante(0, "Resto Default", app_config->posicion_rest_default_x, app_config->posicion_rest_default_y);
+    pushbacklist(&lista_restaurantes, restaurante);
+
     iniciar_servidor("127.0.0.1", "5004", handle_client);
+    //iniciar_planificador();
 
     app_finally(app_config, logger);
     return 0;
@@ -15,13 +20,9 @@ void app_init(t_app_config** app_config, t_log** logger){
     initlist(&lista_clientes);
     initlist(&lista_restaurantes);
 
-    //INSERTO RESTAURANTE DEFAULT
-    t_restaurante* restaurante = nuevo_restaurante(0, "Resto Default");
-    pushbacklist(&lista_restaurantes, restaurante);
+    iniciador_de_planificacion = 1;
 
     *app_config = app_config_loader("./cfg/app.config", logger);
-    //*logger = init_logger((*app_config)->ruta_log, "APP", LOG_LEVEL_INFO);
-
 
 }
 

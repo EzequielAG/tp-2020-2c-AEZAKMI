@@ -1,6 +1,6 @@
 #include "restaurante.h"
 
-int main(void){
+int main(int argc, char *argv[]){
 
     sem_id = malloc(sizeof(sem_t));
     sem_init(sem_id, 0, 1);
@@ -10,24 +10,28 @@ int main(void){
    
     modulo_app.ip = restaurante_config->ip_app;
     modulo_app.puerto =restaurante_config->puerto_app;
-    modulo_app.identificacion = "app";
+    modulo_app.socket = 0;
+    modulo_app.identificacion = "RESTAURANTE";
 
     modulo_sindicato.ip = restaurante_config->ip_sindicato;
     modulo_sindicato.puerto = restaurante_config->puerto_sindicato;
-    modulo_sindicato.identificacion = "sindicato";
+    modulo_sindicato.socket = 0;
+    modulo_sindicato.identificacion = "RESTAURANTE";
     handshake_init(modulo_app,modulo_sindicato);
 
     data_restaurante();
+
+    cantidad_pedidos = 0;
    
    
     inicializar_colas();
 
-  
-    iniciar_servidor("127.0.0.1", "5002", handle_client);
+    //iniciar_servidor("127.0.0.1", "5002", handle_client);
+    //handle_client();
     
-    caso_uso();
+    //caso_uso();
 
-   //planificacion_fifo();
+    //planificacion_fifo();
 
     ver_estado_pcb();
 
@@ -43,16 +47,16 @@ void* escuchar_servidor(void* handle_client){
 
 // Comienzo handles
 void handle_client(t_result* result){
-
+/*
     for(int i = 0; i < *result->mensajes->size; i++){
         printf("%s ", result->mensajes->mensajes[i]);
     }
     printf("\n");
-
-    if (result->operacion == MENSAJES){
+*/
+    //if (result->operacion == MENSAJES){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
 
-        if(tipo_mensaje == 16){
+        if(tipo_mensaje == handshake_cliente){
             send_message_socket(result->socket, "OK");
 
         }
@@ -68,11 +72,11 @@ void handle_client(t_result* result){
             }
 
             } else if (tipo_mensaje == crear_pedido) {
-
+                //QUITO SINDICATO PARA TESTEAR
                 handle_crear_pedido(result->socket);
 
             } else if (tipo_mensaje == anadir_plato) {
-
+                //QUITO SINDICATO PARA TESTEAR
                 handle_anadir_plato(result);
 
             } else if (tipo_mensaje == confirmar_pedido) {
@@ -82,29 +86,35 @@ void handle_client(t_result* result){
             } else if (tipo_mensaje == consultar_pedido) {
                 // TODO : FALTA LOGICA CONSULTAR_PEDIDO
             }
-    }
+    //}
 
     
 }
 
 void handle_crear_pedido(int socket){
 
-    int id = asignar_pedido_id();
+    char* id[1];
+    char* respuesta[1];
+    id[0] = string_itoa(asignar_pedido_id());
        
-    char* respuesta = enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,string_itoa(id));
+    respuesta[0] = "OK";//enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,id[0]);
 
-    if(!strcmp(respuesta,"OK")){
-        send_message_socket(socket,string_itoa(id));
-    }else{
-        send_message_socket(socket,"FAIL");
+    if(!strcmp(respuesta[0],"OK")){
+        send_messages_socket(socket, id, 1);
+        return;
     }
+    
+    send_messages_socket(socket, respuesta, 1);
+    //liberar_conexion(socket);
+    
 }
 
 void handle_anadir_plato(t_result* result){
  
-    char* respuesta = enviar_mensaje_guardar_plato(&modulo_sindicato, restaurante_config->nombre_restaurante,result->mensajes->mensajes[2] ,result->mensajes->mensajes[1] , "1");
+    char* respuesta[1] = {"OK"};//enviar_mensaje_guardar_plato(&modulo_sindicato, restaurante_config->nombre_restaurante,result->mensajes->mensajes[2] ,result->mensajes->mensajes[1] , "1");
 
-    send_message_socket(result->socket,respuesta);
+    send_messages_socket(result->socket,respuesta, 1);
+    //liberar_conexion(result->socket);
 
 };
 
@@ -227,6 +237,9 @@ void inicializacion_default(){
    initlist(afinidades_default);
    pushbacklist(afinidades_default,"Milanesa");
    pushbacklist(afinidades_default,"Pizza");
+   pushbacklist(afinidades_default,"Guiso");
+   pushbacklist(afinidades_default,"Guiso");
+   pushbacklist(afinidades_default,"Mondongo");
 
 
    resto_default->afinidades = afinidades_default;
@@ -327,11 +340,34 @@ void data_restaurante(){
 
 //COMIENZO HANDSHAKES
 
-int handshake(t_modulo* modulo){
+int handshake_app(t_modulo* modulo){
+
+    char* mensajes[4] = {string_itoa(handshake_restaurante), restaurante_config->nombre_restaurante, pos_x, pos_y};
+
+    socket_app = send_messages_and_return_socket(modulo->identificacion, modulo->ip, modulo->puerto, mensajes, 4);
+
+    if (socket_app == -1){
+        return -1;
+    }
+
+    char * mensaje = receive_simple_message(socket_app);
+
+    if (mensaje == NULL){
+        return -1;
+    }
+
+    printf("El handshake con el modulo APP fue correcto\n");
+
+    escuchar_mensajes_socket_desacoplado(socket_app);
+
+    return 0;
+}
+
+int handshake_sindicato(t_modulo* modulo){
 
     char* mensajes[2] = {string_itoa(handshake_restaurante), restaurante_config->nombre_restaurante};
 
-    socket_sindicato = send_messages_and_return_socket(restaurante_config->nombre_restaurante, modulo->ip, modulo->puerto, mensajes, 2);
+    socket_sindicato = send_messages_and_return_socket(modulo->identificacion, modulo->ip, modulo->puerto, mensajes, 2);
 
     if (socket_sindicato == -1){
         return -1;
@@ -343,7 +379,7 @@ int handshake(t_modulo* modulo){
         return -1;
     }
 
-    printf("El handshake con el modulo %s fue correcto\n", modulo->identificacion);
+    printf("El handshake con el modulo SINDICATO fue correcto\n");
 
     escuchar_mensajes_socket_desacoplado(socket_sindicato);
 
@@ -356,15 +392,15 @@ void escuchar_mensajes_socket_desacoplado(int socket){
     t_parameter* parametro = malloc(sizeof(t_parameter));
 
 	parametro->socket = socket;
-	parametro->f = (void*) handle_client;
+	parametro->f = handle_client;
 
 	pthread_create(&thread,NULL,(void*)escuchar_mensajes_socket, parametro);
-	pthread_join(thread,NULL);
+	pthread_detach(thread);
 
 }
 
 void escuchar_mensajes_socket(t_parameter* parametro){
-    escuchar_socket(&parametro->socket, parametro->f);
+    escuchar_socket_sin_conexion(&parametro->socket, parametro->f);
 }
 
 
@@ -383,6 +419,7 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     initlist(&colas_ready);
     initlist(&colas_exit);
     initlist(&colas_pcb);
+    initlist(&colas_exec);
 
     cola_io = malloc(sizeof(t_io));
 
@@ -441,13 +478,7 @@ void restaurante_destroy(t_restaurante_config* restaurante_config) {
 
 void handshake_init(t_modulo modulo1, t_modulo modulo2){
     
-    int handshake_app_r = handshake(&modulo1);
-
-    if (handshake_app_r == -1){
-        printf("No se pudo realizar la conexion inicial con el modulo app\n");
-    }
-
-    int handshake_sindicato_r = handshake(&modulo2);
+    int handshake_sindicato_r = handshake_sindicato(&modulo2);
 
     if (handshake_sindicato_r == -1){
         printf("No se pudo realizar la conexion inicial con el modulo sindicato\n");
@@ -455,6 +486,13 @@ void handshake_init(t_modulo modulo1, t_modulo modulo2){
     }
     else{
         handle_obtener_restaurante(enviar_mensaje_obtener_restaurante(&modulo2, restaurante_config->nombre_restaurante));
+        //inicializacion_default();
+    }
+
+    int handshake_app_r = handshake_app(&modulo1);
+
+    if (handshake_app_r == -1){
+        printf("No se pudo realizar la conexion inicial con el modulo app\n");
     }
 
 }
@@ -489,9 +527,9 @@ int asignar_pid(){
 
 int asignar_pedido_id(){
 
-    sem_wait(sem_id);
+    //sem_wait(sem_id);
     cantidad_pedidos = cantidad_pedidos + 1;
-    sem_post(sem_id);
+    //sem_post(sem_id);
         
     return cantidad_pedidos;
 }

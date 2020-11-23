@@ -78,6 +78,7 @@ List lista_semaforos_pedidos;
 t_restaurante* buscar_restaurante_lista(char* nombre_restaurante);
 t_cliente* buscar_cliente_lista(char* id_cliente);
 t_pedido_espera* buscar_pedido_espera(char* id_pedido);
+t_pedido_espera* eliminar_pedido_espera(char* id_pedido);
 void enviar_final_pedido(char*, int);
 t_pcb* crear_pcb(char* restaurante, int id_pedido, char* id_cliente);
 int comparar_platos(r_obtener_pedido*);

@@ -97,14 +97,13 @@ void handle_crear_pedido(int socket, char* id_cliente){
     id_pedido = obtener_id_pedido(restaurante);
 
     respuesta[0] = id_pedido;
-    //respuesta[0] = "3";
 
     if(strcmp(id_pedido, "FAIL")){
         enviar_mensaje_guardar_pedido(&modulo_comanda, restaurante->nombre_restaurante, respuesta[0]);
     }
     inicializar_pedido_semaforo(id_pedido);
     send_messages_socket(socket, respuesta, 1);
-    //liberar_conexion(socket);
+
 }
 
 char* obtener_id_pedido(t_restaurante* restaurante){
@@ -131,7 +130,7 @@ void handle_seleccionar_restaurante(int socket, char* cliente, char* restaurante
     }
 
     send_messages_socket(socket, respuesta, 1);
-    //liberar_conexion(socket);
+
 }
 
 int relacionar(char* nombre_restaurante, char* id_cliente){
@@ -158,7 +157,7 @@ void handle_consultar_restaurantes(int socket){
     char* respuesta[1] = {restaurantes};
 
     send_messages_socket(socket, respuesta, 1);
-    //liberar_conexion(socket);
+
 }
 
 char* obtener_restaurantes(){
@@ -203,7 +202,6 @@ void handle_consultar_platos(int socket, char* idCliente){
     lista_platos = *enviar_mensaje_consultar_platos(&modulo_restaurante, NULL);
     
     send_message_socket(socket, obtener_platos(lista_platos));
-    //liberar_conexion(socket);
 
 }
 
@@ -258,7 +256,6 @@ void handle_anadir_plato(int socket, char* id_cliente, char* plato, char* id_ped
     }
 
     send_messages_socket(socket, respuesta, 1);
-    //liberar_conexion(socket);
 
 }
 
@@ -279,6 +276,7 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* pl
 
     if(comparar_platos(pedido)){
         t_pedido_espera* pedido_espera = buscar_pedido_espera(id_pedido);
+        eliminar_pedido_espera(id_pedido);
         sem_post(pedido_espera->semaforo);
     }
 
@@ -352,7 +350,6 @@ void handle_consultar_pedido(int socket, char* id_cliente, char* id_pedido){
     arrayReturn[0] = armar_string_consultar_pedido(&pedido);
 
     send_messages_socket(socket, arrayReturn, 1);
-    //liberar_conexion(socket);
 
 }
 
@@ -388,5 +385,17 @@ char* armar_string_consultar_pedido(r_consultar_pedido* pedido){
     string_append(&arrayReturn, "}");
 
     return arrayReturn;
+
+}
+
+void inicializar_pedido_semaforo(char* id_pedido){
+    t_pedido_espera* pedido_espera = malloc(sizeof(t_pedido_espera));
+    
+    pedido_espera->id_pedido = string_new();
+    string_append(&pedido_espera->id_pedido, id_pedido);
+    pedido_espera->semaforo = malloc(sizeof(sem_t));
+    sem_init(pedido_espera->semaforo, 0, 0);
+
+    pushfrontlist(&lista_semaforos_pedidos, pedido_espera);
 
 }

@@ -147,15 +147,3 @@ void pcb_prueba(){
     sem_post(sem_pcb_new);
 }
 
-<<<<<<< HEAD
-t_pcb* crear_pcb(char* restaurante, int id_pedido){
-
-    t_pcb* pcb = malloc(sizeof(t_pcb));
-    pcb->restaurante = restaurante;
-    pcb->id_pedido = id_pedido;
-    
-    return pcb;
-}
-=======
-
->>>>>>> f93f143a96b2906ae41ea05ef2a8847547675181

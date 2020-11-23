@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
    
     inicializar_colas();
 
-    //iniciar_servidor("127.0.0.1", "5002", handle_client);
+    iniciar_servidor("127.0.0.1", "5002", handle_client);
     //handle_client();
     
     //caso_uso();

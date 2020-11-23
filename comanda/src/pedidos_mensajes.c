@@ -132,7 +132,7 @@ void handle_obtener_pedido(t_result* result){
 
         for(iterator = beginlist(*segmento->punteroTablaPaginas); iterator != NULL; iterator = nextlist(iterator)){
             l_pagina* pagina = (l_pagina*) dataiterlist(iterator);
-            l_frame* frame = pagina->swap;
+            l_frame* frame = pagina->frame;
 
             char* cantidad = string_itoa(frame->cantidadPlato);
             char* cantidadLista = string_itoa(frame->cantidadLista);
@@ -142,8 +142,7 @@ void handle_obtener_pedido(t_result* result){
             string_append(&arrayReturn[2], cantidad);
             string_append(&arrayReturn[2], ",");
             string_append(&arrayReturn[3], cantidadLista);
-            string_append(&arrayReturn[3], ",");    
-
+            string_append(&arrayReturn[3], ",");
         }
         
         send_messages_socket(result->socket, arrayReturn, 4);
@@ -299,7 +298,7 @@ int plato_listo_en_memoria(char* nombreResto, char* idPedido, char* plato){
 
     modificarPagina(pagina_plato);
  
-    //terminarPlatoPagina(pagina_plato);
+    terminarPlatoPagina(pagina_plato);
     /*
     if(platos_listos(segmento)){
         terminar_pedido_segmento(segmento); 

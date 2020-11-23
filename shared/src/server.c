@@ -123,7 +123,6 @@ void process_request(int cod_op, t_parameter* parametros) {
 			for(int i = 0; i < *resultado->mensajes->size; i++){
 				free(resultado->mensajes->mensajes[i]);
 			}
-
 			free(resultado->mensajes->size);
 			free(resultado->mensajes);
 			free(resultado);

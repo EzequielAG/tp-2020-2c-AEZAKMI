@@ -40,6 +40,7 @@ struct t_repartidor {
     int frecuencia_de_descanso;
     int tiempo_de_descanso;
     sem_t* nuevo_pedido;
+    sem_t* espera_pedido;
     sem_t* ciclo_cpu;
     t_pedido* pedido;
     int cansancio;
@@ -63,12 +64,19 @@ typedef struct {
     t_restaurante* restaurante;
 } t_cliente;
 
+typedef struct {
+    char* id_pedido;
+    sem_t* semaforo;
+} t_pedido_espera;
+
 //MUEVO LAS LISTAS PARA UTILIZARLAS ACA
 List lista_clientes;
 List lista_restaurantes;
+List lista_semaforos_pedidos;
 
 //MUEVO LAS FUNCIONES PARA UTILIZARLAS ACA
 t_restaurante* buscar_restaurante_lista(char* nombre_restaurante);
 t_cliente* buscar_cliente_lista(char* id_cliente);
+t_pedido_espera* buscar_pedido_espera(char* id_pedido);
 void enviar_final_pedido(char*, int);
 t_pcb* crear_pcb(char* restaurante, int id_pedido, char* id_cliente);

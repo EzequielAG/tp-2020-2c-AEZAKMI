@@ -2,67 +2,38 @@
 
 void handle_client(t_result* result){
 
-    //CADA UNO DE LOS MENSAJES CON UN HILO DISTINTO; PASAR POR PARAMETRO SOLAMENTE EL T_RESULT
-
-    pthread_t guardar_pedido_thread;
-    pthread_t guardar_plato_thread;
-    pthread_t confirmar_pedido_thread;
-    pthread_t plato_listo_thread;
-    pthread_t obtener_pedido_thread;
-    pthread_t finalizar_pedido_thread;
-    
+    //sleep(10);
 
     int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
     if (tipo_mensaje == guardar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
 
-        pthread_create(&guardar_pedido_thread, NULL, (void*)handle_guardar_pedidos, (void*)result);
-	    pthread_join(guardar_pedido_thread, NULL); //MENSAJE LISTO EN TEORIA XD
+        handle_guardar_pedidos(result);
 
     } else if (tipo_mensaje == guardar_plato){ // NOMBRE_RESTAURANTE ID_PEDIDO PLATO CANTIDAD_PLATO
-
-        pthread_create(&guardar_plato_thread, NULL, (void*)handle_guardar_plato, result);
-	    pthread_join(guardar_plato_thread, NULL);
+        
+        handle_guardar_plato(result);
 
     } else if (tipo_mensaje == confirmar_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO 
-
-        pthread_create(&confirmar_pedido_thread, NULL, (void*)handle_confirmar_pedido, result);
-	    pthread_join(confirmar_pedido_thread, NULL);
+        
+        handle_confirmar_pedido(result);
 
     } else if (tipo_mensaje == plato_listo){ //  NOMBRE_RESTAURANTE ID_PEDIDO PLATO
-
-        pthread_create(&plato_listo_thread, NULL, (void*)handle_plato_listo, result);
-	    pthread_join(plato_listo_thread, NULL);
+        
+        handle_plato_listo(result);
 
     } else if (tipo_mensaje == obtener_pedido){ // NOMBRE_RESTAURANTE ID_PEDIDO
-
-        pthread_create(&obtener_pedido_thread, NULL, (void*)handle_obtener_pedido, result);
-	    pthread_join(obtener_pedido_thread, NULL);
+        
+        handle_obtener_pedido(result);
 
     } else if (tipo_mensaje == finalizar_pedido){ //  NOMBRE_RESTAURANTE ID_PEDIDO
-
-        pthread_create(&finalizar_pedido_thread, NULL, (void*)handle_finalizar_pedido, result);
-	    pthread_join(finalizar_pedido_thread, NULL);
-
+        
+        handle_finalizar_pedido(result);
 
     }else if (tipo_mensaje == handshake_cliente){
         send_message_socket(result->socket, "OK");
         liberar_conexion(result->socket);
         printf("Se conecto el cliente con el id: %s \n", result->mensajes->mensajes[1]);
-    }else if (tipo_mensaje == 20){
-        printf("Llego el mensaje CREAR_MENSAJE\n");
-        send_message_socket(result->socket, "3");
-        liberar_conexion(result->socket);
     }
-        /*
-    else if (!strcmp(result->identificador_cliente, "APP")){
-        send_message_socket(result->socket, "OK");
-        liberar_conexion(result->socket);
-        printf("Se conecto el cliente con el id: %s \n", result->mensajes->mensajes[1]);
-    }
-    */
-
-
-    return;
 }
 
 int existe_restaurante(char* restaurante){
@@ -80,8 +51,6 @@ int existe_restaurante(char* restaurante){
     return 0;
 
 }
-
-//ESTOS DOS QUEDAN ASI PARA TESTEAR
 
 void handle_guardar_plato(t_result* result){
 
@@ -153,13 +122,13 @@ void handle_plato_listo(t_result* result){
 void handle_obtener_pedido(t_result* result){
 
     IteratorList iterator = NULL;
+    char* arrayReturn[4] = {string_new(), string_new(), string_new(), string_new()};
 
     l_segmento* segmento = obtener_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 
     if(segmento != NULL){
 
-        char* arrayReturn[4];
-        strcpy(arrayReturn[0], string_itoa(segmento->estadoPedido));
+        string_append(&arrayReturn[0], string_itoa(segmento->estadoPedido));
 
         for(iterator = beginlist(*segmento->punteroTablaPaginas); iterator != NULL; iterator = nextlist(iterator)){
             l_pagina* pagina = (l_pagina*) dataiterlist(iterator);
@@ -175,18 +144,16 @@ void handle_obtener_pedido(t_result* result){
             string_append(&arrayReturn[3], cantidadLista);
             string_append(&arrayReturn[3], ",");    
 
-            free(cantidad);
-            free(cantidadLista);
-
         }
         
         send_messages_socket(result->socket, arrayReturn, 4);
     }else{
-        char* arrayReturn[1];
-        arrayReturn[0] = "FAIL";
+        string_append(&arrayReturn[0], "FAIL");
         send_messages_socket(result->socket, arrayReturn, 1);
     }
-
+    // for(int i=0; i<4; i++){
+    //     free(arrayReturn[i]);
+    // }
     liberar_conexion(result->socket);
    
 }
@@ -246,19 +213,22 @@ int guardar_plato_en_memoria(char* nombreResto, char* idPedido, char* cantidadPl
 
 int guardar_pedido_en_memoria(char* restaurante, char* id_pedido){
 
-
     l_proceso *restoEnTabla = find_resto_lista(restaurante);
 
     if(restoEnTabla == NULL){
         pushbacklist(&tablaRestaurantes, (void *) crearProceso(restaurante));
         restoEnTabla = backlist(tablaRestaurantes);
     }
+    l_segmento *segmento = find_segmento_lista(id_pedido, restoEnTabla->punteroTablaSegmentos);
 
-    return crearSegmento(restoEnTabla, id_pedido);      
+    if(segmento == NULL){
+        return crearSegmento(restoEnTabla, id_pedido);
+    }
+    return 0;      
 
 }
 
-int confirmar_pedido_en_memoria(char* restaurante, char* id_pedido){
+int confirmar_pedido_en_memoria(char* id_pedido, char* restaurante){
 
     l_segmento* segmento = obtener_pedido_en_memoria(restaurante, id_pedido);
 
@@ -285,6 +255,11 @@ l_segmento* obtener_pedido_en_memoria(char* nombreResto, char* id_pedido){
     }
 
     l_segmento *segmento = find_segmento_lista(id_pedido, restoEnTabla->punteroTablaSegmentos);
+
+    if(segmento == NULL){
+        printf("El pedido no esta en la tabla de pedidos del restaurante\n");
+        return NULL;
+    }
 
     pasarPaginasAPrincipal(segmento);
 

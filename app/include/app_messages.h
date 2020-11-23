@@ -3,13 +3,17 @@
 #include <commons/string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <semaphore.h>
 #include "shared_utils.h"
 #include "server.h"
 #include "list.h"
 #include "api.h"
 #include "tests.h"
-#include "config_app.h"
-#include "config_handle.h"
+//#include "config_app.h"
+//#include "config_handle.h"
+#include "planificador.h"
+
+int iniciador_de_planificacion;
 
 void handle_consultar_restaurantes(int socket);
 int relacionar(char* restaurante, char* cliente);

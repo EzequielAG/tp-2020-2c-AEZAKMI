@@ -106,7 +106,7 @@ int handshake(t_modulo* modulo){
     printf("El handshake con el modulo %s fue correcto\n", mensaje);
 
     escuchar_mensajes_socket_desacoplado(socket);
-
+ 
     return 0;
 }
 

@@ -54,35 +54,36 @@ void ir_hacia_restaurante(t_repartidor* repartidor){
         
         sem_wait(repartidor->ciclo_cpu);
 
+        log_info(logger, "Repartidor se mueve hacia restaurante");
+
         avanzar_hacia(repartidor, pedido->posicion_restaurante);
     }
 }
 
 void esperar_pedido(t_repartidor* repartidor){
 
-    if(pedido_terminado(repartidor->pcb_actual->id_pedido)){
+    if(buscar_pedido_espera(string_itoa(repartidor->pcb_actual->id_pedido)) != NULL){
         return;
     }
 
+    t_pedido_espera* pedido_espera = malloc(sizeof(t_pedido_espera));
+    pedido_espera->id_pedido = string_itoa(repartidor->pcb_actual->id_pedido);
+    pedido_espera->semaforo = repartidor->espera_pedido;
+
     desuscribirse_clock(repartidor->ciclo_cpu);
 
+    pushfrontlist(&lista_semaforos_pedidos, pedido_espera);
 
-    if(pedido_terminado(repartidor->pcb_actual->id_pedido)){
-        pasar_a_ready(repartidor);
-    }
+    log_info(logger, "Repartidor espera el pedido");
 
-}
+    sem_wait(repartidor->espera_pedido);
 
-int pedido_terminado(int id_pedido){
+    log_info(logger, "Pedido listo");
 
-    for(IteratorList it = beginlist(pedidos_terminados); it != NULL; it = nextlist(it)){
-        if((int)dataiterlist(it) == id_pedido){
-            popiterlist(&pedidos_terminados, it);
-            return 1;
-        }
-    }
+    free(pedido_espera);
 
-    return 0;
+    pasar_a_ready(repartidor);
+
 }
 
 void ir_hacia_cliente(t_repartidor* repartidor){
@@ -92,6 +93,8 @@ void ir_hacia_cliente(t_repartidor* repartidor){
         
         sem_wait(repartidor->ciclo_cpu);
 
+        log_info(logger, "Repartidor avanza hacia el cliente");
+
         avanzar_hacia(repartidor, pedido->posicion_cliente);
 
     }
@@ -100,6 +103,7 @@ void ir_hacia_cliente(t_repartidor* repartidor){
 
 void entregar_pedido(t_repartidor* repartidor){
     desuscribirse_clock(repartidor->ciclo_cpu);
+    log_info(logger, "Pedido entregado");
     enviar_final_pedido(repartidor->pcb_actual->restaurante, repartidor->pcb_actual->id_pedido);
 }
 
@@ -160,6 +164,8 @@ void descansar(t_repartidor* repartidor){
 
     sem_post(sem_grado_multiprocesamiento);
 
+    log_info(logger, "Repartidor descansa");
+
     for (int i = 0; i < repartidor->tiempo_de_descanso; i++){
         sem_wait(repartidor->ciclo_cpu);
     }
@@ -169,12 +175,13 @@ void descansar(t_repartidor* repartidor){
 
 void pasar_a_ready(t_repartidor* repartidor){
     
+    log_info(logger, "Pasa a ready");
     pushbacklist(&pcb_ready, repartidor->pcb_actual);
     sem_post(sem_pcb_ready);
 }
 
 void desuscribirse_clock(sem_t* ciclo_cpu){
-
+    log_info(logger, "Pasa a block");
     for (IteratorList it = beginlist(suscriptores_cpu); it != NULL ; it = nextlist(it)){
         if ((sem_t*)dataiterlist(it) == ciclo_cpu){
             popiterlist(&suscriptores_cpu, it);

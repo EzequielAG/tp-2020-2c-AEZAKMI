@@ -30,6 +30,24 @@ t_cliente* buscar_cliente_lista(char* id_cliente){
 
 }
 
+t_pedido_espera* buscar_pedido_espera(char* id_pedido){
+
+    for (IteratorList iter = beginlist(lista_semaforos_pedidos); iter != NULL; iter = nextlist(iter)){
+        t_pedido_espera* pedido = (t_pedido_espera*) iter->data;
+
+        if (!strcmp(pedido->id_pedido, id_pedido)){
+            popiterlist(&lista_semaforos_pedidos, iter);
+            return pedido;
+        }
+
+    }
+
+    return NULL;
+
+
+
+}
+
 void enviar_final_pedido(char* restaurante, int id_pedido){
 
     enviar_mensaje_finalizar_pedido(&modulo_comanda, string_itoa(id_pedido), restaurante);

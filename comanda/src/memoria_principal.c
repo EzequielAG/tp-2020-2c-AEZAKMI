@@ -195,6 +195,10 @@ void pasarPaginasAPrincipal(l_segmento *segmento){
 	l_pagina *pagina = NULL;
 	IteratorList iterador = NULL;
 
+	if(isemptylist(*segmento->punteroTablaPaginas)){
+		return;
+	}
+
 	for(iterador = beginlist(*segmento->punteroTablaPaginas);iterador!=NULL;iterador = nextlist(iterador)){
 
 		pagina = dataiterlist(iterador);

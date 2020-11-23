@@ -1,6 +1,6 @@
 #include "restaurante.h"
 
-int main(void){
+int main(int argc, char *argv[]){
 
     sem_id = malloc(sizeof(sem_t));
     sem_init(sem_id, 0, 1);
@@ -21,12 +21,13 @@ int main(void){
 
     data_restaurante();
 
-    //cantidad_pedidos = 0;
+    cantidad_pedidos = 0;
    
    
     //inicializar_colas();
 
     iniciar_servidor("127.0.0.1", "5002", handle_client);
+    //handle_client();
     
     //caso_uso();
 
@@ -46,13 +47,13 @@ void* escuchar_servidor(void* handle_client){
 
 // Comienzo handles
 void handle_client(t_result* result){
-
+/*
     for(int i = 0; i < *result->mensajes->size; i++){
         printf("%s ", result->mensajes->mensajes[i]);
     }
     printf("\n");
-
-    if (result->operacion == MENSAJES){
+*/
+    //if (result->operacion == MENSAJES){
         int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
 
         if(tipo_mensaje == handshake_cliente){
@@ -71,11 +72,11 @@ void handle_client(t_result* result){
             }
 
             } else if (tipo_mensaje == crear_pedido) {
-
+                //QUITO SINDICATO PARA TESTEAR
                 handle_crear_pedido(result->socket);
 
             } else if (tipo_mensaje == anadir_plato) {
-
+                //QUITO SINDICATO PARA TESTEAR
                 handle_anadir_plato(result);
 
             } else if (tipo_mensaje == confirmar_pedido) {
@@ -85,7 +86,7 @@ void handle_client(t_result* result){
             } else if (tipo_mensaje == consultar_pedido) {
                 // TODO : FALTA LOGICA CONSULTAR_PEDIDO
             }
-    }
+    //}
 
     
 }
@@ -96,20 +97,24 @@ void handle_crear_pedido(int socket){
     char* respuesta[1];
     id[0] = string_itoa(asignar_pedido_id());
        
-    respuesta[0] = enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,id[0]);
+    respuesta[0] = "OK";//enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,id[0]);
 
     if(!strcmp(respuesta[0],"OK")){
         send_messages_socket(socket, id, 1);
-    }else{
-        send_messages_socket(socket, respuesta, 1);
+        return;
     }
+    
+    send_messages_socket(socket, respuesta, 1);
+    //liberar_conexion(socket);
+    
 }
 
 void handle_anadir_plato(t_result* result){
  
-    char* respuesta = enviar_mensaje_guardar_plato(&modulo_sindicato, restaurante_config->nombre_restaurante,result->mensajes->mensajes[2] ,result->mensajes->mensajes[1] , "1");
+    char* respuesta[1] = {"OK"};//enviar_mensaje_guardar_plato(&modulo_sindicato, restaurante_config->nombre_restaurante,result->mensajes->mensajes[2] ,result->mensajes->mensajes[1] , "1");
 
-    send_message_socket(result->socket,respuesta);
+    send_messages_socket(result->socket,respuesta, 1);
+    //liberar_conexion(result->socket);
 
 };
 
@@ -380,7 +385,7 @@ void escuchar_mensajes_socket_desacoplado(int socket){
     t_parameter* parametro = malloc(sizeof(t_parameter));
 
 	parametro->socket = socket;
-	parametro->f = (void*) handle_client;
+	parametro->f = handle_client;
 
 	pthread_create(&thread,NULL,(void*)escuchar_mensajes_socket, parametro);
 	pthread_detach(thread);

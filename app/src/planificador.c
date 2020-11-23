@@ -42,6 +42,8 @@ void clock_cpu(){
     while(true){
         sleep(app_config->retardo_ciclo_cpu);
 
+        log_info(logger, "-----------CICLO-------------");
+
         for (IteratorList il = beginlist(suscriptores_cpu); il != NULL; il = nextlist(il)){
             sem_t* suscriptor = (sem_t*) dataiterlist(il);
             sem_post(suscriptor);
@@ -57,7 +59,8 @@ void iniciar_repartidores(){
         char** posiciones_spliteadas = string_split(app_config->repartidores[i], "|");
 
         if (app_config->frecuencia_descanso[i] == NULL || app_config->tiempo_descanso[i] == NULL){
-            //FALLO
+            printf("Tiempo o frecuencia de descanso mal inicializada\n");
+            return;
         }
 
         repartidor_actual->id = i;
@@ -68,6 +71,8 @@ void iniciar_repartidores(){
         repartidor_actual->cansancio = 0;
         repartidor_actual->nuevo_pedido = malloc(sizeof(sem_t));
         sem_init(repartidor_actual->nuevo_pedido, 0, 0);
+        repartidor_actual->espera_pedido = malloc(sizeof(sem_t));
+        sem_init(repartidor_actual->espera_pedido, 0, 0);
         repartidor_actual->ciclo_cpu = malloc(sizeof(sem_t));
         sem_init(repartidor_actual->ciclo_cpu, 0, 0);
 
@@ -77,6 +82,8 @@ void iniciar_repartidores(){
 
         pushbacklist(&repartidores_libres, repartidor_actual);
         sem_post(sem_entrenador_libre);
+
+        log_info(logger, "Se crea un repartidor");
         
     }
     
@@ -107,6 +114,8 @@ void planificar_largo_plazo(){
         repartidor->pcb_actual = pcb;
         pcb->repartidor_actual = repartidor;
 
+        log_info(logger, "Se asigna pcb a repartidor");
+
         sem_post(repartidor->nuevo_pedido);
 
         pushbacklist(&pcb_ready, pcb);
@@ -120,6 +129,8 @@ void planificar_corto_plazo_FIFO(){
         sem_wait(sem_grado_multiprocesamiento);
 
         t_pcb* pcb = popfrontlist(&pcb_ready);
+
+        log_info(logger, "Pasa a exec");
         
         pushbacklist(&suscriptores_cpu, pcb->repartidor_actual->ciclo_cpu);
 

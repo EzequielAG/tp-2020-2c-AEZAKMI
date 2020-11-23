@@ -23,13 +23,13 @@ int main(void){
     inicializar_colas();
 
   
-    // iniciar_servidor("127.0.0.1", "5002", handle_client);
+    iniciar_servidor("127.0.0.1", "5002", handle_client);
     
     caso_uso();
 
-    planificacion_fifo();
+   //planificacion_fifo();
 
-    // ver_estado_pcb();
+    ver_estado_pcb();
 
     return 0;
 }
@@ -167,6 +167,9 @@ void caso_uso(){
     t_paso* paso_freir = crear_paso("FREI",6);
     t_paso* paso_freir2 = crear_paso("Freir",6);
     t_paso* paso_asar = crear_paso("ASAR",4);
+    t_paso* paso_amasar_empanadas = crear_paso("Amasar",6);
+    t_paso* paso_hornear_empanadas = crear_paso("Hornear",6);
+    t_paso* paso_servir_empadas = crear_paso("Servir",4);
 
     pushbacklist(&lista_pasos_milanesa, paso_rebozar);
     pushbacklist(&lista_pasos_milanesa, paso_hornear);
@@ -176,19 +179,20 @@ void caso_uso(){
     pushbacklist(&lista_pasos_pizza, paso_hornear2);
     pushbacklist(&lista_pasos_pizza, paso_freir2);
    
-    pushbacklist(&lista_pasos_empanada, paso_hornear);
-    pushbacklist(&lista_pasos_empanada, paso_freir);
+    pushbacklist(&lista_pasos_empanada, paso_amasar_empanadas);
+    pushbacklist(&lista_pasos_empanada, paso_hornear_empanadas);
+    pushbacklist(&lista_pasos_empanada, paso_servir_empadas);
 
 
     t_plato* milanesa = crear_plato("Milanesa",&lista_pasos_milanesa,10,1,0,asignar_pid());
     t_plato* pizza = crear_plato("Pizza",&lista_pasos_pizza,10,1,0,asignar_pid());
-    // t_plato* empanada = crear_plato("Empanada", &lista_pasos_empanada,10,1,0,asignar_pid());
+    t_plato* empanada = crear_plato("Empanada", &lista_pasos_empanada,10,1,0,asignar_pid());
    // t_plato* guiso = crear_plato("Guiso",&lista_pasos_empanada,10,1,0);
 
     pushbacklist(&lista_platos, milanesa);
     pushbacklist(&lista_platos, pizza);
-    // pushbacklist(&lista_platos, empanada);
-  //  pushbacklist(&lista_platos, guiso);
+    pushbacklist(&lista_platos, empanada);
+    // pushbacklist(&lista_platos, guiso);
 
     
 
@@ -392,7 +396,7 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     sem_init(sem_id, 0, 1);
 
     sem_exec = malloc(sizeof(sem_t));
-    sem_init(sem_exec, 0, 1);
+    sem_init(sem_exec, 0, 3);
 }
 
 void restaurante_finally(t_restaurante_config* restaurante_config, t_log* logger) {

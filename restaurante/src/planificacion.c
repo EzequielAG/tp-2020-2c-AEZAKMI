@@ -221,20 +221,22 @@ int ejecutar_ciclos_fifo(t_pcb* pcb){
             printf("Paso a ejecutar: %s , Plato ejecuta: %s",paso->nombre_paso,pcb->plato->nombre);
 
             if(pcb->estado==READY){
-                sem_wait(sem_exec); //VARIOS SEMAFOROS HAY QUE CREAR POR CADA COLA EXEC
                 paso_exec(pcb);
-                sem_post(sem_exec);
                 sleep(paso->ciclo_cpu);
                 
                 if(ultimo_paso(pcb)){
                     paso_exit(pcb);
                     paso->se_ejecuto = 1;
+                    sem_post(sem_exec);
                     return 1;
+                    
 
                 }
                 paso->se_ejecuto = 1;
                 sacar_exec(pcb);
+                 sem_post(sem_exec);
                 return 1;
+              
 
             }else if(pcb->estado==EXEC){
 
@@ -244,13 +246,17 @@ int ejecutar_ciclos_fifo(t_pcb* pcb){
                     sleep(paso->ciclo_cpu);
                     paso->se_ejecuto = 1;
                     sacar_horno(pcb);
+                     sem_post(sem_exec);
                     return 1;
+                   
                 }
                     
 
             }else if(pcb->estado==BLOCKED){
                 paso_ready(pcb);
+                sem_post(sem_exec);
                 return 1;
+                
 
                 }
               
@@ -258,11 +264,6 @@ int ejecutar_ciclos_fifo(t_pcb* pcb){
             }
         }
 
-        
-
-    
-
-   
     
     return 1;
 
@@ -282,21 +283,63 @@ int ultimo_paso(t_pcb* pcb){
     return (i==1);
 }
 
+void ejecutar_hilos(t_pcb* pcb){
+    while(true){
+    sem_wait(sem_exec);
+    ejecutar_ciclos_fifo(pcb);
+}
+}
+
 void planificacion_fifo(){ // REVISAR CANTIDAD TOTAL Y CANTIDAD LISTA
 
-    while(true){
+    // while(true){
 
     for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
         t_pcb* pcb = iter_pcb->data;
         
-        ejecutar_ciclos_fifo(pcb);
-       
+            if(pcb->estado != EXIT){
+                //ejecutar_ciclos_fifo(pcb);
+                //crear_hilos_fifo(pcb);
+               
+            
+            }
         }
+    //     if(pedidos_finalizados()){
+    //         break;
+    //     }
+
+        
+    // }
+
+}
+
+void crear_hilos_fifo(t_pcb* pcb){
+
+    pthread_t hilo_fifo[cantidad_cocineros];
+    for(int i=0;i<cantidad_cocineros;i++){
+        
+        pthread_create(&hilo_fifo[i],NULL,(void*)ejecutar_hilos,pcb);
+        pthread_join(hilo_fifo[i],NULL);
+
+    }
+}
+
+int pedidos_finalizados(){
+
+    int tamanio_colas_pcb = sizelist(colas_pcb);
+    int i=0;
+    for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
+        t_pcb* pcb = iter_pcb->data;
+
+        if(pcb->estado == EXIT){
+            i++;
+
+        }
+
+
     }
 
-
-
-
+    return (i==tamanio_colas_pcb);
 }
 
 
@@ -329,7 +372,7 @@ int horno_libre(){
 
 int es_paso_io(t_paso* paso){
 
-    if( !strcmp((paso->nombre_paso),"HORNEAR") || !strcmp((paso->nombre_paso),"Hornear")){
+    if( !strcmp((paso->nombre_paso),"HORNEAR") || !strcmp((paso->nombre_paso),"Hornear") || !strcmp((paso->nombre_paso),"Reposar")){
         return 1;
     }
 
@@ -428,10 +471,11 @@ t_pcb* crear_pcb(int id_pedido,int pid, int estado,t_plato* plato){ //AGREGAR PI
     pcb->estado = estado;
     pcb->plato = plato;
     pcb->cola_ready_perteneciente = asignar_cola_ready(plato);
-
+    
     paso_ready(pcb);
 
     pushfrontlist(&colas_pcb,pcb);
+
 
     return pcb;
 }

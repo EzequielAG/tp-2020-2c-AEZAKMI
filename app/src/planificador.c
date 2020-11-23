@@ -128,8 +128,10 @@ void pcb_prueba(){
 }
 
 t_pcb* crear_pcb(char* restaurante, int id_pedido){
+
     t_pcb* pcb = malloc(sizeof(t_pcb));
     pcb->restaurante = restaurante;
     pcb->id_pedido = id_pedido;
+    
     return pcb;
 }

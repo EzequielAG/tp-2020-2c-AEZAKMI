@@ -54,34 +54,40 @@ typedef struct {
 } t_plato;
 
 typedef struct{
+
     int ocupado;
     t_plato* plato;
+    char* afinidad;
+    List colas_de_ready;
 
 }t_exec;
 
 
 typedef struct {
+
     int id_pedido;
     List platos;
+
 } t_pedido;
 
 typedef struct{
     int ocupado;
     t_plato* plato;
-
 } t_horno;
 
 typedef struct{
+
     char* afinidad;
     List platos_espera;
-    t_exec* puntero_exec;
     
 }t_ready;
 
 
 typedef struct{
+
     List hornos;
     List platos_espera;
+    
 }t_io;
 
 typedef struct{
@@ -98,11 +104,14 @@ typedef struct{
 List colas_ready;
 List colas_exit;
 List colas_pcb;
+List colas_exec;
 t_io* cola_io;
-
+int pedidos_finalizados();
 void planificacion_fifo();
 int ultimo_paso(t_pcb* pcb);
-int inicializar_colas_ready_exec();
+void inicializar_colas_ready();
+t_ready* cola_ready_cocinero(char* afinidad);
+void inicializar_colas_exec();
 void ocupar_horno_libre();
 int horno_libre();
 int paso_ready(t_pcb* pcb);
@@ -120,7 +129,9 @@ List* hilos_ready();
 void sacar_exec(t_pcb* pcb);
 void sacar_ready(t_pcb* pcb);
 void sacar_horno(t_pcb* pcb);
-
+void crear_hilos_fifo(t_pcb* pcb);
+void ejecutar_hilos(t_pcb* pcb);
+int cola_ready_creada(char* afinidad);
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu);
 t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo, int pid);
 t_pedido* creacion_pedido(int id, List* platos);

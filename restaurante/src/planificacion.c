@@ -2,41 +2,114 @@
 
 void inicializar_colas()
 {
-    inicializar_colas_ready_exec();
+    inicializar_colas_ready();
     inicializar_colas_io();
+    inicializar_colas_exec();
+
+    printf("Las colas de ready creadas son: \n");
+    for(IteratorList iter_ready = beginlist(colas_ready); iter_ready != NULL; iter_ready = nextlist(iter_ready)){
+        t_ready* cola_ready = iter_ready->data;
+        printf("- %s \n",cola_ready->afinidad);
+
+    } printf("---------- \n");
+
+    printf("La cantidad de hornos creadas es de: \n");
+    for(IteratorList iter_horno = beginlist(cola_io->hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
+        t_horno* horno = iter_horno->data;
+        printf("- %d \n", horno->ocupado);
+
+    }printf("---------- \n");
+
+    printf("Las colas de exec creadas son: \n");
+    for(IteratorList iter_exec = beginlist(colas_exec); iter_exec != NULL; iter_exec = nextlist(iter_exec)){
+        t_exec* cola_exec = iter_exec->data;
+        printf("- %s \n", cola_exec->afinidad);
+
+    }printf("---------- \n");
+
+
 }
 
-int inicializar_colas_ready_exec(){
+void inicializar_colas_ready(){
 
-    for(int i=0;i<cantidad_cocineros;i++){
+    for(IteratorList iter_afinidades = beginlist(afinidades); iter_afinidades != NULL; iter_afinidades = nextlist(iter_afinidades)){
+        char* afinidad_lista = iter_afinidades->data;
 
-        t_ready* cola_ready = malloc(sizeof(t_ready));
-       
-       
-        if(!isemptylist(afinidades)){
-            char* afinidad = popfrontlist(&afinidades);
-            cola_ready->afinidad = afinidad;
-        }else{
-            cola_ready->afinidad = "GENERAL";
+        if(!cola_ready_creada(afinidad_lista)){
+            t_ready* cola_ready_nueva = malloc(sizeof(t_ready));
+            cola_ready_nueva->afinidad = afinidad_lista;
+            initlist(&cola_ready_nueva->platos_espera);
+            pushbacklist(&colas_ready,cola_ready_nueva);
+
+        }
+  }
+
+    if(sizelist(afinidades)<cantidad_cocineros){
+        t_ready* cola_ready_nueva = malloc(sizeof(t_ready));
+        cola_ready_nueva->afinidad = "GENERAL";
+        initlist(&cola_ready_nueva->platos_espera);
+        pushbacklist(&colas_ready,cola_ready_nueva);
+
+    }
+ 
+}
+
+t_ready* cola_ready_cocinero(char* afinidad){
+
+      for(IteratorList iter_ready = beginlist(colas_ready); iter_ready != NULL; iter_ready = nextlist(iter_ready)){
+        t_ready* cola_ready = iter_ready->data;
+
+        if(!strcmp(cola_ready->afinidad, afinidad)){
+            return cola_ready;
+
+        }
+      }
+        return NULL;
+}
+
+int cola_ready_creada(char* afinidad){
+
+    for(IteratorList iter_ready = beginlist(colas_ready); iter_ready != NULL; iter_ready = nextlist(iter_ready)){
+        t_ready* cola_ready = iter_ready->data;
+
+        if(!strcmp(afinidad,cola_ready->afinidad)){
+            return 1;
         }
 
-       
-        initlist(&cola_ready->platos_espera);
-        cola_ready->puntero_exec = crear_exec();
+  }
 
-        pushbacklist(&colas_ready,cola_ready);
+  return 0;
+ 
+}
+
+void inicializar_colas_exec(){
+    
+    for(int i=0; i<cantidad_cocineros;i++){
+        t_exec* cola_exec = crear_exec();
+        
+        if(!isemptylist(afinidades)){
+            char* afinidad_lista = popfrontlist(&afinidades);
+            t_ready* cola_ready_afinidad = cola_ready_cocinero(afinidad_lista);
+            cola_exec->afinidad = afinidad_lista;
+            pushbacklist(&cola_exec->colas_de_ready,cola_ready_afinidad);
+        }else{
+            t_ready* cola_ready_afinidad = cola_ready_cocinero("GENERAL");
+            cola_exec->afinidad = "GENERAL";
+            pushbacklist(&cola_exec->colas_de_ready,cola_ready_afinidad);
+        }
+         
+        pushbacklist(&colas_exec, cola_exec);
 
     }
 
-    return 1;
 }
-
 
 t_exec* crear_exec(){
 
     t_exec* exec = malloc(sizeof(t_exec));
     exec->ocupado = 0;
     exec->plato = NULL;
+    initlist(&exec->colas_de_ready);
 
     return exec;
 }
@@ -71,15 +144,15 @@ int paso_ready(t_pcb* pcb){
 
 int paso_exec(t_pcb* pcb){
 
-    t_ready* cola_ready = pcb->cola_ready_perteneciente;
+    // t_ready* cola_ready = pcb->cola_ready_perteneciente;
 
-    if(cola_ready->puntero_exec->ocupado == 0){
-        cola_ready->puntero_exec->plato = pcb->plato;
-        cola_ready->puntero_exec->ocupado = 1;
-        pcb->estado = EXEC;
-        printf(" - El plato %s esta ejecutandose por un cocinero de afinidad %s, su estado es: %s \n",pcb->plato->nombre, cola_ready->afinidad,obtener_estado(pcb->estado));
-        return 1;
-    }
+    // if(cola_ready->puntero_exec->ocupado == 0){
+    //     cola_ready->puntero_exec->plato = pcb->plato;
+    //     cola_ready->puntero_exec->ocupado = 1;
+    //     pcb->estado = EXEC;
+    //     printf(" - El plato %s esta ejecutandose por un cocinero de afinidad %s, su estado es: %s \n",pcb->plato->nombre, cola_ready->afinidad,obtener_estado(pcb->estado));
+    //     return 1;
+    // }
 
        printf(" - El plato %s no pudo ser ejecutado, su estado es: %s \n",pcb->plato->nombre,obtener_estado(pcb->estado));
        return 0;
@@ -221,20 +294,22 @@ int ejecutar_ciclos_fifo(t_pcb* pcb){
             printf("Paso a ejecutar: %s , Plato ejecuta: %s",paso->nombre_paso,pcb->plato->nombre);
 
             if(pcb->estado==READY){
-                sem_wait(sem_exec); //VARIOS SEMAFOROS HAY QUE CREAR POR CADA COLA EXEC
                 paso_exec(pcb);
-                sem_post(sem_exec);
                 sleep(paso->ciclo_cpu);
                 
                 if(ultimo_paso(pcb)){
                     paso_exit(pcb);
                     paso->se_ejecuto = 1;
+                    sem_post(sem_exec);
                     return 1;
+                    
 
                 }
                 paso->se_ejecuto = 1;
                 sacar_exec(pcb);
+                 sem_post(sem_exec);
                 return 1;
+              
 
             }else if(pcb->estado==EXEC){
 
@@ -244,13 +319,17 @@ int ejecutar_ciclos_fifo(t_pcb* pcb){
                     sleep(paso->ciclo_cpu);
                     paso->se_ejecuto = 1;
                     sacar_horno(pcb);
+                     sem_post(sem_exec);
                     return 1;
+                   
                 }
                     
 
             }else if(pcb->estado==BLOCKED){
                 paso_ready(pcb);
+                sem_post(sem_exec);
                 return 1;
+                
 
                 }
               
@@ -258,11 +337,6 @@ int ejecutar_ciclos_fifo(t_pcb* pcb){
             }
         }
 
-        
-
-    
-
-   
     
     return 1;
 
@@ -282,21 +356,63 @@ int ultimo_paso(t_pcb* pcb){
     return (i==1);
 }
 
+void ejecutar_hilos(t_pcb* pcb){
+    while(true){
+    sem_wait(sem_exec);
+    ejecutar_ciclos_fifo(pcb);
+}
+}
+
 void planificacion_fifo(){ // REVISAR CANTIDAD TOTAL Y CANTIDAD LISTA
 
-    while(true){
+    // while(true){
 
     for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
         t_pcb* pcb = iter_pcb->data;
         
-        ejecutar_ciclos_fifo(pcb);
-       
+            if(pcb->estado != EXIT){
+                //ejecutar_ciclos_fifo(pcb);
+                //crear_hilos_fifo(pcb);
+               
+            
+            }
         }
+    //     if(pedidos_finalizados()){
+    //         break;
+    //     }
+
+        
+    // }
+
+}
+
+void crear_hilos_fifo(t_pcb* pcb){
+
+    pthread_t hilo_fifo[cantidad_cocineros];
+    for(int i=0;i<cantidad_cocineros;i++){
+        
+        pthread_create(&hilo_fifo[i],NULL,(void*)ejecutar_hilos,pcb);
+        pthread_join(hilo_fifo[i],NULL);
+
+    }
+}
+
+int pedidos_finalizados(){
+
+    int tamanio_colas_pcb = sizelist(colas_pcb);
+    int i=0;
+    for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
+        t_pcb* pcb = iter_pcb->data;
+
+        if(pcb->estado == EXIT){
+            i++;
+
+        }
+
+
     }
 
-
-
-
+    return (i==tamanio_colas_pcb);
 }
 
 
@@ -329,7 +445,7 @@ int horno_libre(){
 
 int es_paso_io(t_paso* paso){
 
-    if( !strcmp((paso->nombre_paso),"HORNEAR") || !strcmp((paso->nombre_paso),"Hornear")){
+    if( !strcmp((paso->nombre_paso),"HORNEAR") || !strcmp((paso->nombre_paso),"Hornear") || !strcmp((paso->nombre_paso),"Reposar")){
         return 1;
     }
 
@@ -338,8 +454,8 @@ int es_paso_io(t_paso* paso){
 
 
 void sacar_exec(t_pcb* pcb){
-    pcb->cola_ready_perteneciente->puntero_exec->ocupado=0;
-    pcb->cola_ready_perteneciente->puntero_exec->plato=NULL;
+    // pcb->cola_ready_perteneciente->puntero_exec->ocupado=0;
+    // pcb->cola_ready_perteneciente->puntero_exec->plato=NULL;
 
 }
 
@@ -428,10 +544,11 @@ t_pcb* crear_pcb(int id_pedido,int pid, int estado,t_plato* plato){ //AGREGAR PI
     pcb->estado = estado;
     pcb->plato = plato;
     pcb->cola_ready_perteneciente = asignar_cola_ready(plato);
-
+    
     paso_ready(pcb);
 
     pushfrontlist(&colas_pcb,pcb);
+
 
     return pcb;
 }

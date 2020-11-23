@@ -29,11 +29,11 @@ int main(int argc, char *argv[]){
     iniciar_servidor("127.0.0.1", "5002", handle_client);
     //handle_client();
     
-    //caso_uso();
+    caso_uso();
 
     //planificacion_fifo();
 
-    ver_estado_pcb();
+    // ver_estado_pcb();
 
     return 0;
 }
@@ -208,6 +208,8 @@ void caso_uso(){
 
     creacion_pedido(10,&lista_platos);
 
+
+    printf("\n \n");
     ver_estado_pcb();
 
 
@@ -237,15 +239,14 @@ void inicializacion_default(){
    initlist(afinidades_default);
    pushbacklist(afinidades_default,"Milanesa");
    pushbacklist(afinidades_default,"Pizza");
-   pushbacklist(afinidades_default,"Guiso");
-   pushbacklist(afinidades_default,"Guiso");
-   pushbacklist(afinidades_default,"Mondongo");
+   pushbacklist(afinidades_default,"Pizza");
+
 
 
    resto_default->afinidades = afinidades_default;
    resto_default->pos_x = "2";
    resto_default->pos_y = "3";
-   resto_default->cantidad_cocineros = "3";
+   resto_default->cantidad_cocineros = "4";
    resto_default->cantidad_pedidos = "2";
    resto_default->cantidad_hornos = "2";
    resto_default->recetas_precio = NULL;
@@ -267,7 +268,7 @@ void ver_estado_pcb(){
         t_pcb* pcb = iter_pcb->data;
 
         printf("- El id del pedido del PCB es: %i \n",pcb->id_pedido);
-         printf("- El PID del PCB es: %i \n",pcb->pid);
+        printf("- El PID del PCB es: %i \n",pcb->pid);
         printf("- El plato que contiene es: %s \n", pcb->plato->nombre);
         printf("- El plato se encuentra en estado: %i \n",pcb->estado);
         printf("- Pertenece a la cola ready: %s \n", pcb->cola_ready_perteneciente->afinidad);
@@ -426,7 +427,7 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
 
 
     initlist(&cola_io->hornos);
-    initlist(&cola_io->platos_espera);
+    initlist(&cola_io->pcb_espera);
    
 
     sem_id = malloc(sizeof(sem_t));

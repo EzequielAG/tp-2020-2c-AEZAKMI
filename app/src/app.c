@@ -24,6 +24,7 @@ void app_init(t_app_config** app_config, t_log** logger){
     //INICIALIZO LISTAS DE RESTAURANTES Y CLIENTES
     initlist(&lista_clientes);
     initlist(&lista_restaurantes);
+    initlist(&lista_semaforos_pedidos);
 
     iniciador_de_planificacion = 1;
 

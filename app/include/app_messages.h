@@ -32,3 +32,4 @@ char* armar_string_consultar_pedido(r_consultar_pedido* );
 char* obtener_restaurantes();
 char* obtener_platos(List);
 void handle_client(t_result* result);
+void inicializar_pedido_semaforo(char* id_pedido);

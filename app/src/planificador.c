@@ -83,7 +83,9 @@ void iniciar_repartidores(){
         pushbacklist(&repartidores_libres, repartidor_actual);
         sem_post(sem_entrenador_libre);
 
-        log_info(logger, "Se crea un repartidor");
+        char string_log[100];
+        sprintf(string_log, "Se crea un repartidor %d", repartidor_actual->id);
+        log_info(logger, string_log);
         
     }
     
@@ -108,13 +110,17 @@ void planificar_largo_plazo(){
         sem_wait(sem_pcb_new);
         sem_wait(sem_entrenador_libre);
 
+
         t_pcb* pcb = popfrontlist(&pcb_new);
-        t_repartidor* repartidor = popfrontlist(&repartidores_libres);
+
+        t_repartidor* repartidor = obtener_repartidor_mas_cercano(pcb);
 
         repartidor->pcb_actual = pcb;
         pcb->repartidor_actual = repartidor;
 
-        log_info(logger, "Se asigna pcb a repartidor");
+        char string_log[100];
+        sprintf(string_log, "Se asigna el pcb %d al repartidor %d\n", pcb->id_pedido, repartidor->id);
+        log_info(logger, string_log);
 
         sem_post(repartidor->nuevo_pedido);
 
@@ -130,7 +136,9 @@ void planificar_corto_plazo_FIFO(){
 
         t_pcb* pcb = popfrontlist(&pcb_ready);
 
-        log_info(logger, "Pasa a exec");
+        char string_log[100];
+        sprintf(string_log, "PCB A EXEC: %d\n", pcb->id_pedido);
+        log_info(logger, string_log);
         
         pushbacklist(&suscriptores_cpu, pcb->repartidor_actual->ciclo_cpu);
 
@@ -147,3 +155,31 @@ void pcb_prueba(){
     sem_post(sem_pcb_new);
 }
 
+
+t_repartidor* obtener_repartidor_mas_cercano(t_pcb* pcb){
+
+    t_repartidor* repartidorAux = NULL;
+    int calculoAux;
+    t_restaurante *restaurante = buscar_restaurante_lista(pcb->restaurante);
+    
+    for(IteratorList iter = beginlist(repartidores_libres); iter != NULL; iter = nextlist(iter)){
+
+        t_repartidor* repartidor = (t_repartidor*) iter->data;
+        
+        int posix = repartidor->posicion.posx - restaurante->posicion.posx;
+
+        int posiy = repartidor->posicion.posy - restaurante->posicion.posy;
+
+        int calculo = abs(posix) + abs(posiy);
+
+        if(repartidorAux == NULL){
+            repartidorAux = repartidor;
+            calculoAux = calculo;
+        }
+        if(calculo < calculoAux){
+            repartidorAux = repartidor;
+            calculoAux = calculo;
+        }
+    }
+    return repartidorAux;
+}

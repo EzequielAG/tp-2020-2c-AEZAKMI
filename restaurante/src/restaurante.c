@@ -32,7 +32,7 @@ int main(int argc, char *argv[]){
 
     planificacion();
 
-       sem_wait(sem_exec);
+    sem_wait(sem_exec);
 
     //iniciar_servidor("127.0.0.1", "5002", handle_client);
     //handle_client();
@@ -298,16 +298,7 @@ void ver_info_pedido(List* lista_pedidos){
             t_plato* plato = iter_platos->data;
             printf(" - Nombre plato: %s \n", plato->nombre);
             printf("Pasos sin ejecutar: \n");
-              for(IteratorList iter_pasos = beginlist((plato->pasos)); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
-                 t_paso* paso_plato = iter_pasos->data;
-                
-                 if(paso_plato->se_ejecuto){
-                 printf(" - Paso: %s \n", paso_plato->nombre_paso);
-                 printf(" - Ciclo cpu: %d \n", paso_plato->ciclo_cpu);
-                 printf(" - Es io : %d \n", es_paso_io(paso_plato));
-
-                 printf("--------\n");
-                }
+    
               
               }
 
@@ -316,8 +307,8 @@ void ver_info_pedido(List* lista_pedidos){
         printf("\n");
         printf("\n");
         
-    }
-};
+}
+
 
 
 void data_restaurante(){
@@ -437,6 +428,15 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
 
     sem_exec = malloc(sizeof(sem_t));
     sem_init(sem_exec, 0, 0);
+
+    sem_block = malloc(sizeof(sem_t));
+    sem_init(sem_block,0,0);
+
+    sem_horno_libre = malloc(sizeof(sem_t));
+    sem_init(sem_horno_libre,0,0);
+
+    sem_ready = malloc(sizeof(sem_t));
+    sem_init(sem_ready,0,0);
 }
 
 void restaurante_finally(t_restaurante_config* restaurante_config, t_log* logger) {

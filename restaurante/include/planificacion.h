@@ -28,6 +28,9 @@ t_modulo modulo_sindicato;
 t_modulo modulo_app;
 receta_precio** recetas;
 sem_t* sem_exec;
+sem_t* sem_block;
+sem_t* sem_ready;
+sem_t* sem_horno_libre;
 
 
 
@@ -59,10 +62,7 @@ typedef struct {
 
 } t_pedido;
 
-typedef struct{
-    int ocupado;
-    t_plato* plato;
-} t_horno;
+
 
 typedef struct{
 
@@ -81,6 +81,12 @@ typedef struct{
 
 } t_pcb;
 
+typedef struct{
+    int ocupado;
+    t_pcb* pcb;
+    sem_t* sem_horno;
+} t_horno;
+
 
 typedef struct{
 
@@ -98,7 +104,8 @@ List colas_exec;
 List hornos;
 List pcb_espera_horno;
 
-
+void controlador_hornos();
+void controlador_ready();
 void inicializar_colas();
 void inicializar_colas_ready();
 void inicializar_colas_exec();
@@ -111,12 +118,10 @@ void paso_exec(t_exec* cocinero);
 
 int pedidos_finalizados();
 int plato_general(char* nombre_plato);
-void ocupar_horno_libre();
-int horno_libre();
-t_horno* paso_block(t_pcb* pcb);
+
+void paso_block(t_horno* horno);
 t_ready* cola_ready_cocinero(char* afinidad);
 int es_paso_io(t_paso* paso);
-int pasos_ejecutados(t_pcb* pcb);
 int termino_pedido(int id_pedido);
 int cola_ready_creada(char* afinidad);
 char* obtener_estado(int estado);

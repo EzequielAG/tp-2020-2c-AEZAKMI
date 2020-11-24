@@ -127,14 +127,18 @@ void inicializar_colas_io(){
 
         t_horno* horno = malloc(sizeof(t_horno));
         horno->ocupado = 0;
-        horno->plato = NULL;
+        horno->pcb = NULL;
+        horno->sem_horno = malloc(sizeof(sem_t));
+        sem_init(horno->sem_horno,0,0);
+        pushbacklist(&hornos,horno);        
+        pthread_t hilo_horno;
+        pthread_create(&hilo_horno,NULL,(void*)paso_block,horno);
+        pthread_detach(hilo_horno);
 
-        pushbacklist(&hornos,horno);
 
     }
 
 }
-
 
 
 
@@ -144,9 +148,13 @@ void paso_exec(t_exec* cocinero){
 
         sem_wait(cocinero->semaforo_exec);
 
-        
+
+
 
         printf("PASO EL SEMAFOROOOO! \n");
+
+
+        sem_post(sem_block);
 
     }
 
@@ -155,6 +163,36 @@ void paso_exec(t_exec* cocinero){
     
 }
 
+
+void controlador_hornos(){
+
+    sem_wait(sem_block);
+    sem_wait(sem_horno_libre);
+
+    t_horno* horno = popfrontlist(&hornos);
+    t_pcb* pcb_horno = popfrontlist(&pcb_espera_horno);
+
+    horno->pcb = pcb_horno;
+    horno->ocupado = 1;
+
+    sem_post(horno->sem_horno);
+
+}
+
+// VA A SER EL ALGORITMO
+
+void controlador_ready(t_ready* ready){
+
+    sem_wait(sem_ready);
+
+
+
+
+
+
+
+
+}
 
 
 int paso_ready(t_pcb* pcb){   
@@ -225,32 +263,21 @@ int paso_exit(t_pcb* pcb){
 };
 
 
-t_horno* paso_block(t_pcb* pcb){
+void paso_block(t_horno* horno){
 
-    for(IteratorList iter_horno = beginlist(hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
+    sem_wait(horno->sem_horno);
 
-        t_horno* horno = iter_horno->data;
+    t_paso* paso = popfrontlist(&horno->pcb->plato->pasos);
 
-        if(horno->ocupado == 0){
-            horno->ocupado = 1;
-            horno->plato = pcb->plato;
-            pcb->estado = BLOCKED;
-            printf(" - El plato %s esta en el horno, su estado es: %s \n",pcb->plato->nombre,obtener_estado(pcb->estado));
-         
-            return horno;
+    sleep(paso->ciclo_cpu);
 
-        }
+    pushbacklist(&hornos,horno);
 
-    }
+    paso_ready(horno->pcb);
 
-    // TODO: CHEQUEAR REPOSAR
 
-    pushbacklist(&pcb_espera_horno,pcb);
-    pcb->estado = BLOCKED_SUSPENDED;
-    printf(" - El plato %s esta en lista de espera para horno, su estado es: %s \n",pcb->plato->nombre,obtener_estado(pcb->estado));
-   
 
-    return NULL;
+  
 
 }
 
@@ -272,19 +299,6 @@ int termino_pedido(int id_pedido){
 
 }
 
-int pasos_ejecutados(t_pcb* pcb){
-
-    for(IteratorList iter_pasos = beginlist(pcb->plato->pasos); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
-        t_paso* paso = iter_pasos->data;
-
-        if(paso->se_ejecuto == 0){
-            return 0;
-        }
-        
-    }
-
-    return 1;
-}
 
 
 t_ready* cola_ready_pcb(t_pcb* pcb){
@@ -357,22 +371,6 @@ int pedidos_finalizados(){
 }
 
 
-
-
-int horno_libre(){
-
-    for(IteratorList iter_io = beginlist(hornos); iter_io != NULL; iter_io = nextlist(iter_io)){
-        t_horno* horno = iter_io->data;
-        
-        if(horno-> ocupado == 0){
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-
 int es_paso_io(t_paso* paso){
 
     if( !strcmp((paso->nombre_paso),"HORNEAR") || !strcmp((paso->nombre_paso),"Hornear") || !strcmp((paso->nombre_paso),"Reposar")){
@@ -383,19 +381,6 @@ int es_paso_io(t_paso* paso){
 }
 
 
-
-void ocupar_horno_libre(){
-
-    if(!isemptylist(pcb_espera_horno)){
-        t_plato* plato = popfrontlist(&pcb_espera_horno);
-        for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
-            t_pcb* pcb = iter_pcb->data;
-            if(!strcmp(pcb->plato->nombre,plato->nombre)){
-                paso_block(pcb);
-            }
-        }
-    } 
-}
 
 
 
@@ -429,15 +414,12 @@ void planificacion(){
 
 
 
-
-
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu){
 
     t_paso* paso = malloc(sizeof(paso));
      
     paso->nombre_paso = nombre_paso;
     paso->ciclo_cpu = ciclo_cpu;
-    paso->se_ejecuto = 0;
 
 
     return paso;

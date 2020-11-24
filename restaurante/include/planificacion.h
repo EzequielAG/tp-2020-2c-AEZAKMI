@@ -30,9 +30,7 @@ receta_precio** recetas;
 sem_t* sem_exec;
 
 
-void inicializar_colas();
 
-void inicializar_colas_io();
 
 typedef enum estado_proceso{
     NEW = 0,
@@ -75,22 +73,12 @@ typedef struct{
 }t_ready;
 
 
-
-
-typedef struct{
-
-    List hornos;
-    List pcb_espera;
-    
-}t_io;
-
 typedef struct{
 
     int id_pedido;
     int pid;
     estado_proceso_t estado;
     t_plato* plato;
-    t_ready* cola_ready_perteneciente;
 
 } t_pcb;
 
@@ -101,6 +89,7 @@ typedef struct{
     t_ready* cola_ready;
     char* afinidad;
     sem_t* semaforo_exec;
+    pthread_t* hilo_ejecucion_exec;
 
 }t_exec;
 
@@ -109,37 +98,40 @@ List colas_ready;
 List colas_exit;
 List colas_pcb;
 List colas_exec;
-t_io* cola_io;
-int pedidos_finalizados();
-void planificacion_fifo();
-int ultimo_paso(t_pcb* pcb);
+List hornos;
+List pcb_espera_horno;
+
+
+void inicializar_colas();
 void inicializar_colas_ready();
-t_ready* cola_ready_cocinero(char* afinidad);
 void inicializar_colas_exec();
-void ocupar_horno_libre();
-int horno_libre();
+void inicializar_colas_io();
+
+
 int paso_ready(t_pcb* pcb);
 int paso_exit(t_pcb* pcb);
+void* paso_exec(t_exec* cocinero);
+
+int pedidos_finalizados();
+int plato_general(char* nombre_plato);
+void ocupar_horno_libre();
+int horno_libre();
 t_horno* paso_block(t_pcb* pcb);
-void paso_exec(t_exec* cocinero);
 int ejecutar_ciclo(t_pcb* pcb,t_paso* paso);
-t_ready* asignar_cola_ready(t_plato* plato);
+t_ready* cola_ready_cocinero(char* afinidad);
 int es_paso_io(t_paso* paso);
-t_exec* crear_exec(t_ready* cola_ready);
 int pasos_ejecutados(t_pcb* pcb);
 int termino_pedido(int id_pedido);
-char* obtener_estado(int estado);
-List* hilos_ready();
-void sacar_exec(t_pcb* pcb);
-void sacar_ready(t_pcb* pcb);
-void sacar_horno(t_pcb* pcb);
-void crear_hilos_fifo(t_pcb* pcb);
-void ejecutar_hilos(t_pcb* pcb);
 int cola_ready_creada(char* afinidad);
+char* obtener_estado(int estado);
+
+
+
+t_exec* crear_exec(t_ready* cola_ready);
+t_ready* asignar_cola_ready(t_plato* plato);
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu);
 t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo, int pid);
 t_pedido* creacion_pedido(int id, List* platos);
 t_pcb* crear_pcb(int id_pedido,int pid, int estado,t_plato* plato);
 
-int ejecutar_ciclos_fifo(t_pcb* pcb);
 #endif

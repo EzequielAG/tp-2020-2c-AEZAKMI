@@ -5,28 +5,45 @@ void inicializar_colas()
     inicializar_colas_ready();
     inicializar_colas_io();
     inicializar_colas_exec();
-
+   
+    printf("\n \n");
     printf("Las colas de ready creadas son: \n");
     for(IteratorList iter_ready = beginlist(colas_ready); iter_ready != NULL; iter_ready = nextlist(iter_ready)){
         t_ready* cola_ready = iter_ready->data;
         printf("- %s \n",cola_ready->afinidad);
 
+
+        for(IteratorList iter_espera = beginlist(cola_ready->pcb_espera); iter_espera != NULL; iter_espera = nextlist(iter_espera)){
+            t_pcb* pcb = iter_espera->data;
+
+            printf("Plato en espera %s \n",pcb->plato->nombre);
+
+        }
+
     } printf("---------- \n");
 
     printf("La cantidad de hornos creadas es de: \n");
-    for(IteratorList iter_horno = beginlist(cola_io->hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
+    for(IteratorList iter_horno = beginlist(hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
         t_horno* horno = iter_horno->data;
         printf("- %d \n", horno->ocupado);
 
     }printf("---------- \n");
 
-    printf("Las colas de exec creadas son: \n");
-    // for(IteratorList iter_exec = beginlist(colas_exec); iter_exec != NULL; iter_exec = nextlist(iter_exec)){
-    //     t_exec* cola_exec = iter_exec->data;
-    //     printf("- %s \n", cola_exec->);
+    printf("Los cocineros tienen afinidad: \n");
+    for(IteratorList iter_cocinero = beginlist(colas_exec); iter_cocinero != NULL; iter_cocinero = nextlist(iter_cocinero)){
+        t_exec* cocinero = iter_cocinero->data;
 
-    // }printf("---------- \n");
+        printf(" -%s \n",cocinero->afinidad);
 
+        pthread_create(cocinero->hilo_ejecucion_exec,NULL,(void*)paso_exec,cocinero);
+        pthread_detach(*cocinero->hilo_ejecucion_exec);
+        //pthread_join(*cocinero->hilo_ejecucion_exec,NULL);
+
+
+    }printf("---------- \n");
+
+
+  
 
 }
 
@@ -67,6 +84,8 @@ t_ready* cola_ready_cocinero(char* afinidad){
         return NULL;
 }
 
+
+
 int cola_ready_creada(char* afinidad){
 
     for(IteratorList iter_ready = beginlist(colas_ready); iter_ready != NULL; iter_ready = nextlist(iter_ready)){
@@ -86,11 +105,10 @@ void inicializar_colas_exec(){
     
     for(int i=0; i<cantidad_cocineros;i++){
         
-        
         if(!isemptylist(afinidades)){
             char* afinidad_lista = popfrontlist(&afinidades);
             t_ready* cola_ready_afinidad = cola_ready_cocinero(afinidad_lista);
-            t_exec* cola_exec =crear_exec(cola_ready_afinidad);
+            t_exec* cola_exec = crear_exec(cola_ready_afinidad);
             pushbacklist(&colas_exec, cola_exec);
         }else{
             t_ready* cola_ready_afinidad = cola_ready_cocinero("GENERAL");
@@ -98,80 +116,8 @@ void inicializar_colas_exec(){
             pushbacklist(&colas_exec, cola_exec);
         }
          
-        
 
     }
-
-}
-
-t_exec* crear_exec(t_ready* cola_ready){
-
-    t_exec* exec = malloc(sizeof(t_exec));
-    exec->ocupado = 0;
-    exec->cola_ready = cola_ready;
-    exec->afinidad = cola_ready->afinidad;
-    exec->semaforo_exec = malloc(sizeof(sem_t));
-    sem_init((exec->semaforo_exec),0,0);
-    pthread_t* hilo_ejecucion_exe = malloc(sizeof(pthread_t));
-    pthread_create(hilo_ejecucion_exe,NULL,(void*)paso_exec,exec);
-    pthread_detach(*hilo_ejecucion_exe);
-    //pthread_join(*hilo_ejecucion_exe,NULL);
-
-    return exec;
-}
-
-
-void paso_exec(t_exec* cocinero){
-
-    while(true){
-    
-    sem_wait(cocinero->semaforo_exec);
-    printf("PASO EL SEMAFOROOOO! \n");
-        if(!isemptylist(cocinero->cola_ready->pcb_espera)){
-            t_pcb* pcb_en_ejecucion = popfrontlist(&cocinero->cola_ready->pcb_espera);
-            pcb_en_ejecucion->estado = EXEC;
-
-            for(IteratorList iter_pasos = beginlist(pcb_en_ejecucion->plato->pasos); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
-                t_paso* paso = iter_pasos->data;
-
-                if(paso->se_ejecuto == 0){
-                    
-                    if(!es_paso_io(paso)){
-                        sleep(paso->ciclo_cpu);
-                        paso->se_ejecuto = 1;
-                        printf(" EJECUTO EXEC \n");
-                    }
-
-            }
-        }
-
-    }
-
-    printf(" - El plato no pudo ser ejecutado, su estado es:\n");
-    
-    }
-
-}
-
-
-
-int paso_ready(t_pcb* pcb){   
-
-    pushbacklist(&pcb->cola_ready_perteneciente->pcb_espera,pcb);
-    pcb->estado = READY;
-    printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
-
-    for(IteratorList iter_cocinero = beginlist(colas_exec); iter_cocinero != NULL; iter_cocinero = nextlist(iter_cocinero)){
-        t_exec* cocinero = iter_cocinero->data;
-        
-        if(!strcmp(pcb->plato->nombre, cocinero->afinidad)){
-            sem_post(cocinero->semaforo_exec);
-
-        }
-
-    }
-    
-   return 1;
 
 }
 
@@ -184,11 +130,89 @@ void inicializar_colas_io(){
         horno->ocupado = 0;
         horno->plato = NULL;
 
-        pushbacklist(&cola_io->hornos,horno);
+        pushbacklist(&hornos,horno);
 
     }
 
 }
+
+
+
+
+void* paso_exec(t_exec* cocinero){
+
+    while(true){
+    
+
+    sleep(3);
+
+    printf("PASO EL SEMAFOROOOO! \n");
+
+        if(!isemptylist(cocinero->cola_ready->pcb_espera)){
+
+            printf("PASO EL IF! \n");
+
+            t_pcb* pcb_en_ejecucion = popfrontlist(&cocinero->cola_ready->pcb_espera);
+
+            pcb_en_ejecucion->estado = EXEC;
+
+            for(IteratorList iter_pasos = beginlist(pcb_en_ejecucion->plato->pasos); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
+                t_paso* paso = iter_pasos->data;
+
+                if(paso->se_ejecuto == 0){
+                    
+                    if(!es_paso_io(paso)){
+                        sleep(paso->ciclo_cpu);
+                        paso->se_ejecuto = 1;
+                        printf(" EJECUTO EXEC \n");
+                        break;
+                    }else{
+                        printf(" ES PASO IO BOLUDOOO \n");
+                        break;
+                    }
+
+            }
+        }
+
+    }
+
+    printf(" - El plato no pudo ser ejecutado, su estado es:\n");
+    
+    }
+    return NULL;
+}
+
+
+
+int paso_ready(t_pcb* pcb){   
+//FALTA LOGICA
+    pcb->estado = READY;
+    printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
+
+    
+   return 1;
+
+}
+
+
+
+int plato_general(char* nombre_plato){
+
+    for(IteratorList iter_afinidad = beginlist(afinidades); iter_afinidad != NULL; iter_afinidad = nextlist(iter_afinidad)){
+        char* afinidad = iter_afinidad->data;
+
+        if(!strcmp(afinidad,nombre_plato)){
+            return 0;
+        }
+
+    }
+
+    return 1;
+}
+
+
+
+
 
 
 
@@ -205,7 +229,7 @@ int paso_exit(t_pcb* pcb){
 
 t_horno* paso_block(t_pcb* pcb){
 
-    for(IteratorList iter_horno = beginlist(cola_io->hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
+    for(IteratorList iter_horno = beginlist(hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
 
         t_horno* horno = iter_horno->data;
 
@@ -223,7 +247,7 @@ t_horno* paso_block(t_pcb* pcb){
 
     // TODO: CHEQUEAR REPOSAR
 
-    pushbacklist(&cola_io->pcb_espera,pcb);
+    pushbacklist(&pcb_espera_horno,pcb);
     pcb->estado = BLOCKED_SUSPENDED;
     printf(" - El plato %s esta en lista de espera para horno, su estado es: %s \n",pcb->plato->nombre,obtener_estado(pcb->estado));
    
@@ -314,117 +338,8 @@ char* obtener_estado(int estado){
 }
 
 
-int ejecutar_ciclos_fifo(t_pcb* pcb){
-
-    for(IteratorList iter_pasos = beginlist(pcb->plato->pasos); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
-        t_paso* paso = iter_pasos->data;
-
-        if(paso->se_ejecuto == 0){
-            printf("Paso a ejecutar: %s , Plato ejecuta: %s",paso->nombre_paso,pcb->plato->nombre);
-
-            if(pcb->estado==READY){
-                // paso_exec(pcb);
-                sleep(paso->ciclo_cpu);
-                
-                if(ultimo_paso(pcb)){
-                    paso_exit(pcb);
-                    paso->se_ejecuto = 1;
-                    sem_post(sem_exec);
-                    return 1;
-                    
-
-                }
-                paso->se_ejecuto = 1;
-                sacar_exec(pcb);
-                 sem_post(sem_exec);
-                return 1;
-              
-
-            }else if(pcb->estado==EXEC){
-
-                t_horno* horno_block = paso_block(pcb);
-
-                if(horno_block != NULL){
-                    sleep(paso->ciclo_cpu);
-                    paso->se_ejecuto = 1;
-                    sacar_horno(pcb);
-                     sem_post(sem_exec);
-                    return 1;
-                   
-                }
-                    
-
-            }else if(pcb->estado==BLOCKED){
-                paso_ready(pcb);
-                sem_post(sem_exec);
-                return 1;
-                
-
-                }
-              
-
-            }
-        }
-
-    
-    return 1;
-
-}
 
 
-int ultimo_paso(t_pcb* pcb){
-    int i=0;
-
-    for(IteratorList iter_pasos = beginlist(pcb->plato->pasos); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
-        t_paso* paso = iter_pasos->data;
-        if(paso->se_ejecuto == 0){
-            i++;
-        }
-
-    }
-    return (i==1);
-}
-
-void ejecutar_hilos(t_pcb* pcb){
-    while(true){
-    sem_wait(sem_exec);
-    ejecutar_ciclos_fifo(pcb);
-}
-}
-
-void planificacion_fifo(){ // REVISAR CANTIDAD TOTAL Y CANTIDAD LISTA
-
-    // while(true){
-
-    for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
-        t_pcb* pcb = iter_pcb->data;
-        
-            if(pcb->estado != EXIT){
-                //ejecutar_ciclos_fifo(pcb);
-                //crear_hilos_fifo(pcb);
-               
-            
-            }
-        }
-    //     if(pedidos_finalizados()){
-    //         break;
-    //     }
-
-        
-    // }
-
-}
-
-void crear_hilos_fifo(t_pcb* pcb){
-
-    pthread_t hilo_fifo[cantidad_cocineros];
-    for(int i=0;i<cantidad_cocineros;i++){
-        
-        pthread_create(&hilo_fifo[i],NULL,(void*)ejecutar_hilos,pcb);
-        pthread_join(hilo_fifo[i],NULL);
-
-    }
-}
 
 int pedidos_finalizados(){
 
@@ -438,7 +353,6 @@ int pedidos_finalizados(){
 
         }
 
-
     }
 
     return (i==tamanio_colas_pcb);
@@ -446,21 +360,10 @@ int pedidos_finalizados(){
 
 
 
-List* hilos_ready(){
-    List* lista_hilos_ready = NULL;
-    for(int i = 0; i<cantidad_cocineros;i++){
-        // pthread_t hilo;
-        // pthread_create(&hilo,NULL,(void*)NULL, NULL);
-        // pushbacklist(lista_hilos_ready,hilo);
-
-    }
-    return lista_hilos_ready;
-}
-
 
 int horno_libre(){
 
-    for(IteratorList iter_io = beginlist(cola_io->hornos); iter_io != NULL; iter_io = nextlist(iter_io)){
+    for(IteratorList iter_io = beginlist(hornos); iter_io != NULL; iter_io = nextlist(iter_io)){
         t_horno* horno = iter_io->data;
         
         if(horno-> ocupado == 0){
@@ -482,57 +385,22 @@ int es_paso_io(t_paso* paso){
 }
 
 
-void sacar_exec(t_pcb* pcb){
-    // pcb->cola_ready_perteneciente->puntero_exec->ocupado=0;
-    // pcb->cola_ready_perteneciente->puntero_exec->plato=NULL;
-
-}
-
-void sacar_ready(t_pcb* pcb){
-
-    for(IteratorList iter_ready = beginlist(pcb->cola_ready_perteneciente->pcb_espera); iter_ready != NULL; iter_ready = nextlist(iter_ready)){
-        t_pcb* pcb_espera = iter_ready->data;
-        if(pcb_espera->pid == pcb->pid){
-            popiterlist(&(pcb->cola_ready_perteneciente->pcb_espera),iter_ready);
-        }
-    }
-
-}
-
-void sacar_horno(t_pcb* pcb){
-
-    for(IteratorList iter_horno = beginlist(cola_io->hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
-        t_horno* horno = iter_horno->data;
-        if(horno->plato != NULL){
-            if(!strcmp(horno->plato->nombre,pcb->plato->nombre)){
-                horno->plato = NULL;
-                horno->ocupado = 0;
-                paso_ready(pcb);
-                ocupar_horno_libre();
-            }
-        }
-
-        
-    }
-
-}
 
 void ocupar_horno_libre(){
 
-    if(!isemptylist(cola_io->pcb_espera)){
-        t_plato* plato = popfrontlist(&cola_io->pcb_espera);
+    if(!isemptylist(pcb_espera_horno)){
+        t_plato* plato = popfrontlist(&pcb_espera_horno);
         for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
             t_pcb* pcb = iter_pcb->data;
             if(!strcmp(pcb->plato->nombre,plato->nombre)){
                 paso_block(pcb);
             }
         }
-        
-    }
-          
-  
-
+    } 
 }
+
+
+
 
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu){
 
@@ -571,13 +439,9 @@ t_pcb* crear_pcb(int id_pedido,int pid, int estado,t_plato* plato){
     pcb->pid = pid;
     pcb->id_pedido = id_pedido;
     pcb->estado = estado;
-    pcb->plato = plato;
-    pcb->cola_ready_perteneciente = asignar_cola_ready(plato);
-    
+    pcb->plato = plato;    
 
     pushfrontlist(&colas_pcb,pcb);
-
-    paso_ready(pcb);
 
 
     return pcb;
@@ -595,3 +459,19 @@ t_pedido* creacion_pedido(int id_pedido, List* platos){
 }
 
 
+t_exec* crear_exec(t_ready* cola_ready){
+
+    t_exec* exec = malloc(sizeof(t_exec));
+    exec->ocupado = 0;
+    exec->cola_ready = cola_ready;
+    exec->afinidad = cola_ready->afinidad;
+    exec->semaforo_exec = malloc(sizeof(sem_t));
+    sem_init((exec->semaforo_exec),0,0);
+    pthread_t* hilo_ejecucion_exe = malloc(sizeof(pthread_t));
+    exec->hilo_ejecucion_exec = hilo_ejecucion_exe;
+    // pthread_create(hilo_ejecucion_exe,NULL,(void*)paso_exec,exec);
+    // pthread_detach(*hilo_ejecucion_exe);
+    // pthread_join(*hilo_ejecucion_exe,NULL);
+
+    return exec;
+}

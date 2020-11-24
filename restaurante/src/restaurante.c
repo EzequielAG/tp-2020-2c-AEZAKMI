@@ -26,10 +26,16 @@ int main(int argc, char *argv[]){
    
     inicializar_colas();
 
+    caso_uso();
+
+
+  
+
+
     //iniciar_servidor("127.0.0.1", "5002", handle_client);
     //handle_client();
     
-    caso_uso();
+    
 
     //planificacion_fifo();
 
@@ -271,7 +277,7 @@ void ver_estado_pcb(){
         printf("- El PID del PCB es: %i \n",pcb->pid);
         printf("- El plato que contiene es: %s \n", pcb->plato->nombre);
         printf("- El plato se encuentra en estado: %i \n",pcb->estado);
-        printf("- Pertenece a la cola ready: %s \n", pcb->cola_ready_perteneciente->afinidad);
+        printf("- Pertenece a la cola ready: \n");
 
         printf("--------\n");
 
@@ -421,13 +427,8 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     initlist(&colas_exit);
     initlist(&colas_pcb);
     initlist(&colas_exec);
-
-    cola_io = malloc(sizeof(t_io));
-
-
-
-    initlist(&cola_io->hornos);
-    initlist(&cola_io->pcb_espera);
+    initlist(&hornos);
+    initlist(&pcb_espera_horno);
    
 
     sem_id = malloc(sizeof(sem_t));

@@ -258,6 +258,12 @@ FILE * get_or_create_bitmap_file(char * mode){
 	string_append(&bitmap_address, "/Metadata/Bitmap.bin");
 
 	FILE * bitmap_file = fopen(bitmap_address, mode);
+
+	if (bitmap_file == NULL){
+		printf("ERROR DE LISTEN: %s | NUMERO DE ERRNO: %d\n", strerror(errno), errno);
+		return bitmap_file;
+	}
+
 	free(bitmap_address);
 
 	return bitmap_file;
@@ -271,14 +277,15 @@ void update_bitmap_file(t_bitarray * bitmap){
 	fwrite(bitmap->bitarray, sizeof(char), bitmap->size, bitmap_file);
 
 	fclose(bitmap_file);
-	free(bitmap->bitarray);
-	free(bitmap);
 }
 
 void crear_bitmap(){
-	FILE * bitmap_file = get_or_create_bitmap_file("rb");
-	if (bitmap_file == NULL)
+	FILE * bitmap_file = get_or_create_bitmap_file("wb+");
+	if (bitmap_file == NULL){
 		log_error(logger, "No se pudo obtener 'bitmap file'");
+		exit(-1);
+	}
+		
 
 	int blocks = atoi(sindicato_config->blocks);
 

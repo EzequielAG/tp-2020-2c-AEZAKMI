@@ -9,9 +9,9 @@ int main(int argc, char *argv[]){
     initlist(&tablaSwap);
     initlist(&pilaPaginasAlgoritmos);
 
-	punteroBitMap = malloc((comanda_config->tamanio_memoria/256));
 	punteroBitMapSwap = malloc(comanda_config->tamanio_swap/256);
-
+	punteroBitMap = malloc(comanda_config->tamanio_memoria/256);
+    
 	bitMap = bitarray_create_with_mode(punteroBitMap, (comanda_config->tamanio_memoria/256), MSB_FIRST);
     bitMapSwap = bitarray_create_with_mode(punteroBitMapSwap, comanda_config->tamanio_swap/256, MSB_FIRST);
 
@@ -29,7 +29,9 @@ int main(int argc, char *argv[]){
 
     iniciarMemoriaSwap();
     
-    iniciar_servidor("127.0.0.1", "5001", handle_client);
+    //iniciar_servidor("127.0.0.1", "5001", handle_client);
+
+    imprimirBitMap();
 
     close(archivoSwap);
 

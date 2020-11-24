@@ -69,8 +69,8 @@ void iniciar_repartidores(){
         repartidor_actual->posicion.posx = atoi(posiciones_spliteadas[0]);
         repartidor_actual->posicion.posy = atoi(posiciones_spliteadas[1]);
         repartidor_actual->cansancio = 0;
-        repartidor_actual->nuevo_pedido = malloc(sizeof(sem_t));
         sem_init(repartidor_actual->nuevo_pedido, 0, 0);
+        repartidor_actual->nuevo_pedido = malloc(sizeof(sem_t));
         // repartidor_actual->espera_pedido = malloc(sizeof(sem_t));
         // sem_init(repartidor_actual->espera_pedido, 0, 0);
         repartidor_actual->ciclo_cpu = malloc(sizeof(sem_t));
@@ -155,7 +155,6 @@ void pcb_prueba(){
     sem_post(sem_pcb_new);
 }
 
-
 t_repartidor* obtener_repartidor_mas_cercano(t_pcb* pcb){
 
     t_repartidor* repartidorAux = NULL;
@@ -183,3 +182,4 @@ t_repartidor* obtener_repartidor_mas_cercano(t_pcb* pcb){
     }
     return repartidorAux;
 }
+

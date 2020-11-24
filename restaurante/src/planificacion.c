@@ -35,9 +35,9 @@ void inicializar_colas()
 
         printf(" -%s \n",cocinero->afinidad);
 
-        pthread_create(cocinero->hilo_ejecucion_exec,NULL,(void*)paso_exec,cocinero);
-        pthread_detach(*cocinero->hilo_ejecucion_exec);
-        //pthread_join(*cocinero->hilo_ejecucion_exec,NULL);
+        // pthread_create(cocinero->hilo_ejecucion_exec,NULL,(void*)paso_exec,cocinero);
+        // pthread_detach(*cocinero->hilo_ejecucion_exec);
+        //  pthread_join(*cocinero->hilo_ejecucion_exec,NULL);
 
 
     }printf("---------- \n");
@@ -185,7 +185,9 @@ void* paso_exec(t_exec* cocinero){
 
 
 int paso_ready(t_pcb* pcb){   
-//FALTA LOGICA
+
+    t_ready* cola_ready = cola_ready_pcb(pcb);
+    pushbacklist(&cola_ready->pcb_espera,pcb);
     pcb->estado = READY;
     printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
 
@@ -289,12 +291,12 @@ int pasos_ejecutados(t_pcb* pcb){
 }
 
 
-t_ready* asignar_cola_ready(t_plato* plato){
+t_ready* cola_ready_pcb(t_pcb* pcb){
 
     for(IteratorList iter_ready = beginlist(colas_ready); iter_ready != NULL; iter_ready = nextlist(iter_ready)){
         t_ready* ready = iter_ready->data;
 
-        if(!strcmp(plato->nombre, ready->afinidad)){
+        if(!strcmp(pcb->plato->nombre, ready->afinidad)){
 
             return ready;
 
@@ -401,6 +403,41 @@ void ocupar_horno_libre(){
 
 
 
+void planificacion(){
+
+    printf("Estoy en planificacion \n");
+
+    for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
+        t_pcb* pcb = iter_pcb->data;
+
+        if(pcb->estado == NEW){
+            paso_ready(pcb);
+        }
+
+
+    }printf("---------- \n");
+
+
+
+    for(IteratorList iter_cocinero = beginlist(colas_exec); iter_cocinero != NULL; iter_cocinero = nextlist(iter_cocinero)){
+        t_exec* cocinero = iter_cocinero->data;
+
+        printf(" -%s \n",cocinero->afinidad);
+
+        pthread_create(cocinero->hilo_ejecucion_exec,NULL,(void*)paso_exec,cocinero);
+        pthread_detach(*cocinero->hilo_ejecucion_exec);
+        //pthread_join(*cocinero->hilo_ejecucion_exec,NULL);
+
+
+    }printf("---------- \n");
+
+
+}
+
+
+
+
+
 
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu){
 
@@ -425,7 +462,7 @@ t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_tota
     plato->cantidad_total = cantidad_total;
     plato->cantidad_listo = cantidad_listo;
 
-    crear_pcb(pedido_id,pid,READY,plato);
+    crear_pcb(pedido_id,pid,plato);
 
 
     return plato;
@@ -433,12 +470,12 @@ t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_tota
 }
 
 
-t_pcb* crear_pcb(int id_pedido,int pid, int estado,t_plato* plato){
+t_pcb* crear_pcb(int id_pedido,int pid,t_plato* plato){
 
     t_pcb* pcb = malloc(sizeof(t_pcb));
     pcb->pid = pid;
     pcb->id_pedido = id_pedido;
-    pcb->estado = estado;
+    pcb->estado = NEW;
     pcb->plato = plato;    
 
     pushfrontlist(&colas_pcb,pcb);

@@ -28,9 +28,7 @@ int main(int argc, char *argv[]){
 
     caso_uso();
 
-
-  
-
+    planificacion();
 
     //iniciar_servidor("127.0.0.1", "5002", handle_client);
     //handle_client();

@@ -117,7 +117,6 @@ int plato_general(char* nombre_plato);
 void ocupar_horno_libre();
 int horno_libre();
 t_horno* paso_block(t_pcb* pcb);
-int ejecutar_ciclo(t_pcb* pcb,t_paso* paso);
 t_ready* cola_ready_cocinero(char* afinidad);
 int es_paso_io(t_paso* paso);
 int pasos_ejecutados(t_pcb* pcb);
@@ -125,13 +124,13 @@ int termino_pedido(int id_pedido);
 int cola_ready_creada(char* afinidad);
 char* obtener_estado(int estado);
 
-
+void planificacion();
 
 t_exec* crear_exec(t_ready* cola_ready);
-t_ready* asignar_cola_ready(t_plato* plato);
+t_ready* cola_ready_pcb(t_pcb* pcb);
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu);
 t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo, int pid);
 t_pedido* creacion_pedido(int id, List* platos);
-t_pcb* crear_pcb(int id_pedido,int pid, int estado,t_plato* plato);
+t_pcb* crear_pcb(int id_pedido,int pid,t_plato* plato);
 
 #endif

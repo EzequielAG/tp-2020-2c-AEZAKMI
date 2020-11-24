@@ -35,10 +35,6 @@ void inicializar_colas()
 
         printf(" -%s \n",cocinero->afinidad);
 
-        // pthread_create(cocinero->hilo_ejecucion_exec,NULL,(void*)paso_exec,cocinero);
-        // pthread_detach(*cocinero->hilo_ejecucion_exec);
-        //  pthread_join(*cocinero->hilo_ejecucion_exec,NULL);
-
 
     }printf("---------- \n");
 
@@ -107,17 +103,18 @@ void inicializar_colas_exec(){
         
         if(!isemptylist(afinidades)){
             char* afinidad_lista = popfrontlist(&afinidades);
-            t_ready* cola_ready_afinidad = cola_ready_cocinero(afinidad_lista);
-            t_exec* cola_exec = crear_exec(cola_ready_afinidad);
+            t_exec* cola_exec = crear_exec(afinidad_lista);
+            printf("Me creo un cocinero %s \n",cola_exec->afinidad);
             pushbacklist(&colas_exec, cola_exec);
         }else{
-            t_ready* cola_ready_afinidad = cola_ready_cocinero("GENERAL");
-            t_exec* cola_exec = crear_exec(cola_ready_afinidad);
+            t_exec* cola_exec = crear_exec("GENERAL");
+            printf("Me creo un cocinero %s \n",cola_exec->afinidad);
             pushbacklist(&colas_exec, cola_exec);
         }
          
-
     }
+
+  
 
 }
 
@@ -139,47 +136,21 @@ void inicializar_colas_io(){
 
 
 
-void* paso_exec(t_exec* cocinero){
+void paso_exec(t_exec* cocinero){
 
     while(true){
-    
 
-    sleep(3);
+        sem_wait(cocinero->semaforo_exec);
 
-    printf("PASO EL SEMAFOROOOO! \n");
+        
 
-        if(!isemptylist(cocinero->cola_ready->pcb_espera)){
-
-            printf("PASO EL IF! \n");
-
-            t_pcb* pcb_en_ejecucion = popfrontlist(&cocinero->cola_ready->pcb_espera);
-
-            pcb_en_ejecucion->estado = EXEC;
-
-            for(IteratorList iter_pasos = beginlist(pcb_en_ejecucion->plato->pasos); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
-                t_paso* paso = iter_pasos->data;
-
-                if(paso->se_ejecuto == 0){
-                    
-                    if(!es_paso_io(paso)){
-                        sleep(paso->ciclo_cpu);
-                        paso->se_ejecuto = 1;
-                        printf(" EJECUTO EXEC \n");
-                        break;
-                    }else{
-                        printf(" ES PASO IO BOLUDOOO \n");
-                        break;
-                    }
-
-            }
-        }
+        printf("PASO EL SEMAFOROOOO! \n");
 
     }
 
     printf(" - El plato no pudo ser ejecutado, su estado es:\n");
     
-    }
-    return NULL;
+    
 }
 
 
@@ -190,6 +161,23 @@ int paso_ready(t_pcb* pcb){
     pushbacklist(&cola_ready->pcb_espera,pcb);
     pcb->estado = READY;
     printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
+
+    
+    for(IteratorList iter_cocinero = beginlist(colas_exec); iter_cocinero != NULL; iter_cocinero = nextlist(iter_cocinero)){
+        t_exec* cocinero = iter_cocinero->data;
+
+        if(!strcmp(pcb->plato->nombre, cocinero->afinidad)){
+
+            printf("Le tiro el post \n");
+
+            sem_post(cocinero->semaforo_exec);
+            
+
+        }
+
+        printf(" -%s \n",cocinero->afinidad);
+
+    }
 
     
    return 1;
@@ -418,15 +406,11 @@ void planificacion(){
     }printf("---------- \n");
 
 
-
     for(IteratorList iter_cocinero = beginlist(colas_exec); iter_cocinero != NULL; iter_cocinero = nextlist(iter_cocinero)){
         t_exec* cocinero = iter_cocinero->data;
 
         printf(" -%s \n",cocinero->afinidad);
 
-        pthread_create(cocinero->hilo_ejecucion_exec,NULL,(void*)paso_exec,cocinero);
-        pthread_detach(*cocinero->hilo_ejecucion_exec);
-        //pthread_join(*cocinero->hilo_ejecucion_exec,NULL);
 
 
     }printf("---------- \n");
@@ -496,19 +480,18 @@ t_pedido* creacion_pedido(int id_pedido, List* platos){
 }
 
 
-t_exec* crear_exec(t_ready* cola_ready){
+t_exec* crear_exec(char* afinidad){
 
     t_exec* exec = malloc(sizeof(t_exec));
     exec->ocupado = 0;
-    exec->cola_ready = cola_ready;
-    exec->afinidad = cola_ready->afinidad;
+    exec->afinidad = string_new();
+    string_append(&exec->afinidad,afinidad);
     exec->semaforo_exec = malloc(sizeof(sem_t));
     sem_init((exec->semaforo_exec),0,0);
-    pthread_t* hilo_ejecucion_exe = malloc(sizeof(pthread_t));
-    exec->hilo_ejecucion_exec = hilo_ejecucion_exe;
-    // pthread_create(hilo_ejecucion_exe,NULL,(void*)paso_exec,exec);
-    // pthread_detach(*hilo_ejecucion_exe);
-    // pthread_join(*hilo_ejecucion_exe,NULL);
+    pthread_t hilo_ejecucion_exe;
+    pthread_create(&hilo_ejecucion_exe,NULL,(void*)paso_exec,exec);
+    pthread_detach(hilo_ejecucion_exe);
+    //pthread_join(hilo_ejecucion_exe,NULL);
 
     return exec;
 }

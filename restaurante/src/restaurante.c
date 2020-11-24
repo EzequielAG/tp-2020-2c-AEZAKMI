@@ -28,7 +28,11 @@ int main(int argc, char *argv[]){
 
     caso_uso();
 
+
+
     planificacion();
+
+       sem_wait(sem_exec);
 
     //iniciar_servidor("127.0.0.1", "5002", handle_client);
     //handle_client();
@@ -275,7 +279,6 @@ void ver_estado_pcb(){
         printf("- El PID del PCB es: %i \n",pcb->pid);
         printf("- El plato que contiene es: %s \n", pcb->plato->nombre);
         printf("- El plato se encuentra en estado: %i \n",pcb->estado);
-        printf("- Pertenece a la cola ready: \n");
 
         printf("--------\n");
 
@@ -433,7 +436,7 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     sem_init(sem_id, 0, 1);
 
     sem_exec = malloc(sizeof(sem_t));
-    sem_init(sem_exec, 0, 3);
+    sem_init(sem_exec, 0, 0);
 }
 
 void restaurante_finally(t_restaurante_config* restaurante_config, t_log* logger) {

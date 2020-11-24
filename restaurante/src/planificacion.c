@@ -101,11 +101,13 @@ void inicializar_colas_exec(){
     
     for(int i=0; i<cantidad_cocineros;i++){
         
-        if(!isemptylist(afinidades)){
-            char* afinidad_lista = popfrontlist(&afinidades);
+        if(atlist(afinidades,i) != NULL){
+            char* afinidad_lista = atlist(afinidades,i);
             t_exec* cola_exec = crear_exec(afinidad_lista);
             printf("Me creo un cocinero %s \n",cola_exec->afinidad);
             pushbacklist(&colas_exec, cola_exec);
+        
+            
         }else{
             t_exec* cola_exec = crear_exec("GENERAL");
             printf("Me creo un cocinero %s \n",cola_exec->afinidad);
@@ -172,8 +174,14 @@ int paso_ready(t_pcb* pcb){
 
             sem_post(cocinero->semaforo_exec);
             
+        }else if(plato_general(pcb->plato->nombre) && !strcmp(cocinero->afinidad,"GENERAL")){
+
+            printf("Le tiro el post en general \n");
+
+            sem_post(cocinero->semaforo_exec);
 
         }
+
 
         printf(" -%s \n",cocinero->afinidad);
 

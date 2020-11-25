@@ -315,7 +315,15 @@ t_bitarray* get_bitarray(){
 	int blocks = atoi(sindicato_config->blocks);
 
 	size_t bitarray_size = BIT_SIZE(blocks, CHAR_BIT);
-	char * bitarray = malloc(bitarray_size);
+	char* bitarray = malloc(bitarray_size);
+	size_t read_bytes = fread(bitarray, 1, bitarray_size, bitmap_file);
+
+	if (read_bytes != bitarray_size) {
+		fclose(bitmap_file);
+		free(bitarray);
+		log_info(logger,"El Bitmap esta incompleto");
+		return NULL;
+	}
 
 	fclose(bitmap_file);
 
@@ -523,17 +531,15 @@ int save_in_blocks(int initial_block, char* content, int number_of_blocks){
 	int next_block;
 	int finish_code;
 	for(int i=0; i<number_of_blocks; i++){
-		int start = i * block_size;
-		int length = start + block_size;
-		if (length < string_length(content)){
-			char* sub_string = string_substring(content, start, length);
+		if (block_size < string_length(content)){
+			char* sub_string = string_substring_until(content, block_size);
+			content = string_substring_from(content, block_size);
 			next_block = get_available_block();
 			finish_code = save_block(initial_block, next_block, sub_string);
 			initial_block = next_block;
-		} else {
-			char* sub_string = string_substring_from(content, start);
-			next_block = -1;
-			finish_code = save_block(initial_block, next_block, sub_string);
+		} else if (block_size > string_length(content)) {
+			next_block = -1; // NULL
+			finish_code = save_block(initial_block, next_block, content);
 		}
 	}
 	return finish_code;

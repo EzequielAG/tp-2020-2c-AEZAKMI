@@ -87,4 +87,6 @@ t_info* get_restaurante(char* restaurante);
 t_receta* get_receta(char* comida);
 int create_pedido_file(char* path, t_afip_file* pedido_file);
 int create_afip_file(char* content, char* path);
+List* obtenerBloquesActuales(uint32_t initial_block);
+uint32_t getSiguienteBloque(uint32_t bloque);
 #endif

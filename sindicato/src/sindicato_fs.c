@@ -530,6 +530,8 @@ int save_in_blocks(int initial_block, char* content, int number_of_blocks){
 	int block_size = atoi(sindicato_config->block_size) - 4;
 	int next_block;
 	int finish_code;
+	List* bloques_actuales = obtenerBloquesActuales(initial_block);
+	
 	for(int i=0; i<number_of_blocks; i++){
 		if (block_size < string_length(content)){
 			char* sub_string = string_substring_until(content, block_size);
@@ -545,11 +547,54 @@ int save_in_blocks(int initial_block, char* content, int number_of_blocks){
 	return finish_code;
 }
 
+List* obtenerBloquesActuales(uint32_t initial_block){
+	List* lista = malloc(sizeof(List));
+	initlist(lista);
+
+	uint32_t siguiente = initial_block;
+	while (siguiente != -1){
+		siguiente = getSiguienteBloque(siguiente);
+		uint32_t* bloque_siguiente = malloc(sizeof(uint32_t));
+		*bloque_siguiente = siguiente;
+		pushbacklist(lista, bloque_siguiente);
+	}
+	
+	return lista;
+}
+
+
+uint32_t getSiguienteBloque(uint32_t bloque){
+	uint32_t siguiente = -1;
+	char* ruta_archivo = string_from_format("/Blocks/%d.AFIP", bloque);
+	FILE * fp = get_or_create_file(ruta_archivo, "r");
+	if (fp == NULL){
+		log_error(logger, "[Save Block] No se obtuvo el archivo bloque");
+		return EXIT_FAILURE;
+	}
+	int resultado = fseek(fp, sizeof(uint32_t), SEEK_END);
+
+	if (resultado == -1){
+		log_error(logger, "[Get Siguiente Bloque] No se pudo mover a la posicion del siguiente");
+		return EXIT_FAILURE;
+	}
+
+	resultado = fscanf(fp, "%d", &siguiente);
+
+	if (resultado == -1){
+		log_error(logger, "[Get Siguiente Bloque] No se pudo mover a la posicion del siguiente");
+		return EXIT_FAILURE;
+	}
+
+	return siguiente;
+
+}
+
+
 int create_afip_file(char* content, char* path){
 	int number_of_blocks = calculate_blocks_required(content);
 
 	t_afip_file* afip_file = malloc(sizeof(t_afip_file));
-	afip_file->size = string_length(content) + number_of_blocks * 4;
+	afip_file->size = string_length(content) + number_of_blocks * sizeof(uint32_t);
 	afip_file->initial_block = get_available_block();
 	if(save_afip_file(path, afip_file)){
 		log_error(logger, "[Create Afip File] No se guardo el archivo afip");

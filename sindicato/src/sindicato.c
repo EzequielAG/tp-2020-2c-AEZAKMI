@@ -151,6 +151,14 @@ void handle_guardar_pedido(int socket, char* restaurante, char* id_pedido){
 	send_messages_socket(socket, respuesta, 1);
 }
 
+bool platos_iguales(char* plato, char* comida){
+	if(!strcmp(plato, comida)){
+		return true;
+	} else {
+		return false;
+	}
+}
+
 void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* comida, char* cantidad){
 	//Verificar si el Restaurante existe dentro del File System. 
 	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
@@ -175,28 +183,34 @@ void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* 
 	//Verificar si ese plato ya existe dentro del archivo.
 	//En caso de existir, se deberán agregar la cantidad pasada por parámetro a la actual. 
 	//En caso de no existir se deberá agregar el plato a la lista de Platos y anexar la cantidad que se tiene que cocinar de dicho plato y aumentar el precio total del pedido.
-	bool platos_iguales(char* plato){
-		if(strcmp(plato, comida)){
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	if (list_any_satisfy(pedido->lista_platos, (void*)platos_iguales)){
-		int i, posicion;
-		int cant_platos = list_size(pedido->lista_platos);
-		for (i=0; i<=cant_platos; i++){
-			char* plato_existente = list_get(pedido->lista_platos, i);
-			if (strcmp(plato_existente, comida)){
-				posicion = i;
-			}
-		}
-		list_replace(pedido->cantidad_platos, posicion, cantidad);
-	} else {
-		list_add(pedido->lista_platos, comida);
-		list_add(pedido->cantidad_platos, cantidad);
-	}
+	
+	// t_link_element* elemento = pedido->lista_platos->head;
+	// int i = 0;
+	// while (elemento->data != NULL){
+	// 	char* plato = elemento->data;
+	// 	if (platos_iguales(, comida)){
+	// 		pedido->lista_platos
+	// 	}
+	// 	elemento = elemento->next;
+	// 	i++;
+	// }
+	// for (int i = 0; i < pedido->lista_platos->elements_count; i++){
+	// 	if (platos_iguales(pedido->lista_platos->head))
+	// }
+	// if (list_any_satisfy(pedido->lista_platos, (void*)platos_iguales)){
+	// 	int i, posicion;
+	// 	int cant_platos = list_size(pedido->lista_platos);
+	// 	for (i=0; i<=cant_platos; i++){
+	// 		char* plato_existente = list_get(pedido->lista_platos, i);
+	// 		if (strcmp(plato_existente, comida)){
+	// 			posicion = i;
+	// 		}
+	// 	}
+	// 	list_replace(pedido->cantidad_platos, posicion, cantidad);
+	// } else {
+	// 	list_add(pedido->lista_platos, comida);
+	// 	list_add(pedido->cantidad_platos, cantidad);
+	// }
 
 	//Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
 	char* respuesta[1];

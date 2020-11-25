@@ -479,14 +479,14 @@ void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posi
 		return;
 	}
 
-	get_or_create_folder(nombre);
+	get_or_create_folder(get_path_restaurante(nombre));
 	char* content = string_new();
 	string_append_with_format(&content, "CANTIDAD_COCINEROS=%s\n", cantidad_cocineros);
 	string_append_with_format(&content, "POSICION=%s\n", posicion);
 	string_append_with_format(&content, "AFINIDAD_COCINEROS=%s\n", afinidad_cocineros);
 	string_append_with_format(&content, "PLATOS=%s\n", platos);
 	string_append_with_format(&content, "PRECIO_PLATOS=%s\n", precio_platos);
-	cantidad_hornos = string_substring_until(cantidad_hornos, (string_length(cantidad_hornos)-2));
+	cantidad_hornos = string_substring_until(cantidad_hornos, (string_length(cantidad_hornos)-1));
 	string_append_with_format(&content, "CANTIDAD_HORNOS=%s", cantidad_hornos);
 
 	int number_of_blocks = calculate_blocks_required(content);

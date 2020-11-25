@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <limits.h>
+#include <math.h>
 #include <commons/bitarray.h>
 #include <commons/string.h>
 #include "sindicato_config.h"
@@ -47,6 +48,11 @@ typedef struct {
 } t_pedido;
 
 typedef struct {
+	int size;
+	int initial_block;
+} t_restaurante_file;
+
+typedef struct {
 	t_list* pasos;
 	t_list* tiempo_paso;
 } t_receta;
@@ -78,4 +84,5 @@ t_list* get_platos(char* restaurante);
 t_pedido* get_pedido(char* restaurante, char* id_pedido);
 t_info* get_restaurante(char* restaurante);
 t_receta* get_receta(char* comida);
+int create_pedido_file(char* path, t_pedido_file* pedido_file);
 #endif

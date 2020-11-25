@@ -179,13 +179,13 @@ int get_or_create_folder(char* file_adress){
 		int rv = mkdir(file_adress, 0777);
 		if (rv == 0){
 			printf("Se creo la carpeta: %s \n", file_adress);
-			log_info(logger, "Se creo la carpeta: %s \n", file_adress);
+			log_info(logger, "Se creo la carpeta: %s", file_adress);
 			closedir(folder_dir);
 			return 1;
 		}
 		else {
 			printf("No se pudo crear la carpeta\n");
-			log_error(logger, "No se pudo crear la carpeta\n");
+			log_error(logger, "No se pudo crear la carpeta");
 			return -1;
 		}
 	}
@@ -369,10 +369,12 @@ void crear_files(){
 
 void create_blocks(){
 	int cantidad_bloques = atoi(sindicato_config->blocks);
+	char* ruta_archivo;
 	for(int id=0; id < cantidad_bloques; id++){
-		char* ruta_archivo = string_from_format("/Blocks/%d.AFIP", id);
+		ruta_archivo = string_from_format("/Blocks/%d.AFIP", id);
 		FILE * bloque = get_or_create_file(ruta_archivo, "w");
 		ruta_archivo = "";
+		fclose(bloque);
 	}
 
 }

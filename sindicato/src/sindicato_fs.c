@@ -513,10 +513,8 @@ int save_block(int initial, int next, char* content){
 		log_error(logger, "[Save Block] No se obtuvo el archivo bloque");
 		return EXIT_FAILURE;
 	}
-	if(next > -1){
-		string_append(&content, string_itoa(next));
-	}
-	int finish_code = fputs(content, bloque);
+	int finish_code = fwrite(content, strlen(content), 1, bloque);
+	finish_code = fwrite(&next, sizeof(uint32_t), 1, bloque);
 	fclose(bloque);
 	free(ruta_archivo);
 	if (finish_code < 0){
@@ -530,19 +528,38 @@ int save_in_blocks(int initial_block, char* content, int number_of_blocks){
 	int block_size = atoi(sindicato_config->block_size) - 4;
 	int next_block;
 	int finish_code;
+	int block;
+
 	List* bloques_actuales = obtenerBloquesActuales(initial_block);
-	
-	for(int i=0; i<number_of_blocks; i++){
-		if (block_size < string_length(content)){
-			char* sub_string = string_substring_until(content, block_size);
-			content = string_substring_from(content, block_size);
-			next_block = get_available_block();
-			finish_code = save_block(initial_block, next_block, sub_string);
-			initial_block = next_block;
-		} else if (block_size > string_length(content)) {
-			next_block = -1; // NULL
-			finish_code = save_block(initial_block, next_block, content);
+	if (number_of_blocks > (int)sizelist(*bloques_actuales)){
+		int faltante = number_of_blocks - (int)sizelist(*bloques_actuales);
+		while(faltante>0){
+			int available_block = get_available_block();
+			uint32_t* block = malloc(sizeof(uint32_t));
+			*block = available_block;
+			pushbacklist(bloques_actuales, block);
+			faltante--;
 		}
+	} else if (number_of_blocks < (int)sizelist(*bloques_actuales)){
+		int restante = (int)sizelist(*bloques_actuales) - number_of_blocks;
+		while(restante>0){
+			uint32_t* block = popbacklist(bloques_actuales);
+			free_block(block);
+			restante--;
+			free(block);
+		}
+	}
+	initial_block = *(int *)popfrontlist(bloques_actuales);
+	for(int i=0; i<number_of_blocks; i++){
+		char* sub_string = string_substring_until(content, block_size);
+		if ((int)sizelist(*bloques_actuales)==0){
+			next_block = -1;
+		} else {
+			content = string_substring_from(content, block_size);
+			next_block = *(int *)popfrontlist(bloques_actuales);
+		}
+		finish_code = save_block(initial_block, next_block, sub_string);
+		initial_block = next_block;
 	}
 	return finish_code;
 }
@@ -553,10 +570,10 @@ List* obtenerBloquesActuales(uint32_t initial_block){
 
 	uint32_t siguiente = initial_block;
 	while (siguiente != -1){
-		siguiente = getSiguienteBloque(siguiente);
 		uint32_t* bloque_siguiente = malloc(sizeof(uint32_t));
 		*bloque_siguiente = siguiente;
 		pushbacklist(lista, bloque_siguiente);
+		siguiente = getSiguienteBloque(siguiente);
 	}
 	
 	return lista;
@@ -571,7 +588,16 @@ uint32_t getSiguienteBloque(uint32_t bloque){
 		log_error(logger, "[Save Block] No se obtuvo el archivo bloque");
 		return EXIT_FAILURE;
 	}
-	int resultado = fseek(fp, sizeof(uint32_t), SEEK_END);
+	int resultado = fseek(fp, 0, SEEK_END);
+	if (resultado == -1){
+		log_error(logger, "[Get Siguiente Bloque] No se pudo mover al final del archivo");
+		return EXIT_FAILURE;
+	}
+	if (ftell( fp ) == 0 ){
+		return -1;
+	}
+
+	resultado = fseek(fp, -sizeof(uint32_t), SEEK_END);
 
 	if (resultado == -1){
 		log_error(logger, "[Get Siguiente Bloque] No se pudo mover a la posicion del siguiente");

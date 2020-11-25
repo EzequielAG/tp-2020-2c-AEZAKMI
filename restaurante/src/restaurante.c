@@ -23,7 +23,6 @@ int main(int argc, char *argv[]){
 
     cantidad_pedidos = 0;
    
-   
     inicializar_colas();
 
     caso_uso();

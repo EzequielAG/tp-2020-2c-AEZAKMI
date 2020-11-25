@@ -25,7 +25,6 @@ typedef struct {
 } t_comanda_config;
 
 t_comanda_config* comanda_config;
-t_log* logger;
 
 // FUNCIONES
 void comanda_init(t_comanda_config** comanda_config, t_log** logger);

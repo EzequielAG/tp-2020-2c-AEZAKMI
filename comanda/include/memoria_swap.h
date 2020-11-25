@@ -18,6 +18,7 @@
 #include "list.h"
 
 void iniciarMemoriaSwap();
+int max (int x, int y);
 
 void *puntero_memoria_swap;
 int archivoSwap;
@@ -30,3 +31,8 @@ void* punteroBitMapSwap;
 char* algoritmo;
 int tamanioMemoria;
 int tamanioSwap;
+int tamanioBitMapPrincipal;
+int tamanioBitMapSwap;
+
+t_log* logger;
+

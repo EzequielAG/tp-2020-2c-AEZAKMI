@@ -28,11 +28,12 @@ t_modulo modulo_sindicato;
 t_modulo modulo_app;
 receta_precio** recetas;
 sem_t* sem_exec;
+sem_t* sem_block;
+sem_t* sem_ready;
+sem_t* sem_horno_libre;
 
 
-void inicializar_colas();
 
-void inicializar_colas_io();
 
 typedef enum estado_proceso{
     NEW = 0,
@@ -53,15 +54,6 @@ typedef struct {
  
 } t_plato;
 
-typedef struct{
-
-    int ocupado;
-    t_plato* plato;
-    char* afinidad;
-    List colas_de_ready;
-
-}t_exec;
-
 
 typedef struct {
 
@@ -70,72 +62,92 @@ typedef struct {
 
 } t_pedido;
 
-typedef struct{
-    int ocupado;
-    t_plato* plato;
-} t_horno;
+
 
 typedef struct{
 
     char* afinidad;
-    List platos_espera;
+    List pcb_espera;
+    List cocineros;
+    sem_t* sem_cocinero_libre;
+    sem_t* sem_pcb_espera;
     
 }t_ready;
 
-
 typedef struct{
 
-    List hornos;
-    List platos_espera;
-    
-}t_io;
-
-typedef struct{
     int id_pedido;
+    char* afinidad;
     int pid;
     estado_proceso_t estado;
     t_plato* plato;
-    t_ready* cola_ready_perteneciente;
+    sem_t* ciclo_cpu;
+
 } t_pcb;
 
+typedef struct{
+    int ocupado;
+    t_pcb* pcb;
+    sem_t* sem_horno;
+} t_horno;
 
+
+typedef struct{
+
+    int ocupado;
+    char* afinidad;
+    t_pcb* pcb;
+    sem_t* semaforo_exec;
+
+}t_exec;
 
 
 List colas_ready;
 List colas_exit;
 List colas_pcb;
 List colas_exec;
-t_io* cola_io;
-int pedidos_finalizados();
-void planificacion_fifo();
-int ultimo_paso(t_pcb* pcb);
+List hornos;
+List pcb_espera_horno;
+List suscriptores_cpu;
+
+void controlador_hornos();
+void inicializar_colas();
 void inicializar_colas_ready();
-t_ready* cola_ready_cocinero(char* afinidad);
 void inicializar_colas_exec();
-void ocupar_horno_libre();
-int horno_libre();
-int paso_ready(t_pcb* pcb);
+void inicializar_colas_io();
+void asignar_pcb_cocinero(t_ready* cola);
+void controlador_ready(t_ready* cola);
+void controlador_a_ready(t_ready* cola);
+void desuscribirse_clock(sem_t* ciclo_cpu);
+void clock_cpu();
+void iniciar_clock();
+
+void paso_ready(t_pcb* pcb);
 int paso_exit(t_pcb* pcb);
-t_horno* paso_block(t_pcb* pcb);
-int paso_exec(t_pcb* pcb);
-int ejecutar_ciclo(t_pcb* pcb,t_paso* paso);
-t_ready* asignar_cola_ready(t_plato* plato);
+void paso_exec(t_exec* cocinero);
+void paso_a_exec(t_exec* cocinero);
+
+int pedidos_finalizados();
+int plato_general(char* nombre_plato);
+t_ready* cola_por_afinidad(char* afinidad);
+void paso_block(t_horno* horno);
+void paso_a_block(t_horno* horno);
+t_ready* cola_ready_cocinero(char* afinidad);
 int es_paso_io(t_paso* paso);
-t_exec* crear_exec();
-int pasos_ejecutados(t_pcb* pcb);
 int termino_pedido(int id_pedido);
-char* obtener_estado(int estado);
-List* hilos_ready();
-void sacar_exec(t_pcb* pcb);
-void sacar_ready(t_pcb* pcb);
-void sacar_horno(t_pcb* pcb);
-void crear_hilos_fifo(t_pcb* pcb);
-void ejecutar_hilos(t_pcb* pcb);
 int cola_ready_creada(char* afinidad);
+char* obtener_estado(int estado);
+char* afinidad_por_nombre_plato(char* nombre);
+
+void planificacion();
+
+t_log* logger;
+
+t_exec* crear_exec();
+t_ready* cola_ready_pcb(t_pcb* pcb);
 t_paso* crear_paso(char* nombre_paso, int ciclo_cpu);
 t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_total, int cantidad_listo, int pid);
 t_pedido* creacion_pedido(int id, List* platos);
-t_pcb* crear_pcb(int id_pedido,int pid, int estado,t_plato* plato);
+t_pcb* crear_pcb(int id_pedido,int pid,t_plato* plato, char* afinidad);
 
-int ejecutar_ciclos_fifo(t_pcb* pcb);
 #endif

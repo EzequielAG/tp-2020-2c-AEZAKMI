@@ -197,16 +197,3 @@ void desuscribirse_clock(sem_t* ciclo_cpu){
         }
     }
 }
-
-void inicializar_pedido_semaforo(char* id_pedido){
-    t_pedido_espera* pedido_espera = malloc(sizeof(t_pedido_espera));
-
-    sem_t* semaforo = malloc(sizeof(sem_t));
-    sem_init(semaforo, 0, 0);
-    
-    pedido_espera->id_pedido = id_pedido;
-    pedido_espera->semaforo = semaforo;
-
-    pushfrontlist(&lista_semaforos_pedidos, pedido_espera);
-
-}

@@ -16,12 +16,7 @@ typedef struct {
     char* nombre_restaurante;
 } t_restaurante_config;
 
-
-
-
 t_restaurante_config* restaurante_config;
-t_log* logger;
-
 
 
 // FUNCIONES

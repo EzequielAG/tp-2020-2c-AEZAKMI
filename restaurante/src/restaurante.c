@@ -26,14 +26,27 @@ int main(int argc, char *argv[]){
    
     inicializar_colas();
 
+    caso_uso();
+
+
+    pthread_t iniciar_planificacion;
+    pthread_create(&iniciar_planificacion, NULL, (void*) planificacion, NULL);
+    pthread_detach(iniciar_planificacion);
+
+
+    sem_wait(sem_exec);
+
+
+    //sem_wait(sem_exec);
+
     //iniciar_servidor("127.0.0.1", "5002", handle_client);
     //handle_client();
     
-    //caso_uso();
+    
 
     //planificacion_fifo();
 
-    ver_estado_pcb();
+    // ver_estado_pcb();
 
     return 0;
 }
@@ -178,7 +191,7 @@ void caso_uso(){
     t_paso* paso_freir2 = crear_paso("Freir",6);
     t_paso* paso_asar = crear_paso("ASAR",4);
     t_paso* paso_amasar_empanadas = crear_paso("Amasar",6);
-    t_paso* paso_hornear_empanadas = crear_paso("Hornear",6);
+    t_paso* paso_hornear_empanadas = crear_paso("HORNEAR",6);
     t_paso* paso_servir_empadas = crear_paso("Servir",4);
 
     pushbacklist(&lista_pasos_milanesa, paso_rebozar);
@@ -208,6 +221,8 @@ void caso_uso(){
 
     creacion_pedido(10,&lista_platos);
 
+
+    printf("\n \n");
     ver_estado_pcb();
 
 
@@ -237,9 +252,8 @@ void inicializacion_default(){
    initlist(afinidades_default);
    pushbacklist(afinidades_default,"Milanesa");
    pushbacklist(afinidades_default,"Pizza");
-   pushbacklist(afinidades_default,"Guiso");
-   pushbacklist(afinidades_default,"Guiso");
-   pushbacklist(afinidades_default,"Mondongo");
+   //pushbacklist(afinidades_default,"Pizza");
+
 
 
    resto_default->afinidades = afinidades_default;
@@ -267,10 +281,9 @@ void ver_estado_pcb(){
         t_pcb* pcb = iter_pcb->data;
 
         printf("- El id del pedido del PCB es: %i \n",pcb->id_pedido);
-         printf("- El PID del PCB es: %i \n",pcb->pid);
+        printf("- El PID del PCB es: %i \n",pcb->pid);
         printf("- El plato que contiene es: %s \n", pcb->plato->nombre);
         printf("- El plato se encuentra en estado: %i \n",pcb->estado);
-        printf("- Pertenece a la cola ready: %s \n", pcb->cola_ready_perteneciente->afinidad);
 
         printf("--------\n");
 
@@ -290,16 +303,7 @@ void ver_info_pedido(List* lista_pedidos){
             t_plato* plato = iter_platos->data;
             printf(" - Nombre plato: %s \n", plato->nombre);
             printf("Pasos sin ejecutar: \n");
-              for(IteratorList iter_pasos = beginlist((plato->pasos)); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
-                 t_paso* paso_plato = iter_pasos->data;
-                
-                 if(paso_plato->se_ejecuto){
-                 printf(" - Paso: %s \n", paso_plato->nombre_paso);
-                 printf(" - Ciclo cpu: %d \n", paso_plato->ciclo_cpu);
-                 printf(" - Es io : %d \n", es_paso_io(paso_plato));
-
-                 printf("--------\n");
-                }
+    
               
               }
 
@@ -308,8 +312,8 @@ void ver_info_pedido(List* lista_pedidos){
         printf("\n");
         printf("\n");
         
-    }
-};
+}
+
 
 
 void data_restaurante(){
@@ -420,20 +424,24 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     initlist(&colas_exit);
     initlist(&colas_pcb);
     initlist(&colas_exec);
-
-    cola_io = malloc(sizeof(t_io));
-
-
-
-    initlist(&cola_io->hornos);
-    initlist(&cola_io->platos_espera);
+    initlist(&hornos);
+    initlist(&pcb_espera_horno);
    
 
     sem_id = malloc(sizeof(sem_t));
     sem_init(sem_id, 0, 1);
 
     sem_exec = malloc(sizeof(sem_t));
-    sem_init(sem_exec, 0, 3);
+    sem_init(sem_exec, 0, 0);
+
+    sem_block = malloc(sizeof(sem_t));
+    sem_init(sem_block,0,0);
+
+    sem_horno_libre = malloc(sizeof(sem_t));
+    sem_init(sem_horno_libre,0,0);
+
+    sem_ready = malloc(sizeof(sem_t));
+    sem_init(sem_ready,0,0);
 }
 
 void restaurante_finally(t_restaurante_config* restaurante_config, t_log* logger) {

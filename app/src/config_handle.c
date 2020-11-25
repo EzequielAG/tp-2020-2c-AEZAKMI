@@ -36,7 +36,6 @@ t_pedido_espera* buscar_pedido_espera(char* id_pedido){
         t_pedido_espera* pedido = (t_pedido_espera*) iter->data;
 
         if (!strcmp(pedido->id_pedido, id_pedido)){
-            popiterlist(&lista_semaforos_pedidos, iter);
             return pedido;
         }
 
@@ -44,7 +43,20 @@ t_pedido_espera* buscar_pedido_espera(char* id_pedido){
 
     return NULL;
 
+}
 
+t_pedido_espera* eliminar_pedido_espera(char* id_pedido){
+
+    for (IteratorList iter = beginlist(lista_semaforos_pedidos); iter != NULL; iter = nextlist(iter)){
+        t_pedido_espera* pedido = (t_pedido_espera*) iter->data;
+
+        if (!strcmp(pedido->id_pedido, id_pedido)){
+            popiterlist(&lista_semaforos_pedidos, iter);
+        }
+
+    }
+
+    return NULL;
 
 }
 
@@ -76,12 +88,12 @@ int comparar_platos(r_obtener_pedido *pedido){
     for(iterador = beginlist(*pedido->info_comidas);iterador != NULL; iterador = nextlist(iterador)){
         info = (informacion_comidas*)dataiterlist(iterador);
 
-        if(info->cantidad_lista != info->cantidad_total){
-            return 1;
+        if(*info->cantidad_lista != *info->cantidad_total){
+            return 0;
         }
 
     }
 
-    return 0;
+    return 1;
 
 }

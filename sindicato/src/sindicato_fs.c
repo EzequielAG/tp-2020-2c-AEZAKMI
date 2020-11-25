@@ -307,7 +307,7 @@ void crear_bitmap(){
 	// bitarray_destroy(bitmap);
 }
 
-t_bitarray * get_bitarray(){
+t_bitarray* get_bitarray(){
 	FILE * bitmap_file = get_or_create_file("/Metadata/Bitmap.bin", "rb");
 	if (bitmap_file == NULL)
 		log_error(logger, "No se pudo obtener 'bitmap file'");
@@ -316,6 +316,8 @@ t_bitarray * get_bitarray(){
 
 	size_t bitarray_size = BIT_SIZE(blocks, CHAR_BIT);
 	char * bitarray = malloc(bitarray_size);
+
+	fclose(bitmap_file);
 
 	return bitarray_create_with_mode(bitarray, bitarray_size, LSB_FIRST);
 }
@@ -344,6 +346,24 @@ void free_block(int block_pos){
 	modify_block(bitmap, false, block_pos);
 	update_bitmap_file(bitmap);
 	pthread_mutex_unlock(&mutex_bitmap);
+}
+int get_available_block_in_bitmap(){
+	int index = -1;
+	bool bit = true;
+	t_bitarray* bitmap = get_bitarray();
+	int max_bit = bitarray_get_max_bit(bitmap);
+
+	while((index<max_bit)&&(bit==true)){
+		index++;
+		bit = bitarray_test_bit(bitmap, index);
+	}
+
+	if (bit){
+		log_error(logger, "[Get Available Block In Bitmap] No se obtuvo un bloque sin usar.");
+		return -1;
+	}
+	take_block(index);
+	return index;
 }
 /* --- END BITMAP --- */
 
@@ -455,11 +475,11 @@ t_receta* get_receta(char* comida){
 int calculate_blocks_required(char* string){
 	int string_size = string_length(string);
 	int wearable_size = atoi(sindicato_config->block_size) - 4;
-	return (string_size / wearable_size) + (string_size % wearable_size) ? 1 : 0;
+	return (string_size / wearable_size) + ((string_size % wearable_size) ? 1 : 0);
 }
 
 int get_available_block(){
-	return 12; //TODO
+	return get_available_block_in_bitmap();
 }
 
 int save_afip_file(char* path, t_afip_file* afip_file){

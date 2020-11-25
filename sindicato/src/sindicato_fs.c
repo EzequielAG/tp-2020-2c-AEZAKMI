@@ -482,7 +482,7 @@ t_receta* get_receta(char* comida){
 
 int calculate_blocks_required(char* string){
 	int string_size = string_length(string);
-	int wearable_size = atoi(sindicato_config->block_size) - 4;
+	int wearable_size = atoi(sindicato_config->block_size) - sizeof(uint32_t);
 	return (string_size / wearable_size) + ((string_size % wearable_size) ? 1 : 0);
 }
 
@@ -525,7 +525,7 @@ int save_block(int initial, int next, char* content){
 
 int save_in_blocks(int initial_block, char* content, int number_of_blocks){
 	log_info(logger, "[Save In Block] Se procede a guardar en bloques");
-	int block_size = atoi(sindicato_config->block_size) - 4;
+	int block_size = atoi(sindicato_config->block_size) - sizeof(uint32_t);
 	int next_block;
 	int finish_code;
 	int block;

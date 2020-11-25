@@ -8,6 +8,7 @@
 #include <commons/bitarray.h>
 #include <commons/string.h>
 #include "sindicato_config.h"
+#include <errno.h>
 
 #define BIT_SIZE(x,y) ((x - 1) / y + 1);
 #define	ES_TEST true

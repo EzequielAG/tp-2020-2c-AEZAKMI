@@ -51,7 +51,7 @@ typedef struct {
 typedef struct {
 	int size;
 	int initial_block;
-} t_restaurante_file;
+} t_afip_file;
 
 typedef struct {
 	t_list* pasos;
@@ -85,5 +85,6 @@ t_list* get_platos(char* restaurante);
 t_pedido* get_pedido(char* restaurante, char* id_pedido);
 t_info* get_restaurante(char* restaurante);
 t_receta* get_receta(char* comida);
-int create_pedido_file(char* path, t_restaurante_file* pedido_file);
+int create_pedido_file(char* path, t_afip_file* pedido_file);
+int create_afip_file(char* content, char* path);
 #endif

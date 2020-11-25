@@ -451,3 +451,87 @@ t_info* get_restaurante(char* restaurante){
 t_receta* get_receta(char* comida){
 	return create_receta_config(comida);
 }
+
+int calculate_blocks_required(char* string){
+	int string_size = string_length(string);
+	int wearable_size = atoi(sindicato_config->block_size) - 4;
+	return (string_size / wearable_size) + (string_size % wearable_size) ? 1 : 0;
+}
+
+int get_available_block(){
+	return 12; //TODO
+}
+
+int save_afip_file(char* path, t_afip_file* afip_file){
+	FILE* pedido = fopen(path, "w");
+	if (pedido == NULL){
+		log_error(logger, "[Save Afip File] No se creo el archivo de pedido");
+		return EXIT_FAILURE;
+	}
+
+	t_config* config = config_create(path);
+	config_set_value(config, "SIZE", string_itoa(afip_file->size));
+	config_set_value(config, "INITIAL_BLOCK", string_itoa(afip_file->initial_block));
+	config_save_in_file(config, path);
+
+	fclose(pedido);
+	return EXIT_SUCCESS;
+}
+
+int save_block(int initial, int next, char* content){
+	char* ruta_archivo = string_from_format("/Blocks/%d.AFIP", initial);
+	FILE * bloque = get_or_create_file(ruta_archivo, "w");
+	if (bloque == NULL){
+		log_error(logger, "[Save Block] No se obtuvo el archivo bloque");
+		return EXIT_FAILURE;
+	}
+	if(next > -1){
+		string_append(&content, string_itoa(next));
+	}
+	int finish_code = fputs(content, bloque);
+	fclose(bloque);
+	free(ruta_archivo);
+	if (finish_code < 0){
+		return EXIT_FAILURE;
+	}
+	return EXIT_SUCCESS;
+}
+
+int save_in_blocks(int initial_block, char* content, int number_of_blocks){
+	log_info(logger, "[Save In Block] Se procede a guardar en bloques");
+	int block_size = atoi(sindicato_config->block_size) - 4;
+	int next_block;
+	int finish_code;
+	for(int i=0; i<number_of_blocks; i++){
+		int start = i * block_size;
+		int length = start + block_size;
+		if (length < string_length(content)){
+			char* sub_string = string_substring(content, start, length);
+			next_block = get_available_block();
+			finish_code = save_block(initial_block, next_block, sub_string);
+			initial_block = next_block;
+		} else {
+			char* sub_string = string_substring_from(content, start);
+			next_block = -1;
+			finish_code = save_block(initial_block, next_block, sub_string);
+		}
+	}
+	return finish_code;
+}
+
+int create_afip_file(char* content, char* path){
+	int number_of_blocks = calculate_blocks_required(content);
+
+	t_afip_file* afip_file = malloc(sizeof(t_afip_file));
+	afip_file->size = string_length(content) + number_of_blocks * 4;
+	afip_file->initial_block = get_available_block();
+	if(save_afip_file(path, afip_file)){
+		log_error(logger, "[Create Afip File] No se guardo el archivo afip");
+		return EXIT_FAILURE;
+	}
+	if(save_in_blocks(afip_file->initial_block, content, number_of_blocks)){
+		log_error(logger, "[Create Afip File] No se guardaron los bloques");
+		return EXIT_FAILURE;
+	}
+	return EXIT_SUCCESS;
+}

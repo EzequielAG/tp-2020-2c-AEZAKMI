@@ -79,90 +79,25 @@ void handle_handshake_restaurante(int socket){
 	send_message_socket(socket, "OK");
 }
 
-int calculate_blocks_required(char* string){
-
-	int string_size = string_length(string);
-	int wearable_size = atoi(sindicato_config->block_size) - 4;
-	return (string_size / wearable_size) + (string_size % wearable_size) ? 1 : 0;
-}
-
-int get_available_block(){
-	return 12; //TODO
-}
-
-int create_restaurante_file(char* path, t_restaurante_file* restaurante_file){
-	FILE* pedido = fopen(path, "w");
-	if (pedido == NULL){
-		log_error(logger, "[Create Pedido File] No se creo el archivo de pedido");
-		return EXIT_FAILURE;
-	}
-
-	t_config* config = config_create(path);
-	config_set_value(config, "SIZE", string_itoa(restaurante_file->size));
-	config_set_value(config, "INITIAL_BLOCK", string_itoa(restaurante_file->initial_block));
-	config_save_in_file(config, path);
-
-	fclose(pedido);
-	return EXIT_SUCCESS;
-}
-
-int save_block(int initial, int next, char* content){
-	char* ruta_archivo = string_from_format("/Blocks/%d.AFIP", initial);
-	FILE * bloque = get_or_create_file(ruta_archivo, "w");
-	if (bloque == NULL){
-		log_error(logger, "[Save Block] No se obtuvo el archivo bloque");
-		return EXIT_FAILURE;
-	}
-	if(next != NULL){
-		string_append(&content, string_itoa(next));
-	}
-	int finish_code = fputs(content, bloque);
-	fclose(bloque);
-	free(ruta_archivo);
-	return finish_code;
-}
-
-int save_in_blocks(int initial_block, char* content, int number_of_blocks){
-	log_info(logger, "[Save In Block] Se procede a guardar en bloques");
-	int block_size = atoi(sindicato_config->block_size) - 4;
-	int next_block;
-	int finish_code;
-	for(int i=0; i<number_of_blocks; i++){
-		int start = i * block_size;
-		int length = start + block_size;
-		if (length < string_length(content)){
-			char* sub_string = string_substring(content, start, length);
-			next_block = get_available_block();
-			finish_code = save_block(initial_block, next_block, sub_string);
-			initial_block = next_block;
-		} else {
-			char* sub_string = string_substring_from(content, start);
-			next_block = NULL;
-			finish_code = save_block(initial_block, next_block, sub_string);
-		}
-	}
-	return finish_code;
-}
-
 int create_pedido(char* restaurante, char* id_pedido){
 
 	char* content = "ESTADO_PEDIDO=Pendiente\nLISTA_PLATOS=[]\nCANTIDAD_PLATOS=[]\nCANTIDAD_LISTA=[]";
 
-	int number_of_blocks = calculate_blocks_required(content);
-	int block_size = atoi(sindicato_config->block_size);
+	// int number_of_blocks = calculate_blocks_required(content);
+	// int block_size = atoi(sindicato_config->block_size);
 
-	t_restaurante_file* restaurante_file = malloc(sizeof(t_restaurante_file));
-	restaurante_file->size = number_of_blocks * block_size;
-	restaurante_file->initial_block = get_available_block();
-	if(!create_restaurante_file(get_path_pedido_file(restaurante, id_pedido), restaurante_file)){
-		log_error(logger, "[Crear Pedido] No se creo el archivo de pedido");
-		return EXIT_FAILURE;
-	}
+	// t_afip_file* restaurante_file = malloc(sizeof(t_afip_file));
+	// restaurante_file->size = number_of_blocks * block_size;
+	// restaurante_file->initial_block = get_available_block();
+	// if(!create_restaurante_file(get_path_pedido_file(restaurante, id_pedido), restaurante_file)){
+	// 	log_error(logger, "[Crear Pedido] No se creo el archivo de pedido");
+	// 	return EXIT_FAILURE;
+	// }
 
-	if(!save_in_blocks(restaurante_file->initial_block, content, number_of_blocks)){
-		log_error(logger, "[Crear Pedido] No se guardo en bloques");
-		return EXIT_FAILURE;
-	}
+	// if(!save_in_blocks(restaurante_file->initial_block, content, number_of_blocks)){
+	// 	log_error(logger, "[Crear Pedido] No se guardo en bloques");
+	// 	return EXIT_FAILURE;
+	// }
 
 	return EXIT_SUCCESS;
 }
@@ -489,14 +424,7 @@ void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posi
 	cantidad_hornos = string_substring_until(cantidad_hornos, (string_length(cantidad_hornos)-1));
 	string_append_with_format(&content, "CANTIDAD_HORNOS=%s", cantidad_hornos);
 
-	int number_of_blocks = calculate_blocks_required(content);
-	int block_size = atoi(sindicato_config->block_size);
-
-	t_restaurante_file* restaurante_file = malloc(sizeof(t_restaurante_file));
-	restaurante_file->size = number_of_blocks * block_size;
-	restaurante_file->initial_block = get_available_block();
-	create_restaurante_file(get_path_info_file(nombre), restaurante_file);
-	save_in_blocks(restaurante_file->initial_block, content, number_of_blocks);
+	create_afip_file(content, get_path_info_file(nombre));
 }
 
 void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos){
@@ -523,7 +451,11 @@ void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos){
 		return;
 	}
 
-	//CREAR RECETA
+	char* content = string_new();
+	string_append_with_format(&content, "PASOS=%s\n", pasos);
+	string_append_with_format(&content, "TIEMPO_PASOS=%s\n", tiempo_pasos);
+	create_afip_file(content, get_path_receta_file(nombre));
+
 }
 /* --- END SUITES DE HANDLES --- */
 

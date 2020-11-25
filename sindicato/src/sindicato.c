@@ -3,7 +3,6 @@
 int main(void){
 	sindicato_init(&sindicato_config, &logger);
 	get_or_create_fs();
-	handle_guardar_pedido(1, "Perolaccia", "7");
 
 	printf("Imprimiendo el path %s", sindicato_config->ruta_log);
 
@@ -83,7 +82,7 @@ void handle_handshake_restaurante(int socket){
 int calculate_blocks_required(char* string){
 
 	int string_size = string_length(string);
-	int wearable_size = sindicato_config->block_size - 4;
+	int wearable_size = atoi(sindicato_config->block_size) - 4;
 	return (string_size / wearable_size) + (string_size % wearable_size) ? 1 : 0;
 }
 
@@ -125,7 +124,7 @@ int save_block(int initial, int next, char* content){
 
 int save_in_blocks(int initial_block, char* content, int number_of_blocks){
 	log_info(logger, "[Save In Block] Se procede a guardar en bloques");
-	int block_size = sindicato_config->block_size - 4;
+	int block_size = atoi(sindicato_config->block_size) - 4;
 	int next_block;
 	int finish_code;
 	for(int i=0; i<number_of_blocks; i++){
@@ -150,7 +149,7 @@ int create_pedido(char* restaurante, char* id_pedido){
 	char* content = "ESTADO_PEDIDO=Pendiente\nLISTA_PLATOS=[]\nCANTIDAD_PLATOS=[]\nCANTIDAD_LISTA=[]";
 
 	int number_of_blocks = calculate_blocks_required(content);
-	int block_size = sindicato_config->block_size;
+	int block_size = atoi(sindicato_config->block_size);
 
 	t_restaurante_file* restaurante_file = malloc(sizeof(t_restaurante_file));
 	restaurante_file->size = number_of_blocks * block_size;
@@ -483,14 +482,15 @@ void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posi
 	get_or_create_folder(nombre);
 	char* content = string_new();
 	string_append_with_format(&content, "CANTIDAD_COCINEROS=%s\n", cantidad_cocineros);
-	string_append_with_format(&content, "POSICION=[%s]\n", posicion);
-	string_append_with_format(&content, "AFINIDAD_COCINEROS=[%s]\n", afinidad_cocineros);
-	string_append_with_format(&content, "PLATOS=[%s]\n", platos);
-	string_append_with_format(&content, "PRECIO_PLATOS=[%s]\n", precio_platos);
+	string_append_with_format(&content, "POSICION=%s\n", posicion);
+	string_append_with_format(&content, "AFINIDAD_COCINEROS=%s\n", afinidad_cocineros);
+	string_append_with_format(&content, "PLATOS=%s\n", platos);
+	string_append_with_format(&content, "PRECIO_PLATOS=%s\n", precio_platos);
+	cantidad_hornos = string_substring_until(cantidad_hornos, (string_length(cantidad_hornos)-2));
 	string_append_with_format(&content, "CANTIDAD_HORNOS=%s", cantidad_hornos);
 
 	int number_of_blocks = calculate_blocks_required(content);
-	int block_size = sindicato_config->block_size;
+	int block_size = atoi(sindicato_config->block_size);
 
 	t_restaurante_file* restaurante_file = malloc(sizeof(t_restaurante_file));
 	restaurante_file->size = number_of_blocks * block_size;

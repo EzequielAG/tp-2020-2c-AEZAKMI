@@ -218,7 +218,7 @@ void crear_metadata_default(char * metadata_afip_adress){
 	string_append(&config, blocks);
 	string_append(&config, magic_number);
 
-	fwrite(config , 1 , sizeof(char) * (strlen(config) + 1) , fp );
+	fputs(config, fp);
 	fclose(fp);
 }
 
@@ -251,10 +251,16 @@ int necesita_recrearse(char * block_size, char * blocks, char * magic_number){
 }
 
 FILE * get_or_create_file(char* path_file, char * mode){
-	char * address = string_new();
+	char* address = string_new();
 	string_append(&address, sindicato_config->punto_montaje);
 	string_append(&address, path_file);
-
+	FILE* file = fopen(address, mode);
+	if (file == NULL){
+		log_error(logger, "[Get Or Create File] No se creo el archivo de pedido");
+		exit(-1);
+	}
+	return file;
+}
 /* --- BITMAP --- */
 FILE * get_or_create_bitmap_file(char * mode){
 	char * bitmap_address = string_new();
@@ -270,10 +276,9 @@ FILE * get_or_create_bitmap_file(char * mode){
 
 	free(bitmap_address);
 
-	return file;
+	return bitmap_file;
 }
 
-/* --- BITMAP --- */
 void update_bitmap_file(t_bitarray * bitmap){
 	FILE * bitmap_file = get_or_create_file("/Metadata/Bitmap.bin", "wb");
 	if (bitmap_file == NULL)
@@ -286,13 +291,6 @@ void update_bitmap_file(t_bitarray * bitmap){
 
 void crear_bitmap(){
 	FILE * bitmap_file = get_or_create_file("/Metadata/Bitmap.bin", "wb");
-	if (bitmap_file == NULL)
-	FILE * bitmap_file = get_or_create_bitmap_file("wb+");
-	if (bitmap_file == NULL){
-		log_error(logger, "No se pudo obtener 'bitmap file'");
-		exit(-1);
-	}
-		
 
 	int blocks = atoi(sindicato_config->blocks);
 
@@ -350,11 +348,14 @@ void free_block(int block_pos){
 /* --- END BITMAP --- */
 
 
-int existe_archivo(char* ruta_archivo){
-	if( access( ruta_archivo, F_OK ) != -1 ) {
-		return 1;
+bool existe_archivo(char* ruta_archivo){
+	FILE *fp;
+
+	if ((fp = fopen(ruta_archivo, "r")) == NULL){
+		return false;
 	} else {
-		return 0;
+		fclose(fp);
+		return true;
 	}
 }
 

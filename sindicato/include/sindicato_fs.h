@@ -72,7 +72,7 @@ void crear_metadata_default();
 int leer_metadata_afip();
 void crear_bitmap();
 int get_or_create_folder();
-int existe_archivo(char* archivo_path);
+bool existe_archivo(char* archivo_path);
 int necesita_recrearse(char * block_size, char * blocks, char * magic_number);
 void crear_files();
 bool existe_restaurante(char* restaurante);
@@ -85,5 +85,5 @@ t_list* get_platos(char* restaurante);
 t_pedido* get_pedido(char* restaurante, char* id_pedido);
 t_info* get_restaurante(char* restaurante);
 t_receta* get_receta(char* comida);
-int create_pedido_file(char* path, t_pedido_file* pedido_file);
+int create_pedido_file(char* path, t_restaurante_file* pedido_file);
 #endif

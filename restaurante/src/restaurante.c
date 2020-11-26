@@ -5,6 +5,9 @@ int main(int argc, char *argv[]){
     sem_id = malloc(sizeof(sem_t));
     sem_init(sem_id, 0, 1);
 
+    sem_finalizar_pedido = malloc(sizeof(sem_t));
+    sem_init(sem_finalizar_pedido, 0, 1);
+
     //INICIALIZACION CON VARIABLES GLOBALES
     restaurante_init(&restaurante_config, &logger);
    
@@ -96,7 +99,7 @@ void handle_client(t_result* result){
                 handle_confirmar_pedido(result);
                 
             } else if (tipo_mensaje == consultar_pedido) {
-                // TODO : FALTA LOGICA CONSULTAR_PEDIDO
+                // TODO !!: FALTA LOGICA CONSULTAR_PEDIDO
             }
     //}
 
@@ -148,9 +151,17 @@ void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS
         List lista_pasos;
         initlist(&lista_pasos);
 
-        t_plato* plato_creado = crear_plato(info_comida->comida ,&lista_pasos, pedido_id, atoi(info_comida->cantidad_total), atoi(info_comida->cantidad_lista),asignar_pid());
+        for(int i = 0; i < (atoi(info_comida->cantidad_total) - atoi(info_comida->cantidad_lista));i++)
+        {
+            t_plato* plato_creado = crear_plato(info_comida->comida ,&lista_pasos, pedido_id, atoi(info_comida->cantidad_total), atoi(info_comida->cantidad_lista),asignar_pid());
+            pushbacklist(&lista_platos_confirmados,plato_creado);
+        }
+        
+        //!! Lista platos hechos {pedido*, nombre_plato, cantidad_total, cantidad_lista,terminado} 
+        //actualizarla cuando paso_exit y chequear si fue el ultimo plato de ese pedido
+        //Tambien avisar por cada plato terminado al Sindicato
+        ////////////////////////
 
-        pushbacklist(&lista_platos_confirmados,plato_creado);
     }
 
     t_pedido* pedido_creado = creacion_pedido(pedido_id,&lista_platos_confirmados);
@@ -216,18 +227,12 @@ void caso_uso(){
     pushbacklist(&lista_platos, empanada);
     // pushbacklist(&lista_platos, guiso);
 
-    
+   t_pedido* pedido_creado = creacion_pedido(10,&lista_platos);
 
-    creacion_pedido(10,&lista_platos);
-
+    pushbacklist(&lista_pedidos,pedido_creado);
 
     printf("\n \n");
     ver_estado_pcb();
-
-
-    
-
-
 
 }
 

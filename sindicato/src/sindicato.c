@@ -81,23 +81,15 @@ void handle_handshake_restaurante(int socket){
 
 int create_pedido(char* restaurante, char* id_pedido){
 
-	char* content = "ESTADO_PEDIDO=Pendiente\nLISTA_PLATOS=[]\nCANTIDAD_PLATOS=[]\nCANTIDAD_LISTA=[]";
+	char* content = "ESTADO_PEDIDO=Pendiente\nLISTA_PLATOS=[]\nCANTIDAD_PLATOS=[]\nCANTIDAD_LISTA=[]\nPRECIO_TOTAL=0";
+	char* path_pedido = get_path_pedido_file(restaurante, id_pedido);
 
-	// int number_of_blocks = calculate_blocks_required(content);
-	// int block_size = atoi(sindicato_config->block_size);
+	bool created = create_afip_file(content, path_pedido);
 
-	// t_afip_file* restaurante_file = malloc(sizeof(t_afip_file));
-	// restaurante_file->size = number_of_blocks * block_size;
-	// restaurante_file->initial_block = get_available_block();
-	// if(!create_restaurante_file(get_path_pedido_file(restaurante, id_pedido), restaurante_file)){
-	// 	log_error(logger, "[Crear Pedido] No se creo el archivo de pedido");
-	// 	return EXIT_FAILURE;
-	// }
-
-	// if(!save_in_blocks(restaurante_file->initial_block, content, number_of_blocks)){
-	// 	log_error(logger, "[Crear Pedido] No se guardo en bloques");
-	// 	return EXIT_FAILURE;
-	// }
+	if (!created){
+		log_error(logger, "[Create Pedido] No se pudo guardar el contenido");
+		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 }
@@ -112,21 +104,22 @@ void handle_consultar_platos(int socket, char* restaurante){
 	}
 
 	//Obtener los platos que puede preparar dicho Restaurante del archivo info.AFIP.
-	t_list* platos = get_platos(restaurante);
+	// t_list* platos = get_platos(restaurante);
 
 	//Responder el mensaje indicando los platos que puede preparar el Restaurante.
 
 }
 
 void handle_guardar_pedido(int socket, char* restaurante, char* id_pedido){
-
+	char* respuesta[1];
 	//Verificar si el Restaurante existe dentro del File System. 
 	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_restaurante(restaurante)){
 		log_error(logger, "[Guardar Pedido] El restaurante no existe");
-		// TODO: En caso de no existir se deberá informar dicha situación.
-		exit(-1);
+		respuesta[0] = "El restaurante no existe.";
+		send_messages_socket(socket, respuesta, 1);
+		return;
 	}
 
 	//Verificar que el ID de pedido no exista para dicho restaurante.
@@ -134,14 +127,15 @@ void handle_guardar_pedido(int socket, char* restaurante, char* id_pedido){
 	//En caso de que no exista, se deberá crear el archivo.
 	if (existe_pedido(restaurante, id_pedido)){
 		log_error(logger, "[Guardar Pedido] El pedido ya existe");
-		// TODO: En caso de existir se deberá informar sobre dicha situación.
-		exit(-1);
+		respuesta[0] = "El pedido no existe.";
+		send_messages_socket(socket, respuesta, 1);
+		return;
 	}
 
 	log_info(logger, "[Guardar Pedido] Se procede a crear el pedido");
 	int resultado_operacion = create_pedido(restaurante, id_pedido);
 	//Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
-	char* respuesta[1];
+	
 
 	if (resultado_operacion == EXIT_SUCCESS){
 		respuesta[0] = "Ok";
@@ -290,7 +284,7 @@ void handle_obtener_restaurante(int socket, char* restaurante){
 	}
 
 	//Obtener todo los datos del archivo info.AFIP.
-	t_info* info = get_restaurante(restaurante);
+	// t_info* info = get_restaurante(restaurante);
 
 	//Responder el mensaje indicando los datos del Restaurante.
 
@@ -435,7 +429,6 @@ void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posi
 	string_append_with_format(&content, "AFINIDAD_COCINEROS=%s\n", afinidad_cocineros);
 	string_append_with_format(&content, "PLATOS=%s\n", platos);
 	string_append_with_format(&content, "PRECIO_PLATOS=%s\n", precio_platos);
-	cantidad_hornos = string_substring_until(cantidad_hornos, (string_length(cantidad_hornos)-1));
 	string_append_with_format(&content, "CANTIDAD_HORNOS=%s", cantidad_hornos);
 
 	create_afip_file(content, get_path_info_file(nombre));
@@ -467,7 +460,7 @@ void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos){
 
 	char* content = string_new();
 	string_append_with_format(&content, "PASOS=%s\n", pasos);
-	string_append_with_format(&content, "TIEMPO_PASOS=%s\n", tiempo_pasos);
+	string_append_with_format(&content, "TIEMPO_PASOS=%s", tiempo_pasos);
 	create_afip_file(content, get_path_receta_file(nombre));
 
 }
@@ -477,8 +470,10 @@ void iniciar_consola(){
 	do {
 		printf("Ingrese alguno de los siguientes comandos: \n");
 		//CrearRestaurante MiRestaurante 5 [4,5] [Milanesa] [Milanesa,Empanadas,Ensalada] [200,50,150] 2
+		//CrearRestaurante MiRestaurante 5 [4, 5] [Milanesa] [Milanesa, Empanadas, Ensalada] [200, 50, 150] 2
 		printf("1. CrearRestaurante [NOMBRE] [CANTIDAD_COCINEROS] [POSICION] [AFINIDAD_COCINEROS] [PLATOS] [PRECIO_PLATOS] [CANTIDAD_HORNOS] \n");
 		//CrearReceta Milanesa [Trocear,Empanar,Reposar,Hornear] [4,5,3,10]
+		//CrearReceta Milanesa [Trocear, Empanar, Reposar, Hornear] [4, 5, 3, 10]
 		printf("2. CrearReceta [NOMBRE] [PASOS] [TIEMPO_PASOS] \n");
 		printf("3. Exit \n");
 		char * line = getlinefromconsole();
@@ -492,9 +487,20 @@ void iniciar_consola(){
 }
 
 void process_line(char* line){
+	line = string_substring_until(line, (string_length(line)-1));
 	char** lineas = string_split(line, " ");
-	int longitud = 0;
-	while (lineas[longitud] != NULL){
+	int longitud = 0, long_aux = 0;
+	while (lineas[long_aux] != NULL){
+		char* aux_string = string_new();
+		if (string_starts_with(lineas[long_aux], "[")){
+			string_append(&aux_string, lineas[long_aux]);
+			while(!string_ends_with(lineas[long_aux], "]")){
+				long_aux++;
+				string_append(&aux_string, lineas[long_aux]);
+			}
+			lineas[longitud] = aux_string;
+		}
+		long_aux++;
 		longitud++;
 	}
 	

@@ -21,7 +21,7 @@ char* get_path_info_file(char* restaurante){
 char* get_path_pedido_file(char* restaurante, char* id_pedido){
 	char* path = string_new();
 	string_append(&path, sindicato_config->punto_montaje);
-	string_append(&path, "/Files/Restaurantes/Pedido");
+	string_append(&path, "/Files/Restaurantes/");
 	string_append(&path, restaurante);
 	string_append(&path, "/Pedido");
 	string_append(&path, id_pedido);
@@ -35,6 +35,20 @@ char* get_path_receta_file(char* nombre_receta){
 	string_append(&path, "/Files/Recetas/");
 	string_append(&path, nombre_receta);
 	string_append(&path, ".AFIP");
+	return path;
+}
+
+char* get_path_bitmap_file(){
+	char* path = string_new();
+	string_append(&path, sindicato_config->punto_montaje);
+	string_append(&path, "/Metadata/Bitmap.bin");
+	return path;
+}
+
+char* get_path_block_file(uint32_t id){
+	char* path = string_new();
+	string_append(&path, sindicato_config->punto_montaje);
+	string_append(&path, string_from_format("/Blocks/%d.AFIP", id));
 	return path;
 }
 /* --- END SUITES DE PATH O RUTAS --- */
@@ -251,10 +265,7 @@ int necesita_recrearse(char * block_size, char * blocks, char * magic_number){
 }
 
 FILE * get_or_create_file(char* path_file, char * mode){
-	char* address = string_new();
-	string_append(&address, sindicato_config->punto_montaje);
-	string_append(&address, path_file);
-	FILE* file = fopen(address, mode);
+	FILE* file = fopen(path_file, mode);
 	if (file == NULL){
 		log_error(logger, "[Get Or Create File] No se creo el archivo de pedido");
 		exit(-1);
@@ -280,7 +291,7 @@ FILE * get_or_create_bitmap_file(char * mode){
 }
 
 void update_bitmap_file(t_bitarray * bitmap){
-	FILE * bitmap_file = get_or_create_file("/Metadata/Bitmap.bin", "wb");
+	FILE * bitmap_file = get_or_create_file(get_path_bitmap_file(), "wb");
 	if (bitmap_file == NULL)
 		log_error(logger, "No se pudo obtener 'bitmap file'");
 
@@ -290,8 +301,6 @@ void update_bitmap_file(t_bitarray * bitmap){
 }
 
 void crear_bitmap(){
-	FILE * bitmap_file = get_or_create_file("/Metadata/Bitmap.bin", "wb");
-
 	int blocks = atoi(sindicato_config->blocks);
 
 	size_t bytes = BIT_SIZE(blocks, CHAR_BIT);
@@ -308,7 +317,7 @@ void crear_bitmap(){
 }
 
 t_bitarray* get_bitarray(){
-	FILE * bitmap_file = get_or_create_file("/Metadata/Bitmap.bin", "rb");
+	FILE * bitmap_file = get_or_create_file(get_path_bitmap_file(), "rb");
 	if (bitmap_file == NULL)
 		log_error(logger, "No se pudo obtener 'bitmap file'");
 
@@ -347,7 +356,7 @@ void take_block(int block_pos){
 	pthread_mutex_unlock(&mutex_bitmap);
 }
 
-void free_block(int block_pos){
+void free_block(uint32_t block_pos){
 	// Setea 0 en la posicion indicada (bloque libre)
 	pthread_mutex_lock(&mutex_bitmap);
 	t_bitarray * bitmap = get_bitarray();
@@ -413,11 +422,8 @@ void crear_files(){
 
 void create_blocks(){
 	int cantidad_bloques = atoi(sindicato_config->blocks);
-	char* ruta_archivo;
 	for(int id=0; id < cantidad_bloques; id++){
-		ruta_archivo = string_from_format("/Blocks/%d.AFIP", id);
-		FILE * bloque = get_or_create_file(ruta_archivo, "w");
-		ruta_archivo = "";
+		FILE * bloque = get_or_create_file(get_path_block_file(id), "w");
 		fclose(bloque);
 	}
 
@@ -490,11 +496,11 @@ int get_available_block(){
 	return get_available_block_in_bitmap();
 }
 
-int save_afip_file(char* path, t_afip_file* afip_file){
+bool save_afip_file(char* path, t_afip_file* afip_file){
 	FILE* pedido = fopen(path, "w");
 	if (pedido == NULL){
 		log_error(logger, "[Save Afip File] No se creo el archivo de pedido");
-		return EXIT_FAILURE;
+		return false;
 	}
 
 	t_config* config = config_create(path);
@@ -503,32 +509,29 @@ int save_afip_file(char* path, t_afip_file* afip_file){
 	config_save_in_file(config, path);
 
 	fclose(pedido);
-	return EXIT_SUCCESS;
+	return true;
 }
 
-int save_block(int initial, int next, char* content){
-	char* ruta_archivo = string_from_format("/Blocks/%d.AFIP", initial);
-	FILE * bloque = get_or_create_file(ruta_archivo, "w");
+bool save_block(int initial, int next, char* content){
+	FILE * bloque = get_or_create_file(get_path_block_file(initial), "w");
 	if (bloque == NULL){
 		log_error(logger, "[Save Block] No se obtuvo el archivo bloque");
-		return EXIT_FAILURE;
+		return false;
 	}
 	int finish_code = fwrite(content, strlen(content), 1, bloque);
 	finish_code = fwrite(&next, sizeof(uint32_t), 1, bloque);
 	fclose(bloque);
-	free(ruta_archivo);
 	if (finish_code < 0){
-		return EXIT_FAILURE;
+		return false;
 	}
-	return EXIT_SUCCESS;
+	return true;
 }
 
-int save_in_blocks(int initial_block, char* content, int number_of_blocks){
+bool save_in_blocks(int initial_block, char* content, int number_of_blocks){
 	log_info(logger, "[Save In Block] Se procede a guardar en bloques");
 	int block_size = atoi(sindicato_config->block_size) - sizeof(uint32_t);
 	int next_block;
 	int finish_code;
-	int block;
 
 	List* bloques_actuales = obtenerBloquesActuales(initial_block);
 	if (number_of_blocks > (int)sizelist(*bloques_actuales)){
@@ -544,7 +547,7 @@ int save_in_blocks(int initial_block, char* content, int number_of_blocks){
 		int restante = (int)sizelist(*bloques_actuales) - number_of_blocks;
 		while(restante>0){
 			uint32_t* block = popbacklist(bloques_actuales);
-			free_block(block);
+			free_block(*block);
 			restante--;
 			free(block);
 		}
@@ -559,9 +562,12 @@ int save_in_blocks(int initial_block, char* content, int number_of_blocks){
 			next_block = *(int *)popfrontlist(bloques_actuales);
 		}
 		finish_code = save_block(initial_block, next_block, sub_string);
+		if(!finish_code){
+			return false;
+		}
 		initial_block = next_block;
 	}
-	return finish_code;
+	return true;
 }
 
 List* obtenerBloquesActuales(uint32_t initial_block){
@@ -582,8 +588,7 @@ List* obtenerBloquesActuales(uint32_t initial_block){
 
 uint32_t getSiguienteBloque(uint32_t bloque){
 	uint32_t siguiente = -1;
-	char* ruta_archivo = string_from_format("/Blocks/%d.AFIP", bloque);
-	FILE * fp = get_or_create_file(ruta_archivo, "r");
+	FILE * fp = get_or_create_file(get_path_block_file(bloque), "r");
 	if (fp == NULL){
 		log_error(logger, "[Save Block] No se obtuvo el archivo bloque");
 		return EXIT_FAILURE;
@@ -616,19 +621,19 @@ uint32_t getSiguienteBloque(uint32_t bloque){
 }
 
 
-int create_afip_file(char* content, char* path){
+bool create_afip_file(char* content, char* path){
 	int number_of_blocks = calculate_blocks_required(content);
 
 	t_afip_file* afip_file = malloc(sizeof(t_afip_file));
 	afip_file->size = string_length(content) + number_of_blocks * sizeof(uint32_t);
 	afip_file->initial_block = get_available_block();
-	if(save_afip_file(path, afip_file)){
+	if(!save_afip_file(path, afip_file)){
 		log_error(logger, "[Create Afip File] No se guardo el archivo afip");
-		return EXIT_FAILURE;
+		return false;
 	}
-	if(save_in_blocks(afip_file->initial_block, content, number_of_blocks)){
+	if(!save_in_blocks(afip_file->initial_block, content, number_of_blocks)){
 		log_error(logger, "[Create Afip File] No se guardaron los bloques");
-		return EXIT_FAILURE;
+		return false;
 	}
-	return EXIT_SUCCESS;
+	return true;
 }

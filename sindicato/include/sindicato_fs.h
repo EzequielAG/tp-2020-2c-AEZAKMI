@@ -86,7 +86,9 @@ t_pedido* get_pedido(char* restaurante, char* id_pedido);
 t_info* get_restaurante(char* restaurante);
 t_receta* get_receta(char* comida);
 int create_pedido_file(char* path, t_afip_file* pedido_file);
-int create_afip_file(char* content, char* path);
+bool create_afip_file(char* content, char* path);
 List* obtenerBloquesActuales(uint32_t initial_block);
 uint32_t getSiguienteBloque(uint32_t bloque);
+FILE * get_or_create_file(char* path_file, char * mode);
+void create_blocks();
 #endif

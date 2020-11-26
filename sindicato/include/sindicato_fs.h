@@ -54,8 +54,8 @@ typedef struct {
 } t_afip_file;
 
 typedef struct {
-	t_list* pasos;
-	t_list* tiempo_paso;
+	List pasos;
+	List tiempo_paso;
 } t_receta;
 
 t_sindicato_metadata* sindicato_metadata;

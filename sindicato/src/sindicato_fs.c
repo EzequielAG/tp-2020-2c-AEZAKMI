@@ -64,6 +64,16 @@ t_list* strings_to_list(char** strings) {
 	return list;
 }
 
+List* strings_to_List(char** strings) {
+	List* list = malloc(sizeof(List));;
+	initlist(list);
+	while (*strings != NULL) {
+		pushbacklist(list, strdup(*strings));
+		strings++;
+	}
+	return list;
+}
+
 t_estado_pedido config_get_estado_pedido(t_config* config, char* key){
 	if (!config_has_property(config, key)) exit(EXIT_FAILURE);
 
@@ -133,25 +143,50 @@ t_pedido* create_pedido_config(char* restaurante, char* id_pedido){
 	return pedido_config;
 }
 
-void receta_file_parser(t_config* config, t_receta* receta_config){
-	//preparing lists
-	char** pasos_str = config_get_array_value(config, "PASOS");
-	char** tiempo_paso_str = config_get_array_value(config, "TIEMPO_PASOS");
-
-	receta_config->pasos = strings_to_list(pasos_str);
-	receta_config->tiempo_paso = strings_to_list(tiempo_paso_str);
-}
-
-t_receta* create_receta_config(char* nombre_receta){
-	char* path_receta = get_path_receta_file(nombre_receta);
-	t_config* config = config_create(path_receta);
-	t_receta* receta_config = malloc(sizeof(t_receta));
-
-	receta_file_parser(config, receta_config);
-	//TODO: config_destroy(config);
-	return receta_config;
-}
 /* --- END SUITES DE FILES PARSER--- */
+
+/* --- SUITES DE FUNCIONES READ--- */
+t_afip_file* read_afip_file(char* path){
+	t_afip_file* afip_file = malloc(sizeof(t_afip_file));
+	t_config* config = config_create(path);
+
+	afip_file->initial_block = config_get_int_value(config, "INITIAL_BLOCK");
+	afip_file->size = config_get_int_value(config, "SIZE");
+	config_destroy(config);
+
+	return afip_file;
+}
+
+char* get_block_data(uint32_t block){
+	char* block_file_path = get_path_block_file(block);
+	FILE* block_file = get_or_create_file(block_file_path, "rb");
+	int size = atoi(sindicato_config->block_size) - sizeof(uint32_t);
+	char* data = string_new();
+	fread (data, size, 1, block_file);
+	return data;
+}
+
+char* read_blocks(t_afip_file* afip_file){
+	char* data = string_new();
+	uint32_t siguiente = afip_file->initial_block;
+	while(siguiente!=-1){
+		// TODO: puede devolver EXIT_FAILURE
+		string_append(&data, get_block_data(siguiente));
+		siguiente = getSiguienteBloque(siguiente);
+	}
+	return data;
+}
+
+t_receta* read_receta(char* nombre_receta){
+	t_afip_file* afip_file = read_afip_file(get_path_receta_file(nombre_receta));
+	char* data = read_blocks(afip_file);
+	t_receta* receta = malloc(sizeof(t_receta));
+	// receta_config->pasos = *strings_to_List(pasos_str);
+	// receta_config->tiempo_paso = *strings_to_List(tiempo_paso_str);
+	// TODO: hay que completar receta con la data
+	return receta;
+}
+/* --- END SUITES DE FUNCIONES READ--- */
 
 void get_or_create_fs() {
 

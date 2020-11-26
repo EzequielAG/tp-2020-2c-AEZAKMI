@@ -323,23 +323,24 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* co
 }
 
 void handle_obtener_receta(int socket, char* comida){
-	if (ES_TEST){
-		// return ['amasar,2', 'batir,1']
-		char* respuesta[1];
-		respuesta[0] = "batir,5,amasar,3,hornear,6";
+	// if (ES_TEST){
+	// 	// return ['amasar,2', 'batir,1']
+	// 	char* respuesta[1];
+	// 	respuesta[0] = "batir,5,amasar,3,hornear,6";
 	
-		send_messages_socket(socket, respuesta, 1);
-	} else {
-		//Verificar si existe el plato dado dentro del directorio de recetas.
-		//En caso de no existir, se deberá informar dicha situación.
-		if (!existe_receta(comida)){
-			// TODO: En caso de no existir, se deberá informar dicha situación.
-		}
+	// 	send_messages_socket(socket, respuesta, 1);
+	// 	return;
+	// }
 
-		get_receta(comida);
-
-		//Responder el mensaje con la receta solicitada.
+	//Verificar si existe el plato dado dentro del directorio de recetas.
+	//En caso de no existir, se deberá informar dicha situación.
+	if (!existe_receta(comida)){
+		// TODO: En caso de no existir, se deberá informar dicha situación.
 	}
+
+	get_receta(comida);
+
+	//Responder el mensaje con la receta solicitada.
 }
 
 void handle_terminar_pedido(int socket, char* id_pedido, char* restaurante){

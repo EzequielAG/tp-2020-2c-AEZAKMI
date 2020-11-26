@@ -146,9 +146,11 @@ void handle_obtener_pedido(t_result* result){
         }
         
         send_messages_socket(result->socket, arrayReturn, 4);
+        imprimirTodo();
     }else{
         string_append(&arrayReturn[0], "FAIL");
         send_messages_socket(result->socket, arrayReturn, 1);
+        imprimirTodo();
     }
     // for(int i=0; i<4; i++){
     //     free(arrayReturn[i]);
@@ -199,7 +201,7 @@ int guardar_plato_en_memoria(char* nombreResto, char* idPedido, char* cantidadPl
 
     if(pagina_plato == NULL){
         crear_pagina2(segmento, atoi(cantidadPlato), plato); 
-        return 1; 
+        return 1;
     }
 
     modificarPagina(pagina_plato);
@@ -229,9 +231,24 @@ int guardar_pedido_en_memoria(char* restaurante, char* id_pedido){
 
 int confirmar_pedido_en_memoria(char* id_pedido, char* restaurante){
 
-    l_segmento* segmento = obtener_pedido_en_memoria(id_pedido, restaurante);
+    l_proceso *restoEnTabla = find_resto_lista(restaurante);
+
+    if(restoEnTabla == NULL){
+        
+        printf("El restaurante no esta en la tabla de restaurantes \n");
+        
+        return 0;
+    }
+
+    l_segmento *segmento = find_segmento_lista(id_pedido, restoEnTabla->punteroTablaSegmentos);
 
     if(segmento == NULL){
+        printf("El pedido no esta en la tabla de pedidos del restaurante\n");
+        return 0;
+    }
+
+    if(segmento->estadoPedido != 0){
+        printf("El pedido ya esta confirmado o se encuentra terminado");
         return 0;
     }
 

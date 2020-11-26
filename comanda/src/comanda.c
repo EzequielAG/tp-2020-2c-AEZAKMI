@@ -9,17 +9,28 @@ int main(int argc, char *argv[]){
     initlist(&tablaSwap);
     initlist(&pilaPaginasAlgoritmos);
 
-	punteroBitMapSwap = malloc(comanda_config->tamanio_swap/256);
-	punteroBitMap = malloc(comanda_config->tamanio_memoria/256);
+    double tamanioMemoriaPrincipal = comanda_config->tamanio_memoria;
+    double tamanioMemoriaSwap = comanda_config->tamanio_swap;
+
+    tamanioBitMapPrincipal = (tamanioMemoriaPrincipal/256)*8;
+    tamanioBitMapSwap = (tamanioMemoriaSwap/256)*8;
+
+	punteroBitMapSwap = malloc(max(1, comanda_config->tamanio_swap/256));
+	punteroBitMap = malloc(max(1, comanda_config->tamanio_memoria/256));
     
-	bitMap = bitarray_create_with_mode(punteroBitMap, (comanda_config->tamanio_memoria/256), MSB_FIRST);
-    bitMapSwap = bitarray_create_with_mode(punteroBitMapSwap, comanda_config->tamanio_swap/256, MSB_FIRST);
+	bitMap = bitarray_create_with_mode(punteroBitMap, max(1, (comanda_config->tamanio_memoria/256)), MSB_FIRST);
+    bitMapSwap = bitarray_create_with_mode(punteroBitMapSwap, max(1, (comanda_config->tamanio_swap/256)), MSB_FIRST);
 
     puntero_memoria_principal = malloc(comanda_config->tamanio_memoria);
 
     algoritmo = comanda_config->algoritmo_reemplazo;
     tamanioMemoria = comanda_config->tamanio_memoria;
     tamanioSwap = comanda_config->tamanio_swap;
+
+    semaforo_contador = malloc(sizeof(sem_t));
+    sem_init(semaforo_contador, 0, 0);
+
+    inicioClockMej = 1;
     
     printf("Imprimiendo el path %s", comanda_config->ruta_log);
 
@@ -29,9 +40,7 @@ int main(int argc, char *argv[]){
 
     iniciarMemoriaSwap();
     
-    //iniciar_servidor("127.0.0.1", "5001", handle_client);
-
-    imprimirBitMap();
+    iniciar_servidor("127.0.0.1", "5001", handle_client);
 
     close(archivoSwap);
 

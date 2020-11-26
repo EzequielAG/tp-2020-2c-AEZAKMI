@@ -101,6 +101,19 @@ typedef struct{
 
 }t_exec;
 
+typedef struct {
+    char* puerto_escucha;
+    char* ip_sindicato;
+    char* puerto_sindicato;
+    char* ip_app;
+    char* puerto_app;
+    int quantum;
+    char* ruta_log;
+    char* algoritmo_planificador;
+    char* nombre_restaurante;
+} t_restaurante_config;
+
+t_restaurante_config* restaurante_config;
 
 List colas_ready;
 List colas_exit;
@@ -125,8 +138,8 @@ void iniciar_clock();
 void paso_ready(t_pcb* pcb);
 int paso_exit(t_pcb* pcb);
 void paso_exec(t_exec* cocinero);
-void paso_a_exec(t_exec* cocinero);
-
+void paso_a_exec_FIFO(t_exec* cocinero);
+void paso_a_exec_RR(t_exec* cocinero);
 int pedidos_finalizados();
 int plato_general(char* nombre_plato);
 t_ready* cola_por_afinidad(char* afinidad);

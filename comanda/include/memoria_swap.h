@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <sys/types.h>
+#include <semaphore.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <commons/bitarray.h>
@@ -18,6 +19,7 @@
 #include "list.h"
 
 void iniciarMemoriaSwap();
+int max (int x, int y);
 
 void *puntero_memoria_swap;
 int archivoSwap;
@@ -30,3 +32,12 @@ void* punteroBitMapSwap;
 char* algoritmo;
 int tamanioMemoria;
 int tamanioSwap;
+int tamanioBitMapPrincipal;
+int tamanioBitMapSwap;
+
+IteratorList iteradorClockMej;
+int inicioClockMej;
+
+t_log* logger;
+sem_t* semaforo_contador;
+

@@ -16,7 +16,7 @@ void iniciarMemoriaSwap(){
 
 	puntero = puntero_memoria_swap;
 
-    for(int i=0; bitarray_get_max_bit(bitMapSwap) > i; i++){
+    for(int i=0; tamanioBitMapSwap > i; i++){
 
 		bitarray_clean_bit(bitMapSwap, i);
 
@@ -33,4 +33,13 @@ void iniciarMemoriaSwap(){
     puntero_memoria_swap = puntero;
 
 
+}
+
+int max (int x, int y)
+{
+if (x<y) {
+return (y);
+}  else  {
+return (x);
+}
 }

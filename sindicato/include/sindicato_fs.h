@@ -54,8 +54,8 @@ typedef struct {
 } t_afip_file;
 
 typedef struct {
-	List pasos;
-	List tiempo_paso;
+	List* pasos;
+	List* tiempo_paso;
 } t_receta;
 
 t_sindicato_metadata* sindicato_metadata;
@@ -84,11 +84,13 @@ t_receta* create_receta_config(char* nombre_receta);
 t_list* get_platos(char* restaurante);
 t_pedido* get_pedido(char* restaurante, char* id_pedido);
 t_info* get_restaurante(char* restaurante);
-t_receta* get_receta(char* comida);
+//t_receta* get_receta(char* comida);
 int create_pedido_file(char* path, t_afip_file* pedido_file);
 bool create_afip_file(char* content, char* path);
 List* obtenerBloquesActuales(uint32_t initial_block);
 uint32_t getSiguienteBloque(uint32_t bloque);
 FILE * get_or_create_file(char* path_file, char * mode);
 void create_blocks();
+char* get_receta(char* nombre_receta);
+int get_data_size(FILE* fp);
 #endif

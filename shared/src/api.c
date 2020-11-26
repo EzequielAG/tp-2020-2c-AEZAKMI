@@ -485,20 +485,20 @@ List* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
     printf("%s \n" , respuesta->mensajes[0]);
 
 
-    char** respuesta_pasos = string_split(respuesta->mensajes[1], ",");
+    // char** respuesta_pasos = string_split(respuesta->mensajes[1], ",");
 
 
-    for(int i = 0; respuesta_pasos[i]!=NULL; i=i+2){
+    // for(int i = 0; respuesta_pasos[i]!=NULL; i=i+2){
 
-        t_paso* paso = NULL;
+    //     t_paso* paso = NULL;
 
-        paso->nombre_paso = respuesta_pasos[i];
-        paso->ciclo_cpu = atoi(respuesta_pasos[i+1]);
-        //paso->se_ejecuto = 0;
+    //     paso->nombre_paso = respuesta_pasos[i];
+    //     paso->ciclo_cpu = atoi(respuesta_pasos[i+1]);
+    //     //paso->se_ejecuto = 0;
 
-        pushbacklist(lista_pasos_receta,paso);
+    //     pushbacklist(lista_pasos_receta,paso);
 
-    }
+    // }
 
 
     if(modulo->socket <= 0){

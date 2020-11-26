@@ -160,10 +160,17 @@ t_afip_file* read_afip_file(char* path){
 char* get_block_data(uint32_t block){
 	char* block_file_path = get_path_block_file(block);
 	FILE* block_file = get_or_create_file(block_file_path, "rb");
-	int size = atoi(sindicato_config->block_size) - sizeof(uint32_t);
+	int size = get_data_size(block_file);
 	char* data = string_new();
 	fread (data, size, 1, block_file);
 	return data;
+}
+
+int get_data_size(FILE* fp){
+	fseek(fp, -sizeof(int32_t), SEEK_END);
+	int size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	return size;
 }
 
 char* read_blocks(t_afip_file* afip_file){
@@ -177,14 +184,14 @@ char* read_blocks(t_afip_file* afip_file){
 	return data;
 }
 
-t_receta* read_receta(char* nombre_receta){
-	t_afip_file* afip_file = read_afip_file(get_path_receta_file(nombre_receta));
-	char* data = read_blocks(afip_file);
-	t_receta* receta = malloc(sizeof(t_receta));
-	// receta_config->pasos = *strings_to_List(pasos_str);
-	// receta_config->tiempo_paso = *strings_to_List(tiempo_paso_str);
-	// TODO: hay que completar receta con la data
-	return receta;
+char* read_receta(char* nombre_receta){
+	// t_afip_file* afip_file = read_afip_file(get_path_receta_file(nombre_receta));
+	// char* data = read_blocks(afip_file);
+	// t_receta* receta = malloc(sizeof(t_receta));
+	// // receta->pasos = strings_to_List(pasos_str);
+	// // receta->tiempo_paso = strings_to_List(tiempo_paso_str);
+	// // TODO: hay que completar receta con la data
+	return NULL;//receta;
 }
 /* --- END SUITES DE FUNCIONES READ--- */
 
@@ -517,9 +524,9 @@ t_info* get_restaurante(char* restaurante){
 	return create_info_config(restaurante);
 }
 
-t_receta* get_receta(char* comida){
-	return create_receta_config(comida);
-}
+// t_receta* get_receta(char* comida){
+// 	return create_receta_config(comida);
+// }
 
 int calculate_blocks_required(char* string){
 	int string_size = string_length(string);
@@ -671,4 +678,9 @@ bool create_afip_file(char* content, char* path){
 		return false;
 	}
 	return true;
+}
+
+char* get_receta(char* nombre_receta){
+	t_afip_file* afip_file = read_afip_file(get_path_receta_file(nombre_receta));
+	return read_blocks(afip_file);
 }

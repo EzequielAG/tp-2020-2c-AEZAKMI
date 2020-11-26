@@ -66,6 +66,7 @@ void desalojarPedido(l_proceso *resto, l_segmento* segmento);
 void pasarPaginasAPrincipal(l_segmento*);
 void ocuparFrame(void*, t_bitarray *, List);
 void desocuparFrame(void*, t_bitarray *, List);
+void pasarSupremo(l_pagina* paginaSwap);
 void imprimirBitMap();
 void imprimirTodo();
 void imprimirMemoria();
@@ -87,6 +88,7 @@ void modificarPagina(l_pagina*);
 void quitarSiExiste(l_pagina*);
 int pasarAPrincipal(l_pagina*);
 void imprimirSwap();
+void imprimirLista();
 
 // ALGORITMOS
 
@@ -101,4 +103,5 @@ List tablaFrames;
 char* punteroBitMap;
 t_bitarray *bitMap;
 int numeroPaginaGlobal;
+
 List pilaPaginasAlgoritmos;

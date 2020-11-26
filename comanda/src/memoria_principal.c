@@ -23,7 +23,6 @@ void iniciarMemoria(){
 
 	puntero_memoria_principal = puntero;
 
-	//iniciarMemoriaSwap();
 }
 
 l_proceso *crearProceso(char *nombreResto){
@@ -46,7 +45,7 @@ l_proceso *crearProceso(char *nombreResto){
 int crearSegmento(l_proceso *resto, char *idPedido){
 
     l_segmento *segmento = malloc(sizeof(l_segmento));
-	segmento->idPedido = malloc(sizeof(char*));
+	// segmento->idPedido = malloc(sizeof(char));
 
 
     List *tablaPaginas = malloc(sizeof(List));
@@ -55,7 +54,8 @@ int crearSegmento(l_proceso *resto, char *idPedido){
 
   //  segmento->idPedido = idPedido;
 
-	strcpy(segmento->idPedido,idPedido);
+	segmento->idPedido = string_new();
+	string_append(&segmento->idPedido, idPedido);
     segmento->punteroTablaPaginas = tablaPaginas;
 	segmento->estadoPedido = 0;
 
@@ -73,19 +73,20 @@ void crear_pagina2(l_segmento *segmento, int cantidad, char *plato){
     pagina->bitPresencia = 0;
 	pagina->bitModificado = 0;
 
-	pagina->frame = NULL;
 	pagina->swap = frameLibreSwap();
+	pagina->frame = NULL;
 
 	frame = pagina->swap;
 	frame->cantidadPlato = cantidad;
 	frame->cantidadLista = 0;
 	strncpy(frame->plato, plato, 24);
 
-	modificarPagina(pagina);
-
     pushbacklist(segmento->punteroTablaPaginas, pagina);
 
 	numeroPaginaGlobal += 1;
+
+	modificarPagina(pagina);
+
 }
 
 void terminarPlatoPagina(l_pagina *pagina){
@@ -228,12 +229,12 @@ void *frameLibre(){
 void ocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
 
 	if(bitMapp == bitMapSwap){
-			for(int i=0; tamanioBitMapSwap > i; i++){
+		for(int i=0; tamanioBitMapSwap > i; i++){
 
-				void *punteroFrame = atlist(lista, i);
+			void *punteroFrame = atlist(lista, i);
 
 			if(punteroFrame == frame){
-				bitarray_set_bit(bitMapp, i);
+				bitarray_set_bit(bitMapSwap, i);
 				return;
 			}
 
@@ -241,10 +242,10 @@ void ocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
 	} else {
 		for(int i=0; tamanioBitMapPrincipal > i; i++){
 
-				void *punteroFrame = atlist(lista, i);
+			void *punteroFrame = atlist(lista, i);
 
 			if(punteroFrame == frame){
-				bitarray_set_bit(bitMapp, i);
+				bitarray_set_bit(bitMap, i);
 				return;
 			}
 
@@ -260,12 +261,12 @@ void desocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
 	if(bitMapp == bitMapSwap){
 		for(int i=0; tamanioBitMapSwap > i; i++){
 
-		void *punteroFrame = atlist(lista, i);
+			void *punteroFrame = atlist(lista, i);
 
-		if(punteroFrame == frame){
-			bitarray_clean_bit(bitMapp, i);
-			return;
-		}
+			if(punteroFrame == frame){
+				bitarray_clean_bit(bitMapSwap, i);
+				return;
+			}
 
 		}
 	} else {
@@ -274,7 +275,7 @@ void desocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
 			void *punteroFrame = atlist(lista, i);
 
 			if(punteroFrame == frame){
-				bitarray_clean_bit(bitMapp, i);
+				bitarray_clean_bit(bitMap, i);
 				return;
 			}
 
@@ -298,6 +299,7 @@ void *frameLibreSwap(){
 
 	return NULL;
 }
+
 
 void modificarPagina(l_pagina* paginaSwap){
 
@@ -374,11 +376,10 @@ void *ejecutarAlgoritmo(){
 	return NULL;
 }
 
-void *ejecutarLRU(){
-
-	l_pagina* pagina = popfrontlist(&pilaPaginasAlgoritmos);
+void* ejecutarLRU(){
+	l_pagina* pagina = popbacklist(&pilaPaginasAlgoritmos);
 	l_frame* frame = pagina->frame;
-	char string_log[100];
+	char string_log[200];
     sprintf(string_log, "Victima seleccionada: %s | Direccion principal: %p | Direccion virtual: %p ", frame->plato, pagina->frame, pagina->swap);
     log_info(logger, string_log);
 	return desalojarDePrincipal(pagina);
@@ -391,17 +392,23 @@ void *ejecutarClockMej(){
 	IteratorList iterador = NULL;
 	int gradoDeBusqueda = 0; //0 = bitUso en 0 + bitModificado en 0 | 1 = bitUso en 0 + bitModificado en 1
 
-	iterador = beginlist(pilaPaginasAlgoritmos);
+	if(inicioClockMej == 1){
+		iteradorClockMej = beginlist(pilaPaginasAlgoritmos);
+		inicioClockMej = 0;
+	}
+
+	iterador = iteradorClockMej;
 
 	while(iterador != NULL){
 	
-		pagina = dataiterlist(iterador);
+		pagina = (l_pagina*)dataiterlist(iterador);
 		l_frame* frame = pagina->frame;
 
 		if(gradoDeBusqueda){
 			if(!pagina->bitUso){
+				iteradorClockMej = nextlist(iterador);
 				popiterlist(&pilaPaginasAlgoritmos, iterador);
-				char string_log[100];
+				char string_log[200];
     			sprintf(string_log, "Victima seleccionada: %s | Direccion principal: %p | Direccion virtual: %p ", frame->plato, pagina->frame, pagina->swap);
     			log_info(logger, string_log);
 				return desalojarDePrincipal(pagina);
@@ -413,8 +420,11 @@ void *ejecutarClockMej(){
 		if(!gradoDeBusqueda){
 			if(!pagina->bitUso){
 				if(!pagina->bitModificado){
+					if(nextlist(iterador) == NULL){
+						iteradorClockMej = beginlist(pilaPaginasAlgoritmos);
+					} else iteradorClockMej = nextlist(iterador);
 					popiterlist(&pilaPaginasAlgoritmos, iterador);
-					char string_log[100];
+					char string_log[200];
     				sprintf(string_log, "Victima seleccionada: %s | Direccion principal: %p | Direccion virtual: %p ", frame->plato, pagina->frame, pagina->swap);
     				log_info(logger, string_log);
 					return desalojarDePrincipal(pagina);
@@ -440,7 +450,7 @@ void *desalojarDePrincipal(l_pagina* pagina){
 
 	pagina->bitPresencia = 0;
 	direccionPagina = pagina->frame;
-	if(direccionPagina != NULL && pagina->bitModificado == 1){
+	if(pagina->bitModificado == 1){
 		memcpy(pagina->swap, pagina->frame, 32);
 	}
 	//pagina->frame = NULL;
@@ -508,6 +518,15 @@ l_pagina* plato_en_pagina(char* plato, List* lista){
     return NULL;
 }
 
+char* obtenerEstadoPedido(int estado){
+	if (estado == 0){
+		return "Pendiente";
+	} else if (estado == 1){
+		return "Confirmado";
+	}
+	return "Terminado";
+}
+
 
 void imprimirTodo(){
 
@@ -523,23 +542,23 @@ void imprimirTodo(){
 	IteratorList jterador = NULL;
 	IteratorList kterador = NULL;
 
-	char string_log[100];
-    sprintf(string_log, "---------------------------------------------------");
+	char string_log[200];
+    sprintf(string_log, "----------------------------------------------------------------------------------------------");
     log_info(logger, string_log);
 
     for(iterador = beginlist(tablaRestaurantes);iterador!=NULL;iterador = nextlist(iterador)){
         resto = dataiterlist(iterador);
 
-		char string_log[100];
-    	sprintf(string_log, "Restaurant: %s | Contiene los segmentos: ", resto->nombreResto);
+		char string_log[200];
+    	sprintf(string_log, "Restaurant: %s | Contiene los pedidos: ", resto->nombreResto);
     	log_info(logger, string_log);
 
 		for(jterador = beginlist(*resto->punteroTablaSegmentos);jterador!=NULL;jterador = nextlist(jterador)){
         	segmento = dataiterlist(jterador);
 
 
-			char string_log[100];
-    		sprintf(string_log, "\tID: %s | Contiene las paginas: ", segmento->idPedido);
+			char string_log[200];
+    		sprintf(string_log, "\tPedido ID: %s | Contiene los platos: (%s)", segmento->idPedido, obtenerEstadoPedido(segmento->estadoPedido));
     		log_info(logger, string_log);
 
 			for(kterador = beginlist(*segmento->punteroTablaPaginas);kterador!=NULL;kterador = nextlist(kterador)){
@@ -547,14 +566,14 @@ void imprimirTodo(){
 
 				if(pagina->bitPresencia == 1){
 					frame = pagina->frame;
-					char string_log[200];
-    				sprintf(string_log, "\t\tPlato: %s | Cantidad: %i | CantLista: %i | Direccion Memoria: %p | Direccion Swap: %p", frame->plato, frame->cantidadPlato, frame->cantidadLista, pagina->frame, pagina->swap);
+					char string_log[300];
+    				sprintf(string_log, "\t\tPlato: %s | Cantidad: %i | CantLista: %i | Direccion Memoria: %p | Direccion Swap: %p | Presencia: %d | Uso : %d | Modificado: %d", frame->plato, frame->cantidadPlato, frame->cantidadLista, pagina->frame, pagina->swap, pagina->bitPresencia, pagina->bitUso, pagina->bitModificado);
     				log_info(logger, string_log);
 				} else {
-					frame = pagina->swap;
-					char string_log[200];
-    				sprintf(string_log, "\t\tPlato: %s | Cantidad: %i | CantLista: %i | Direccion Memoria: %p | Direccion Swap: %p", frame->plato, frame->cantidadPlato, frame->cantidadLista, pagina->frame, pagina->swap);
-    				log_info(logger, string_log);
+				 	frame = pagina->swap;
+				 	char string_log[300];
+    			 	sprintf(string_log, "\t\tPlato: %s | Cantidad: %i | CantLista: %i | Direccion Memoria: %p | Direccion Swap: %p | Presencia: %d | Uso : %d | Modificado: %d", frame->plato, frame->cantidadPlato, frame->cantidadLista, pagina->frame, pagina->swap, pagina->bitPresencia, pagina->bitUso, pagina->bitModificado);
+    			 	log_info(logger, string_log);
 				}
     		}
     	
@@ -578,6 +597,17 @@ void imprimirBitMap(){
 		printf("Bit: %d | Posicion: %d | Direccion de memoria: %p\n", bitOcupado, i, puntero);
 	}
 
+}
+
+void imprimirLista(List lista){
+	for(IteratorList iter = beginlist(lista); iter != NULL; iter = nextlist(iter)){
+		l_pagina* data = (l_pagina*) iter->data;
+		l_frame* frame = data->frame;
+		char string_log[200];
+    	sprintf(string_log, "PAGINA EN LISTA DE ALGORITMOS: Plato: %s | Cantidad: %i | CantLista: %i | Direccion Memoria: %p | Direccion Swap: %p\n", frame->plato, frame->cantidadPlato, frame->cantidadLista, data->frame, data->swap);
+    	log_info(logger, string_log);
+
+	}
 }
 
 void imprimirMemoria(){

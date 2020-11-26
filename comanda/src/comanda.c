@@ -26,6 +26,11 @@ int main(int argc, char *argv[]){
     algoritmo = comanda_config->algoritmo_reemplazo;
     tamanioMemoria = comanda_config->tamanio_memoria;
     tamanioSwap = comanda_config->tamanio_swap;
+
+    semaforo_contador = malloc(sizeof(sem_t));
+    sem_init(semaforo_contador, 0, 0);
+
+    inicioClockMej = 1;
     
     printf("Imprimiendo el path %s", comanda_config->ruta_log);
 
@@ -36,8 +41,6 @@ int main(int argc, char *argv[]){
     iniciarMemoriaSwap();
     
     iniciar_servidor("127.0.0.1", "5001", handle_client);
-
-    //imprimirBitMap();
 
     close(archivoSwap);
 

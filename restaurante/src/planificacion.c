@@ -53,7 +53,7 @@ void iniciar_clock(){
 void clock_cpu(){
     
     while(true){
-        sleep(2);
+        sleep(2); //todo: pasar tiempo del config
 
         log_info(logger, "-----------CICLO-------------");
 
@@ -208,24 +208,34 @@ void inicializar_colas_io(){
 }
 
 void paso_exec(t_exec* cocinero){
+
     while(true){
         sem_wait(cocinero->semaforo_exec);
         sem_wait(cocinero->pcb->ciclo_cpu);
-        paso_a_exec(cocinero);
+    
+        if(!strcmp(restaurante_config->algoritmo_planificador,"FIFO"))
+        {
+            paso_a_exec_FIFO(cocinero);
+        }
+        else if(!strcmp(restaurante_config->algoritmo_planificador,"RR"))
+        {
+            paso_a_exec_RR(cocinero);
+        }
     }
 }
 
 
-void paso_a_exec(t_exec* cocinero){
+void paso_a_exec_FIFO(t_exec* cocinero){
 
     t_ready* cola = cola_por_afinidad(cocinero->afinidad);
 
     t_plato* plato = cocinero->pcb->plato;
 
-    t_paso* paso = popfrontlist(&plato->pasos);
+    t_paso* paso = popfrontlist(&plato->pasos); 
     
-    for(int i = 0; i<paso->ciclo_cpu; i++){
+    for(int i = 0; i<paso->ciclo_cpu; i++){ 
         sem_wait(cocinero->pcb->ciclo_cpu);
+        printf("PCB %i - Ejecutando paso %s \n",cocinero->pcb->pid,paso->nombre_paso);
     }
     paso = frontlist(plato->pasos);
 
@@ -248,6 +258,53 @@ void paso_a_exec(t_exec* cocinero){
     
 }
 
+
+void paso_a_exec_RR(t_exec* cocinero){
+
+    t_ready* cola = cola_por_afinidad(cocinero->afinidad);
+
+    t_plato* plato = cocinero->pcb->plato;
+
+    int quant = restaurante_config->quantum;
+
+    t_paso* paso = frontlist(plato->pasos); //cambia para RR
+
+    int i = 0;
+
+    while(i < quant && paso != NULL && strcmp(paso->nombre_paso, "HORNEAR")){
+        sem_wait(cocinero->pcb->ciclo_cpu);
+        paso->ciclo_cpu -= 1;
+        printf("PCB %i - Ejecutando paso %s \n",cocinero->pcb->pid,paso->nombre_paso);
+        i++;
+        if(paso->ciclo_cpu == 0)
+        {
+            popfrontlist(&plato->pasos);
+            t_paso* proximo_paso = frontlist(plato->pasos); //cambia para RR
+
+            if (proximo_paso == NULL){
+                paso_exit(cocinero->pcb);
+                pushbacklist(&cola->cocineros, cocinero);
+                sem_post(cola->sem_cocinero_libre);
+                return;
+            } else if (!strcmp(proximo_paso->nombre_paso, "HORNEAR")){
+                pushbacklist(&pcb_espera_horno, cocinero->pcb);
+                sem_post(sem_block);
+                pushbacklist(&cola->cocineros, cocinero);
+                sem_post(cola->sem_cocinero_libre);
+                return;
+            } 
+            
+            paso_ready(cocinero->pcb);
+            pushbacklist(&cola->cocineros, cocinero);
+            sem_post(cola->sem_cocinero_libre);
+        }
+    }
+    
+    paso_ready(cocinero->pcb);
+    pushbacklist(&cola->cocineros, cocinero);
+    sem_post(cola->sem_cocinero_libre);
+    
+}
 
 void controlador_hornos(){
 
@@ -415,9 +472,10 @@ void paso_block(t_horno* horno){
 void paso_a_block(t_horno* horno){
 
     t_paso* paso = popfrontlist(&horno->pcb->plato->pasos);
-
+    
     for(int i = 0; i < paso->ciclo_cpu; i++){
         sem_wait(horno->pcb->ciclo_cpu);
+        printf("HORNO %i - Paso: %s \n",horno->pcb->pid,   paso->nombre_paso);
     }
 
     horno->ocupado = 0;

@@ -4,19 +4,7 @@
 #include "planificacion.h"
 
 // VARIABLES Y ESTRUCTURAS
-typedef struct {
-    char* puerto_escucha;
-    char* ip_sindicato;
-    char* puerto_sindicato;
-    char* ip_app;
-    char* puerto_app;
-    int quantum;
-    char* ruta_log;
-    char* algoritmo_planificador;
-    char* nombre_restaurante;
-} t_restaurante_config;
 
-t_restaurante_config* restaurante_config;
 
 
 // FUNCIONES

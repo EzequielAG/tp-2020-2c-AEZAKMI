@@ -39,6 +39,7 @@ void handle_client(t_result* result){
 				handle_consultar_platos(result->socket, result->mensajes->mensajes[1]);
 				break;
 			case guardar_pedido:
+				//OK
 				handle_guardar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 				break;
 			case guardar_plato:
@@ -48,15 +49,18 @@ void handle_client(t_result* result){
 				handle_confirmar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 				break;
 			case obtener_pedido:
+				//OK
 				handle_obtener_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 				break;
 			case obtener_restaurante:
+				//OK
 				handle_obtener_restaurante(result->socket, result->mensajes->mensajes[1]);
 				break;
 			case plato_listo:
 				handle_plato_listo(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3]);
 				break;
 			case obtener_receta:
+				//OK
 				handle_obtener_receta(result->socket, result->mensajes->mensajes[1]);
 				break;
 			case terminar_pedido:
@@ -64,6 +68,10 @@ void handle_client(t_result* result){
 				break;
 			case handshake_restaurante:
 				handle_handshake_restaurante(result->socket);
+				break;
+			case handshake_cliente:
+				//OK
+				handle_handshake_cliente(result->socket);
 				break;
 			default:
 				handle_error(result->socket);
@@ -78,6 +86,11 @@ void handle_client(t_result* result){
 void handle_handshake_restaurante(int socket){
 	send_message_socket(socket, "OK");
 }
+
+void handle_handshake_cliente(int socket){
+	send_message_socket(socket, "OK");
+}
+
 
 int create_pedido(char* restaurante, char* id_pedido){
 
@@ -558,6 +571,7 @@ void process_line(char* line){
 		if (longitud < 8){
 			printf("No se tienen los suficientes parametros para llamar a Crear restaurante, se requieren 7 y se obtuvieron: %d\n", longitud - 1);
 		}
+		//OK
 		handle_crear_restaurante(array[1], array[2], array[3], array[4], array[5], array[6], array[7]);
 		return;
 	}
@@ -566,6 +580,7 @@ void process_line(char* line){
 		if (longitud < 4){
 			printf("No se tienen los suficientes parametros para llamar a Crear restaurante, se requieren 7 y se obtuvieron: %d\n", longitud - 1);
 		}
+		//OK
 		handle_crear_receta(array[1], array[2], array[3]);
 		return;
 	}

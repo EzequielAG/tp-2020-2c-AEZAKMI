@@ -30,4 +30,5 @@ void handle_handshake_restaurante(int socket);
 bool platos_iguales(char* plato, char* comida);
 char* sacar_corchetes(char* array);
 int obtener_cantidad_pedidos(char* restaurante);
+void handle_handshake_cliente(int socket);
 #endif

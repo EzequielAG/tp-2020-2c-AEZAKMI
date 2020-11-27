@@ -103,8 +103,8 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
         printf("Faltan parametros \n");
         return NULL;
     }
-    // char* [4] = [estado]     [platos]    [cantidadLista]     [cantidadTotal]
-    //            PENDIENTE   plato,plato        1,2,3               1,2,3
+    // char* [7] = [afinidades] [pos x] [pos y]     [precioRecetas]     [cantidadHornos] [cantidadPedidos] [cantidadCocineros]
+    //             plato,plato     1      4    receta1,12|receta2,25|...       3                 5                  3
     char* tipo_mensaje = string_itoa(obtener_restaurante);
     char* obtener_restaurante[2] ={tipo_mensaje,restaurante};
     int socket = enviar_mensaje_modulo(modulo, obtener_restaurante, 2);
@@ -135,7 +135,7 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
 char** obtener_array_mensajes(char* array_mensaje){
 
     char** array_string = string_split(array_mensaje, ",");
-    array_string =separar_por_comillas(array_string);
+    // array_string =separar_por_comillas(array_string);
  
     return array_string;
 

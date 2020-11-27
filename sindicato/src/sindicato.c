@@ -350,11 +350,12 @@ void handle_obtener_receta(int socket, char* comida){
 		}
 		i++;
 	}
-	// Trocear, 4, Empanar, 5, Reposar, 3, Hornear, 10
-	char* respuesta[1] = {receta_alternada};
+	// respuesta[0] = "Milanesas"
+	// respuesta[1] = "Trocear, 4, Empanar, 5, Reposar, 3, Hornear, 10"
+	char* respuesta[2] = {comida, receta_alternada};
 
 	//Responder el mensaje con la receta solicitada.
-	send_messages_socket(socket, respuesta, 1);
+	send_messages_socket(socket, respuesta, 2);
 
 	
 }

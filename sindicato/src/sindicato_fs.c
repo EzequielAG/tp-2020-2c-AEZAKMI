@@ -683,6 +683,23 @@ bool create_afip_file(char* content, char* path){
 	return true;
 }
 
+bool update_afip_file(char* content, char* path){
+	int number_of_blocks = calculate_blocks_required(content);
+
+	t_config* config = config_create(path);
+	int bloque_actual = config_get_int_value(config, "INITIAL_BLOCK");
+
+	int size = string_length(content) + number_of_blocks * sizeof(uint32_t);
+	config_set_value(config, "SIZE", string_itoa(size));
+	config_save_in_file(config, path);
+
+	if(!save_in_blocks(bloque_actual, content, number_of_blocks)){
+		log_error(logger, "[Create Afip File] No se guardaron los bloques");
+		return false;
+	}
+	return true;
+}
+
 char* afip_file_to_char(char* path){
 	return read_blocks(read_afip_file(path));
 }

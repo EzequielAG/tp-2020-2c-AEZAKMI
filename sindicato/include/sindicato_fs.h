@@ -95,4 +95,5 @@ char* data_to_char(char* data);
 char* afip_file_to_char(char* path);
 char* get_restaurante_data(char* restaurante);
 char* get_pedido_data(char* restaurante, char* pedido);
+bool update_afip_file(char* content, char* path);
 #endif

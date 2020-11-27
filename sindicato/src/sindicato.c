@@ -235,27 +235,56 @@ void handle_confirmar_pedido(int socket, char* id_pedido, char* restaurante){
 	//Verificar si el Restaurante existe dentro del File System. 
 	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
 	//En caso de no existir se deberá informar dicha situación.
-	bool resultado_operacion = existe_restaurante(restaurante);
+	if (!existe_restaurante(restaurante)){
+		log_error(logger, "[Obtener Pedido] El restaurante no existe");
+		char* respuesta[1] = {"El restaurante no existe."};
+		send_messages_socket(socket, respuesta, 1);
+		return;
+	}
 
 	//Verificar si el Pedido existe dentro del File System. 
 	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
 	//En caso de no existir se deberá informar dicha situación.
-	if (resultado_operacion){
-		resultado_operacion = existe_pedido(restaurante, id_pedido);
+	if (!existe_pedido(restaurante, id_pedido)){
+		log_error(logger, "[Guardar Pedido] El pedido ya existe");
+		char* respuesta[1] = {"El pedido no existe."};
+		send_messages_socket(socket, respuesta, 1);
+		return;
 	}
+
+	char* pedido = get_pedido_data(restaurante, id_pedido);
+
+	pedido =  data_to_char(pedido);
+
+	char** pedido_info = string_split(pedido, " ");
 
 	//Verificar que el pedido esté en estado “Pendiente”. En caso contrario se deberá informar dicha situación.
+	if (strcmp(pedido_info[0], "Pendiente") != 0){
+		log_error(logger, "[Confirmar Pedido] El pedido no esta en estado Pendiente");
+		char* respuesta[1] = {"El pedido no esta en estado Pendiente"};
+		send_messages_socket(socket, respuesta, 1);
+		return;
+	}
 
 	//Cambiar el estado del pedido de “Pendiente” a “Confirmado” (se debe truncar el archivo en caso de ser necesario).
+	pedido_info[0] = string_new();
+	string_append(&pedido_info[0], "Confirmado");
+
+	char* data_actualizada = string_new();
+	string_append_with_format(&data_actualizada, "ESTADO_PEDIDO=%s\nLISTA_PLATOS=%s\nCANTIDAD_PLATOS=%s\nCANTIDAD_LISTA=%s\nPRECIO_TOTAL=%s", pedido_info[0], pedido_info[1], pedido_info[2], pedido_info[3], pedido_info[4]);
+
+	char* path_pedido = get_path_pedido_file(restaurante, id_pedido);
+	bool updated = update_afip_file(data_actualizada, path_pedido);
+
+	if (!updated){
+		log_error(logger, "[Confirmar Pedido] No se pudo guardar el contenido actualizado");
+		char* respuesta[1] = {"No se pudo guardar el contenido actualizado"};
+		send_messages_socket(socket, respuesta, 1);
+		return;
+	}
 
 	//Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
-	char* respuesta[1];
-
-	if (resultado_operacion){
-		respuesta[0] = "Ok";
-	} else {
-		respuesta[0] = "Fail";
-	}
+	char* respuesta[1] = {"OK"};
 	send_messages_socket(socket, respuesta, 1);
 }
 

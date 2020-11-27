@@ -687,3 +687,19 @@ char* get_receta(char* nombre_receta){
 	t_afip_file* afip_file = read_afip_file(get_path_receta_file(nombre_receta));
 	return read_blocks(afip_file);
 }
+
+char* data_to_char(char* data){
+	char** data_split = string_split(data, "\n");
+	int i = 0;
+	char* data_values = string_new();
+	while(data_split[i]!=NULL){
+		char** key_and_value = string_split(data_split[i], "=");
+		if (i==0){
+			string_append(&data_values, key_and_value[1]);
+		} else {
+			string_append_with_format(&data_values, " %s", key_and_value[1]);
+		}
+		i++;
+	}
+	return data_values;
+}

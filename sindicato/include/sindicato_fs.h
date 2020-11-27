@@ -93,4 +93,5 @@ FILE * get_or_create_file(char* path_file, char * mode);
 void create_blocks();
 char* get_receta(char* nombre_receta);
 int get_data_size(FILE* fp);
+char* data_to_char(char* data);
 #endif

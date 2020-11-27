@@ -334,8 +334,24 @@ void handle_obtener_receta(int socket, char* comida){
 	}
 
 	char* receta = get_receta(comida);
+	char* receta_char = data_to_char(receta);
 
-	char* respuesta[1] = {receta};
+	char** receta_pasos_y_tiempos = string_split(receta_char, " ");
+	char** receta_pasos = string_get_string_as_array(receta_pasos_y_tiempos[0]);
+	char** receta_tiempos = string_get_string_as_array(receta_pasos_y_tiempos[1]);
+
+	char* receta_alternada = string_new();
+	int i = 0;
+	while(receta_pasos[i]!=NULL){
+		if(receta_pasos[i+1]==NULL){
+			string_append_with_format(&receta_alternada,"%s, %s", receta_pasos[i], receta_tiempos[i]);
+		} else{
+			string_append_with_format(&receta_alternada,"%s, %s, ", receta_pasos[i], receta_tiempos[i]);
+		}
+		i++;
+	}
+	// Trocear, 4, Empanar, 5, Reposar, 3, Hornear, 10
+	char* respuesta[1] = {receta_alternada};
 
 	//Responder el mensaje con la receta solicitada.
 	send_messages_socket(socket, respuesta, 1);

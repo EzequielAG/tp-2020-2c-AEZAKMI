@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <semaphore.h>
+#include "config_app.h"
 
 typedef struct t_repartidor t_repartidor;
 
@@ -13,6 +14,11 @@ typedef struct {
     int id_pedido;
     char* restaurante;
     char* cliente;
+    int estimacion;
+    int estimacion_anterior;
+    int rafaga_anterior;
+    int ciclos_espera;
+    int valorHRRN;
     t_repartidor* repartidor_actual;
 } t_pcb;
 
@@ -49,11 +55,13 @@ struct t_repartidor {
 
 List repartidores_libres;
 sem_t* sem_entrenador_libre;
+sem_t* sem_mutex_sjf;
 
 //MUEVO LOS STRUCT PARA UTILIZARLOS ACA
 typedef struct {
     int socket;
     char* nombre_restaurante;
+    List platos;
     t_posicion posicion;
 } t_restaurante;
 
@@ -65,9 +73,14 @@ typedef struct {
 } t_cliente;
 
 typedef struct {
+    char* restaurante;
     char* id_pedido;
     sem_t* semaforo;
 } t_pedido_espera;
+
+int id_pedido_default;
+sem_t* sem_pedido_default;
+sem_t* sem_id_pedido;
 
 //MUEVO LAS LISTAS PARA UTILIZARLAS ACA
 List lista_clientes;
@@ -77,8 +90,8 @@ List lista_semaforos_pedidos;
 //MUEVO LAS FUNCIONES PARA UTILIZARLAS ACA
 t_restaurante* buscar_restaurante_lista(char* nombre_restaurante);
 t_cliente* buscar_cliente_lista(char* id_cliente);
-t_pedido_espera* buscar_pedido_espera(char* id_pedido);
-t_pedido_espera* eliminar_pedido_espera(char* id_pedido);
+t_pedido_espera* buscar_pedido_espera(char* id_pedido, char*);
+void eliminar_pedido_espera(char* id_pedido, char*);
 void enviar_final_pedido(char*, int);
 t_pcb* crear_pcb(char* restaurante, int id_pedido, char* id_cliente);
 int comparar_platos(r_obtener_pedido*);

@@ -53,6 +53,7 @@ void ir_hacia_restaurante(t_repartidor* repartidor){
     while(!misma_posicion(repartidor->posicion, pedido->posicion_restaurante)){
         
         sem_wait(repartidor->ciclo_cpu);
+        repartidor->pcb_actual->rafaga_anterior += 1;
 
         log_info(logger, "Repartidor se mueve hacia restaurante");
 
@@ -66,13 +67,13 @@ void esperar_pedido(t_repartidor* repartidor){
 
     pedido = enviar_mensaje_obtener_pedido(&modulo_comanda, string_itoa(repartidor->pcb_actual->id_pedido), repartidor->pcb_actual->restaurante);
 
-    if(pedido != NULL && comparar_platos(pedido)){
+    if(!strcmp(repartidor->pcb_actual->restaurante, "Resto Default") || (pedido != NULL && comparar_platos(pedido))){
 
         return;
 
     }
 
-    t_pedido_espera* pedido_espera = buscar_pedido_espera(string_itoa(repartidor->pcb_actual->id_pedido));
+    t_pedido_espera* pedido_espera = buscar_pedido_espera(string_itoa(repartidor->pcb_actual->id_pedido), repartidor->pcb_actual->restaurante);
 
     desuscribirse_clock(repartidor->ciclo_cpu);
 
@@ -96,6 +97,7 @@ void ir_hacia_cliente(t_repartidor* repartidor){
     while(!misma_posicion(repartidor->posicion, pedido->posicion_cliente)){
         
         sem_wait(repartidor->ciclo_cpu);
+        repartidor->pcb_actual->rafaga_anterior += 1;
 
         log_info(logger, "Repartidor avanza hacia el cliente");
 

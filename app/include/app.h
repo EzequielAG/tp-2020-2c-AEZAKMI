@@ -17,6 +17,7 @@
 
 // FUNCIONES
 void app_init(t_app_config** app_config, t_log** logger);
+void crear_lista_platos_default();
 void app_finally(t_app_config* app_config, t_log* logger);
 
 #endif

@@ -25,11 +25,13 @@ void handle_handshake_restaurante(int socket, char* nombre_restaurante, int, int
 t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante, int, int);
 void handle_consultar_platos(int, char*);
 void handle_anadir_plato(int,char*, char*, char*);
+int plato_en_restaurante(char* plato, List lista);
 void handle_confirmar_pedido(int, char*, char*);
 void handle_plato_listo(int, char*, char*, char*);
 void handle_consultar_pedido(int,char*, char*);
 char* armar_string_consultar_pedido(r_consultar_pedido* );
 char* obtener_restaurantes();
 char* obtener_platos(List);
+int obtener_id_default(t_restaurante* restaurante);
 void handle_client(t_result* result);
-void inicializar_pedido_semaforo(char* id_pedido);
+void inicializar_pedido_semaforo(char* id_pedido, char*);

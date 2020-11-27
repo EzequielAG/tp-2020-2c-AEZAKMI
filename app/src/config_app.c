@@ -31,7 +31,7 @@ void app_config_parser(t_config* config, t_app_config* app_config) {
     app_config->frecuencia_descanso = config_get_array_value(config, "FRECUENCIA_DE_DESCANSO");
     app_config->tiempo_descanso = config_get_array_value(config, "TIEMPO_DE_DESCANSO");
     app_config->ruta_log = strdup(config_get_string_value(config, "ARCHIVO_LOG"));
-    app_config->platos_default = config_get_int_value(config, "PLATOS_DEFAULT");
+    app_config->platos_default = config_get_array_value(config, "PLATOS_DEFAULT");
     app_config->posicion_rest_default_x = config_get_int_value(config, "POSICION_REST_DEFAULT_X");
     app_config->posicion_rest_default_y = config_get_int_value(config, "POSICION_REST_DEFAULT_Y");
     app_config->retardo_ciclo_cpu = config_get_int_value(config, "RETARDO_CICLO_CPU");

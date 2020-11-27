@@ -21,7 +21,7 @@ typedef struct {
     char** frecuencia_descanso;
     char** tiempo_descanso;
     char* ruta_log;
-    int platos_default;
+    char** platos_default;
     int posicion_rest_default_x;
     int posicion_rest_default_y;
     int retardo_ciclo_cpu;
@@ -30,6 +30,8 @@ typedef struct {
 t_app_config* app_config;
 t_modulo modulo_comanda;
 t_log* logger;
+
+List listaPlatosDefault;
 
 t_app_config* app_config_loader(char* path_config_file, t_log**);
 void app_config_parser(t_config* config, t_app_config* app_config);

@@ -30,13 +30,15 @@ t_cliente* buscar_cliente_lista(char* id_cliente){
 
 }
 
-t_pedido_espera* buscar_pedido_espera(char* id_pedido){
+t_pedido_espera* buscar_pedido_espera(char* id_pedido, char* restaurante){
 
     for (IteratorList iter = beginlist(lista_semaforos_pedidos); iter != NULL; iter = nextlist(iter)){
         t_pedido_espera* pedido = (t_pedido_espera*) iter->data;
 
-        if (!strcmp(pedido->id_pedido, id_pedido)){
-            return pedido;
+        if (!strcmp(pedido->restaurante, restaurante)){
+            if(!strcmp(pedido->id_pedido, id_pedido)){
+                return pedido;
+            }
         }
 
     }
@@ -45,18 +47,19 @@ t_pedido_espera* buscar_pedido_espera(char* id_pedido){
 
 }
 
-t_pedido_espera* eliminar_pedido_espera(char* id_pedido){
+void eliminar_pedido_espera(char* id_pedido, char* restaurante){
 
     for (IteratorList iter = beginlist(lista_semaforos_pedidos); iter != NULL; iter = nextlist(iter)){
         t_pedido_espera* pedido = (t_pedido_espera*) iter->data;
 
-        if (!strcmp(pedido->id_pedido, id_pedido)){
-            popiterlist(&lista_semaforos_pedidos, iter);
+        if (!strcmp(pedido->restaurante, restaurante)){
+            if (!strcmp(pedido->id_pedido, id_pedido)){
+                popiterlist(&lista_semaforos_pedidos, iter);
+                return;
+            }
         }
 
     }
-
-    return NULL;
 
 }
 
@@ -71,6 +74,8 @@ t_pcb* crear_pcb(char* restaurante, int id_pedido, char* id_cliente){
     pcb->restaurante = restaurante;
     pcb->id_pedido = id_pedido;
     pcb->cliente = id_cliente;
+    pcb->estimacion = app_config->estimacion_inicial;
+    pcb->ciclos_espera = 0;
     pushbacklist(&pcb_new, pcb);
     sem_post(sem_pcb_new);
     return pcb;
@@ -91,9 +96,7 @@ int comparar_platos(r_obtener_pedido *pedido){
         if(*info->cantidad_lista != *info->cantidad_total){
             return 0;
         }
-
     }
 
     return 1;
-
 }

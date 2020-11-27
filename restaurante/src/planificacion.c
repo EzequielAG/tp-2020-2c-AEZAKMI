@@ -444,18 +444,25 @@ void paso_ready(t_pcb* pcb){
 // }
 
 
-
-
-
-
-
 int paso_exit(t_pcb* pcb){
 
     pushbacklist(&colas_exit,pcb->plato);
     pcb->estado = EXIT;
 
     printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
-     
+
+    if(termino_pedido(pcb->id_pedido) == 1)
+    {
+        char* mensaje_terminar = "OK"; //DESCOMENTAR CUANDO SINDICATO ESTE LISTO enviar_mensaje_terminar_pedido(&modulo_sindicato,(char*)pcb->id_pedido,restaurante_config->nombre_restaurante);
+        
+        if(!strcmp(mensaje_terminar,"OK")){
+            printf(" - El pedido %i fue reportado al Sindicato como finalizado\n",pcb->id_pedido);
+        }
+        else{
+            printf(" - Se produjo un error al reportar el pedido %i como finalizado al Sindicato \n",pcb->id_pedido);
+        }
+    }
+
     return 1;
 };
 
@@ -488,21 +495,35 @@ void paso_a_block(t_horno* horno){
 
 
 
-// int termino_pedido(int id_pedido){
+int termino_pedido(int id_pedido){
 
-//     for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
-        
-//         t_pcb* pcb = iter_pcb->data;
+    sem_wait(sem_finalizar_pedido);
+    for(IteratorList iter_pedido = beginlist(lista_pedidos); iter_pedido != NULL; iter_pedido = nextlist(iter_pedido)){
+    
+        t_pedido* ped_local = iter_pedido->data;
+    
+        if(ped_local->id_pedido == id_pedido)
+        {
+    
+            for(IteratorList iter_pcb = beginlist(colas_pcb); iter_pcb != NULL; iter_pcb = nextlist(iter_pcb)){
 
-//         if(pcb->id_pedido == id_pedido && pcb->estado == EXIT){
-//             return 1;
-//         }
+                t_pcb* pcb = iter_pcb->data;
 
-//     }
+                if(pcb->id_pedido == id_pedido && pcb->estado != EXIT){
+                    sem_post(sem_finalizar_pedido);
+                    return 0;
+                }
+            }
+            sem_post(sem_finalizar_pedido);
+            return 1;
+        }
+    
+    }
+    
+    sem_post(sem_finalizar_pedido);
+    return 0;
 
-//     return 0;
-
-// }
+}
 
 
 
@@ -553,9 +574,6 @@ char* obtener_estado(int estado){
 
 
 }
-
-
-
 
 
 int pedidos_finalizados(){
@@ -670,10 +688,10 @@ t_pcb* crear_pcb(int id_pedido,int pid,t_plato* plato, char* afinidad){
     pcb->plato = plato;    
     pcb->ciclo_cpu = malloc(sizeof(sem_t));
     sem_init(pcb->ciclo_cpu, 0 ,0);
-
+    
     paso_ready(pcb);
-    //pushfrontlist(&colas_pcb,pcb);
 
+    pushbacklist(&colas_pcb,pcb);
 
     return pcb;
 }

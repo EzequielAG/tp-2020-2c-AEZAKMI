@@ -307,7 +307,15 @@ void handle_obtener_restaurante(int socket, char* restaurante){
 }
 
 int obtener_cantidad_pedidos(char* restaurante){
-	return 0;
+	char* restaurante_path = get_path_restaurante(restaurante);
+	DIR* restaurante_dir = opendir(restaurante_path);
+	struct dirent* entry;
+    int pedidos = 0;
+	while((entry=readdir(restaurante_dir))){
+		pedidos++;
+	}
+	closedir(restaurante_dir);
+	return pedidos > 1 ? pedidos-3 : 0;
 }
 
 void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* comida){

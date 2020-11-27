@@ -69,8 +69,8 @@ void iniciar_repartidores(){
         repartidor_actual->posicion.posx = atoi(posiciones_spliteadas[0]);
         repartidor_actual->posicion.posy = atoi(posiciones_spliteadas[1]);
         repartidor_actual->cansancio = 0;
-        sem_init(repartidor_actual->nuevo_pedido, 0, 0);
         repartidor_actual->nuevo_pedido = malloc(sizeof(sem_t));
+        sem_init(repartidor_actual->nuevo_pedido, 0, 0);
         // repartidor_actual->espera_pedido = malloc(sizeof(sem_t));
         // sem_init(repartidor_actual->espera_pedido, 0, 0);
         repartidor_actual->ciclo_cpu = malloc(sizeof(sem_t));
@@ -100,16 +100,20 @@ void iniciar_planificador_largo_plazo(){
 void iniciar_planificador_corto_plazo(){
     if (!strcmp(app_config->algoritmo_planificacion, "FIFO")){
         planificar_corto_plazo_FIFO();
+    } else if (!strcmp(app_config->algoritmo_planificacion, "SJF")){
+        planificar_corto_plazo_SJF();
+    } else if (!strcmp(app_config->algoritmo_planificacion, "HRRN")){
+        pthread_t thread;
+        pthread_create(&thread,NULL,(void*)aumentar_espera_HRRN, NULL);
+	    pthread_detach(thread);
+        planificar_corto_plazo_HRRN();
     }
-
-    //TODO: SJF Y HRRN
 }
 
 void planificar_largo_plazo(){
     while (true){
         sem_wait(sem_pcb_new);
         sem_wait(sem_entrenador_libre);
-
 
         t_pcb* pcb = popfrontlist(&pcb_new);
 
@@ -118,8 +122,8 @@ void planificar_largo_plazo(){
         repartidor->pcb_actual = pcb;
         pcb->repartidor_actual = repartidor;
 
-        char string_log[100];
-        sprintf(string_log, "Se asigna el pcb %d al repartidor %d\n", pcb->id_pedido, repartidor->id);
+        char string_log[200];
+        sprintf(string_log, "Se asigna PCB: x=%d - y=%d | REPARTIDOR: x=%d - y=%d\n", repartidor->pedido->posicion_restaurante.posx, repartidor->pedido->posicion_restaurante.posy, repartidor->posicion.posx, repartidor->posicion.posy);
         log_info(logger, string_log);
 
         sem_post(repartidor->nuevo_pedido);
@@ -137,7 +141,7 @@ void planificar_corto_plazo_FIFO(){
         t_pcb* pcb = popfrontlist(&pcb_ready);
 
         char string_log[100];
-        sprintf(string_log, "PCB A EXEC: %d\n", pcb->id_pedido);
+        sprintf(string_log, "Repartidor %d pasa a EXEC\n", pcb->repartidor_actual->id);
         log_info(logger, string_log);
         
         pushbacklist(&suscriptores_cpu, pcb->repartidor_actual->ciclo_cpu);
@@ -159,6 +163,7 @@ t_repartidor* obtener_repartidor_mas_cercano(t_pcb* pcb){
 
     t_repartidor* repartidorAux = NULL;
     int calculoAux;
+    IteratorList iterAux;
     t_restaurante *restaurante = buscar_restaurante_lista(pcb->restaurante);
     
     for(IteratorList iter = beginlist(repartidores_libres); iter != NULL; iter = nextlist(iter)){
@@ -174,12 +179,109 @@ t_repartidor* obtener_repartidor_mas_cercano(t_pcb* pcb){
         if(repartidorAux == NULL){
             repartidorAux = repartidor;
             calculoAux = calculo;
+            iterAux = iter;
         }
         if(calculo < calculoAux){
             repartidorAux = repartidor;
             calculoAux = calculo;
+            iterAux = iter;
         }
     }
+    popiterlist(&repartidores_libres, iterAux);
     return repartidorAux;
 }
 
+void planificar_corto_plazo_SJF(){
+    while(1){
+        sem_wait(sem_pcb_ready);
+        sem_wait(sem_grado_multiprocesamiento);
+        sem_wait(sem_mutex_sjf);
+
+        int alpha = app_config->alpha;
+
+        int mejor = 999999;
+        IteratorList elMejor;
+        t_pcb* pcb;
+
+        for(IteratorList iter = beginlist(pcb_ready); iter != NULL; iter = nextlist(iter)){
+            pcb = (t_pcb*) dataiterlist(iter);
+
+            if(pcb->estimacion == -1){
+                pcb->estimacion = alpha*pcb->rafaga_anterior + (1-alpha)*pcb->estimacion_anterior;
+            }
+            if(pcb->estimacion < mejor){
+                mejor = pcb->estimacion;
+                elMejor = iter;
+            }
+
+        }
+        pcb = popiterlist(&pcb_ready, elMejor);
+
+        pcb->estimacion_anterior = pcb->estimacion;
+        pcb->estimacion = -1;
+
+        sem_post(sem_mutex_sjf);
+
+        char string_log[100];
+        sprintf(string_log, "Repartidor %d pasa a EXEC\n", pcb->repartidor_actual->id);
+        log_info(logger, string_log);
+        
+        pushbacklist(&suscriptores_cpu, pcb->repartidor_actual->ciclo_cpu);
+
+    }
+
+}
+
+void planificar_corto_plazo_HRRN(){
+    while(1){
+        sem_wait(sem_pcb_ready);
+        sem_wait(sem_grado_multiprocesamiento);
+        sem_wait(sem_mutex_sjf);
+
+        int alpha = app_config->alpha;
+
+        int mejor = 999999;
+        IteratorList elMejor;
+        t_pcb* pcb;
+
+        for(IteratorList iter = beginlist(pcb_ready); iter != NULL; iter = nextlist(iter)){
+            pcb = (t_pcb*) dataiterlist(iter);
+
+            if(pcb->estimacion == -1){
+                pcb->estimacion = alpha*pcb->rafaga_anterior + (1-alpha)*pcb->estimacion_anterior;
+                pcb->valorHRRN = (pcb->estimacion+pcb->espera)/pcb->estimacion;
+            }
+            if(pcb->valorHRRN < mejor){
+                mejor = pcb->estimacion;
+                elMejor = iter;
+            }
+
+        }
+        pcb = popiterlist(&pcb_ready, elMejor);
+
+        pcb->rafaga_anterior = 0;
+        pcb->estimacion_anterior = pcb->estimacion;
+        pcb->estimacion = -1;
+
+        sem_post(sem_mutex_sjf);
+
+        char string_log[100];
+        sprintf(string_log, "Repartidor %d pasa a EXEC\n", pcb->repartidor_actual->id);
+        log_info(logger, string_log);
+        
+        pushbacklist(&suscriptores_cpu, pcb->repartidor_actual->ciclo_cpu);
+
+    }
+}
+
+void aumentar_espera_HRRN(){
+
+    while(true){
+        sem_wait(sem_ciclo_espera_HRRN);
+        for(IteratorList iter = beginlist(pcb_ready); iter != NULL; iter = nextlist(iter){
+            t_pcb* pcb = (t_pcb*) dataiterlist(iter);
+
+            pcb->ciclo_espera += 1;
+        }
+    }
+}

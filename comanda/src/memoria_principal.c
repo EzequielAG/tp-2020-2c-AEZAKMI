@@ -406,7 +406,9 @@ void *ejecutarClockMej(){
 
 		if(gradoDeBusqueda){
 			if(!pagina->bitUso){
-				iteradorClockMej = nextlist(iterador);
+				if(nextlist(iterador) == NULL){
+					iteradorClockMej = beginlist(pilaPaginasAlgoritmos);
+				} else iteradorClockMej = nextlist(iterador);
 				popiterlist(&pilaPaginasAlgoritmos, iterador);
 				char string_log[200];
     			sprintf(string_log, "Victima seleccionada: %s | Direccion principal: %p | Direccion virtual: %p ", frame->plato, pagina->frame, pagina->swap);

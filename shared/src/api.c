@@ -103,7 +103,8 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
         printf("Faltan parametros \n");
         return NULL;
     }
-    
+    // char* [4] = [estado]     [platos]    [cantidadLista]     [cantidadTotal]
+    //            PENDIENTE   plato,plato        1,2,3               1,2,3
     char* tipo_mensaje = string_itoa(obtener_restaurante);
     char* obtener_restaurante[2] ={tipo_mensaje,restaurante};
     int socket = enviar_mensaje_modulo(modulo, obtener_restaurante, 2);
@@ -173,6 +174,7 @@ List* enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
         return NULL;;
     }
   
+    
     char* tipo_mensaje = string_itoa(consultar_platos);
     int socket;
 
@@ -315,6 +317,8 @@ r_consultar_pedido* enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_p
         return NULL;
     }
 
+    // char* [5] = [restaurante]  [estado]     [platos]    [cantidadLista]     [cantidadTotal]
+    //              Restaurante   PENDIENTE   plato,plato        1,2,3               1,2,3
     char* tipo_mensaje = string_itoa(consultar_pedido);
     int socket;
 
@@ -374,7 +378,8 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
         printf("Faltan parametros \n");
         return NULL;
     }
-
+    // char* [4] = [estado]     [platos]    [cantidadLista]     [cantidadTotal]
+    //             PENDIENTE   plato,plato       1,2,3              1,2,3
     char* tipo_mensaje = string_itoa(obtener_pedido);
 
     int socket = 0;

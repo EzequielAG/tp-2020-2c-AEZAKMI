@@ -21,6 +21,7 @@ void planificar_largo_plazo();
 void iniciar_clock();
 void clock_cpu();
 void planificar_corto_plazo_FIFO();
+void planificar_corto_plazo_SJF();
 void asignar_datos_pedido(t_pcb* pcb);
 t_repartidor* obtener_repartidor_mas_cercano(t_pcb* pcb);
 #endif

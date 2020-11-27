@@ -48,6 +48,15 @@ void handle_handshake_restaurante(int socket, char* nombre_restaurante, int pos_
     if (restaurante == NULL){
         restaurante = nuevo_restaurante(socket, nombre_restaurante, pos_x, pos_y);
         pushbacklist(&lista_restaurantes, restaurante);
+        
+        if(!strcmp(nombre_restaurante, "Resto Default")){
+            restaurante->platos = listaPlatosDefault;
+        } else {
+            t_modulo modulo_restaurante;
+            modulo_restaurante.socket = socket;
+            modulo_restaurante.identificacion = "APP";
+            restaurante->platos = *enviar_mensaje_consultar_platos(&modulo_restaurante, nombre_restaurante);
+        }
     } else {
         restaurante->socket = socket;
     }
@@ -59,6 +68,7 @@ t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante, int pos_x
     t_restaurante* restaurante = malloc(sizeof(t_restaurante));
     restaurante->socket = socket;
     restaurante->nombre_restaurante = string_new();
+    restaurante->platos = listaPlatosDefault;
     restaurante->posicion.posx = pos_x;
     restaurante->posicion.posy = pos_y;
     string_append(&restaurante->nombre_restaurante, nombre_restaurante);
@@ -94,19 +104,40 @@ void handle_crear_pedido(int socket, char* id_cliente){
 
     t_restaurante* restaurante = cliente->restaurante;
 
-    id_pedido = obtener_id_pedido(restaurante);
+    if(!strcmp(restaurante->nombre_restaurante, "Resto Default")){
 
-    respuesta[0] = id_pedido;
+        id_pedido = string_itoa(obtener_id_default(restaurante));
+        respuesta[0] = id_pedido;
+        sem_post(sem_pedido_default);
+
+    } else {
+        id_pedido = obtener_id_pedido(restaurante);
+        respuesta[0] = id_pedido;
+        sem_post(sem_id_pedido);
+    }
 
     if(strcmp(id_pedido, "FAIL")){
         enviar_mensaje_guardar_pedido(&modulo_comanda, restaurante->nombre_restaurante, respuesta[0]);
     }
-    inicializar_pedido_semaforo(id_pedido);
+    inicializar_pedido_semaforo(id_pedido, restaurante->nombre_restaurante);
     send_messages_socket(socket, respuesta, 1);
 
 }
 
+int obtener_id_default(t_restaurante* restaurante){
+
+    sem_wait(sem_pedido_default);
+
+    id_pedido_default += 1;
+
+    return id_pedido_default;
+    
+
+}
+
 char* obtener_id_pedido(t_restaurante* restaurante){
+
+    sem_wait(sem_id_pedido);
 
     t_modulo modulo_restaurante;
     modulo_restaurante.ip = NULL;
@@ -197,9 +228,19 @@ void handle_consultar_platos(int socket, char* idCliente){
 
     t_restaurante* restaurante = cliente->restaurante;
 
+    if(!strcmp(restaurante->nombre_restaurante, "Resto Default")){
+
+        printf("PLATOS : %s", obtener_platos(listaPlatosDefault));
+
+
+        return;
+
+    }
+
     modulo_restaurante.socket = restaurante->socket;
 
     lista_platos = *enviar_mensaje_consultar_platos(&modulo_restaurante, NULL);
+    
     
     send_message_socket(socket, obtener_platos(lista_platos));
 
@@ -242,6 +283,23 @@ void handle_anadir_plato(int socket, char* id_cliente, char* plato, char* id_ped
     t_restaurante* restaurante = cliente->restaurante;
 
     modulo_restaurante.socket = restaurante->socket;
+
+    if(!plato_en_restaurante(plato, restaurante->platos)){
+        respuesta[0] = "FAIL";
+        
+        send_messages_socket(socket, respuesta, 1);
+        return;
+
+    }
+
+    if(!strcmp(restaurante->nombre_restaurante, "Resto Default")){
+
+        respuesta[0] = enviar_mensaje_guardar_plato(&modulo_comanda, restaurante->nombre_restaurante, id_pedido, plato, "1");
+
+        send_messages_socket(socket, respuesta, 1);
+        return;
+
+    }
     
     respuesta[0] = enviar_mensaje_anadir_plato(&modulo_restaurante, plato, id_pedido);
     if(!strcmp(respuesta[0], "FAIL")){
@@ -250,13 +308,25 @@ void handle_anadir_plato(int socket, char* id_cliente, char* plato, char* id_ped
     }
     
     respuesta[0] = enviar_mensaje_guardar_plato(&modulo_comanda, restaurante->nombre_restaurante, id_pedido, plato, "1");
-    if(!strcmp(respuesta[0], "FAIL")){
-        send_messages_socket(socket, respuesta, 1);
-        return;
-    }
+    // if(!strcmp(respuesta[0], "FAIL")){
+    //     send_messages_socket(socket, respuesta, 1);
+    //     return;
+    // }
 
     send_messages_socket(socket, respuesta, 1);
 
+}
+
+int plato_en_restaurante(char* plato, List lista){
+    
+    for(IteratorList iter = beginlist(lista); iter != NULL; iter = nextlist(iter)){
+        char* platoE = (char*) dataiterlist(iter);
+
+        if(!strcmp(platoE, plato)){
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* plato){
@@ -275,13 +345,13 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* pl
     }
 
     if(comparar_platos(pedido)){
-        t_pedido_espera* pedido_espera = buscar_pedido_espera(id_pedido);
-        eliminar_pedido_espera(id_pedido);
+        t_pedido_espera* pedido_espera = buscar_pedido_espera(id_pedido, restaurante);
+        eliminar_pedido_espera(id_pedido, restaurante);
         sem_post(pedido_espera->semaforo);
     }
 
     send_messages_socket(socket, respuesta, 1);
-    //liberar_conexion(socket);
+
 
 }
 
@@ -314,16 +384,33 @@ void handle_confirmar_pedido(int socket, char* id_cliente, char* id_pedido){
 
         arrayReturn[0] = armar_string_consultar_pedido(&pedido);
     }
+    if(!strcmp(restaurante->nombre_restaurante, "Resto Default")){
+        crear_pcb(restaurante->nombre_restaurante, atoi(id_pedido), id_cliente);
 
-    // respuesta[0] = enviar_mensaje_confirmar_pedido(&modulo_restaurante, id_pedido, NULL);
-    // if(!strcmp(respuesta[0], "FAIL")){
-    //     send_messages_socket(socket, respuesta, 1);
-    //     return;
-    // }
+        respuesta[0] = enviar_mensaje_confirmar_pedido(&modulo_comanda, id_pedido, restaurante->nombre_restaurante);
+            if(!strcmp(respuesta[0], "FAIL")){
+                send_messages_socket(socket, respuesta, 1);
+                return;
+            }
 
-    crear_pcb(restaurante->nombre_restaurante, atoi(id_pedido), id_cliente);
+        send_messages_socket(socket, respuesta, 1);
+
+        return;
+    }
+    
+    respuesta[0] = enviar_mensaje_confirmar_pedido(&modulo_restaurante, id_pedido, NULL);
+    if(!strcmp(respuesta[0], "FAIL")){
+        send_messages_socket(socket, respuesta, 1);
+        return;
+    }
 
     respuesta[0] = enviar_mensaje_confirmar_pedido(&modulo_comanda, id_pedido, restaurante->nombre_restaurante);
+    if(!strcmp(respuesta[0], "FAIL")){
+        send_messages_socket(socket, respuesta, 1);
+        return;
+    }
+
+    crear_pcb(restaurante->nombre_restaurante, atoi(id_pedido), id_cliente);
 
     send_messages_socket(socket, respuesta, 1);
     //liberar_conexion(socket);
@@ -388,9 +475,11 @@ char* armar_string_consultar_pedido(r_consultar_pedido* pedido){
 
 }
 
-void inicializar_pedido_semaforo(char* id_pedido){
+void inicializar_pedido_semaforo(char* id_pedido, char* restaurante){
     t_pedido_espera* pedido_espera = malloc(sizeof(t_pedido_espera));
     
+    pedido_espera->restaurante = string_new();
+    string_append(&pedido_espera->restaurante, restaurante);
     pedido_espera->id_pedido = string_new();
     string_append(&pedido_espera->id_pedido, id_pedido);
     pedido_espera->semaforo = malloc(sizeof(sem_t));

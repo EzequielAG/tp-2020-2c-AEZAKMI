@@ -187,15 +187,10 @@ List* enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
     char* tipo_mensaje = string_itoa(consultar_platos);
     int socket;
 
-    if(!strcmp((modulo->identificacion),"sindicato")){
-        char* consulta_platos[2] ={tipo_mensaje,restaurante};
-        socket = enviar_mensaje_modulo(modulo, consulta_platos, 2);
-    }else{
-        char* consulta_platos[1] ={tipo_mensaje};
-        socket = enviar_mensaje_modulo(modulo, consulta_platos, 1);
-    }
+    char* consulta_platos[2] ={tipo_mensaje,restaurante};
+    socket = enviar_mensaje_modulo(modulo, consulta_platos, 2);
 
-     if(socket == -1){
+    if(socket == -1){
         return NULL;
     }
 
@@ -391,7 +386,7 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
     //             PENDIENTE   plato,plato       1,2,3              1,2,3
 
     // estado = Pendiente/Confirmado/Terminado
-    
+
     char* tipo_mensaje = string_itoa(obtener_pedido);
 
     int socket = 0;

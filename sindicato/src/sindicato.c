@@ -113,13 +113,21 @@ void handle_consultar_platos(int socket, char* restaurante){
 	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_restaurante(restaurante)){
-		// TODO: En caso de no existir se deberá informar dicha situación.
+		log_error(logger, "[Guardar Pedido] El restaurante no existe");
+		char* respuesta[1] = {"El restaurante no existe."};
+		send_messages_socket(socket, respuesta, 1);
+		return;
 	}
 
 	//Obtener los platos que puede preparar dicho Restaurante del archivo info.AFIP.
-	// t_list* platos = get_platos(restaurante);
+	char* restaurante_char = get_restaurante_data(restaurante);
+	restaurante_char = data_to_char(restaurante_char);
+	char** restaurante_info = string_split(restaurante_char, " ");
+	char* platos = sacar_corchetes(restaurante_info[3]);
 
 	//Responder el mensaje indicando los platos que puede preparar el Restaurante.
+	char* respuesta[1] = {platos};
+	send_messages_socket(socket, respuesta, 1);
 
 }
 

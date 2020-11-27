@@ -247,32 +247,48 @@ void handle_confirmar_pedido(int socket, char* id_pedido, char* restaurante){
 }
 
 void handle_obtener_pedido(int socket, char* restaurante, char* id_pedido){
-	if (ES_TEST){
-		char* respuesta[4];
-		respuesta[0] = "CONFIRMADO";
-		respuesta[1] = "PLATO1,PLATO2";
-		respuesta[2] = "1,1";
-		respuesta[3] = "1,0";
-		send_messages_socket(socket, respuesta, 4);
-	} else {
+	// if (ES_TEST){
+	// 	char* respuesta[4];
+	// 	respuesta[0] = "CONFIRMADO";
+	// 	respuesta[1] = "PLATO1,PLATO2";
+	// 	respuesta[2] = "1,1";
+	// 	respuesta[3] = "1,0";
+	// 	send_messages_socket(socket, respuesta, 4);
+	// } else {
 		//Verificar si el Restaurante existe dentro del File System. 
 		//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
 		//En caso de no existir se deberá informar dicha situación.
 		if (!existe_restaurante(restaurante)){
-			// TODO: En caso de no existir se deberá informar dicha situación.
+			log_error(logger, "[Obtener Pedido] El restaurante no existe");
+			char* respuesta[1] = {"El restaurante no existe."};
+			send_messages_socket(socket, respuesta, 1);
+			return;
 		}
 
 		//Verificar si el Pedido existe dentro del File System. 
 		//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
 		//En caso de no existir se deberá informar dicha situación.
 		if (!existe_pedido(restaurante, id_pedido)){
-			// TODO: En caso de no existir se deberá informar dicha situación.
+			log_error(logger, "[Guardar Pedido] El pedido ya existe");
+			char* respuesta[1] = {"El pedido no existe."};
+			send_messages_socket(socket, respuesta, 1);
+			return;
 		}
 
 
-		get_pedido(restaurante, id_pedido);
+		char* pedido = get_pedido_data(restaurante, id_pedido);
+		pedido =  data_to_char(pedido);
+
+		char** pedido_info = string_split(pedido, " ");
+		char* estado = pedido_info[0];
+		char* platos = sacar_corchetes(pedido_info[1]);
+		char* cantidad_lista = sacar_corchetes(pedido_info[3]);
+		char* cantidad_total = sacar_corchetes(pedido_info[2]);
 		//Responder el mensaje indicando si se pudo realizar en conjunto con la información del pedido si correspondiera.
-	}
+
+		char* respuesta[4] = {estado, platos, cantidad_lista, cantidad_total};
+		send_messages_socket(socket, respuesta, 4);
+	// }
 }
 
 void handle_obtener_restaurante(int socket, char* restaurante){

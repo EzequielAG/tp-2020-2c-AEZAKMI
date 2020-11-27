@@ -695,6 +695,10 @@ char* get_restaurante_data(char* restaurante){
 	return afip_file_to_char(get_path_info_file(restaurante));
 }
 
+char* get_pedido_data(char* restaurante, char* pedido){
+	return afip_file_to_char(get_path_pedido_file(restaurante, pedido));
+}
+
 char* data_to_char(char* data){
 	char** data_split = string_split(data, "\n");
 	int i = 0;

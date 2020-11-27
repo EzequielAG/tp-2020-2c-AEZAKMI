@@ -389,6 +389,9 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
     }
     // char* [4] = [estado]     [platos]    [cantidadLista]     [cantidadTotal]
     //             PENDIENTE   plato,plato       1,2,3              1,2,3
+
+    // estado = Pendiente/Confirmado/Terminado
+    
     char* tipo_mensaje = string_itoa(obtener_pedido);
 
     int socket = 0;
@@ -402,7 +405,7 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
     for (int i= 0; i < *respuesta->size; i++){
         printf("%s ", respuesta->mensajes[i]);
     } printf("\n");
-    if(!strcmp(respuesta->mensajes[0],"FAIL")){
+    if(*respuesta->size != 4){
 
         r_obtener_pedido* respuesta_obtener_pedido = NULL;
         

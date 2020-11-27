@@ -83,15 +83,15 @@ t_pedido* create_pedido_config(char* restaurante, char* id_pedido);
 t_receta* create_receta_config(char* nombre_receta);
 t_list* get_platos(char* restaurante);
 t_pedido* get_pedido(char* restaurante, char* id_pedido);
-t_info* get_restaurante(char* restaurante);
-//t_receta* get_receta(char* comida);
 int create_pedido_file(char* path, t_afip_file* pedido_file);
 bool create_afip_file(char* content, char* path);
 List* obtenerBloquesActuales(uint32_t initial_block);
 uint32_t getSiguienteBloque(uint32_t bloque);
 FILE * get_or_create_file(char* path_file, char * mode);
 void create_blocks();
-char* get_receta(char* nombre_receta);
+char* get_receta_data(char* nombre_receta);
 int get_data_size(FILE* fp);
 char* data_to_char(char* data);
+char* afip_file_to_char(char* path);
+char* get_restaurante_data(char* restaurante);
 #endif

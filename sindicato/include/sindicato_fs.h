@@ -94,4 +94,5 @@ int get_data_size(FILE* fp);
 char* data_to_char(char* data);
 char* afip_file_to_char(char* path);
 char* get_restaurante_data(char* restaurante);
+char* get_pedido_data(char* restaurante, char* pedido);
 #endif

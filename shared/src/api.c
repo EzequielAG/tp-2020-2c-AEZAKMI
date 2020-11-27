@@ -162,9 +162,11 @@ List* obtener_receta_precios(char* platos, char* precioplatos){
 
         recetaprecio->receta = string_new();
         string_append(&recetaprecio->receta,  array_platos[i]);
-       
+
         recetaprecio->precio = string_new();
-        string_append(&recetaprecio->precio, array_precioplatos[i]);
+        if (array_precioplatos[i] == NULL){
+            string_append(&recetaprecio->precio, "0");
+        }
 
         pushbacklist(receta_precio_final, recetaprecio);
 

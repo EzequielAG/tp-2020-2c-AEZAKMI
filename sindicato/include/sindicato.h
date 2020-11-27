@@ -29,4 +29,5 @@ void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos);
 void handle_handshake_restaurante(int socket);
 bool platos_iguales(char* plato, char* comida);
 char* sacar_corchetes(char* array);
+int obtener_cantidad_pedidos(char* restaurante);
 #endif

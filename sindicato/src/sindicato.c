@@ -298,11 +298,16 @@ void handle_obtener_restaurante(int socket, char* restaurante){
 	char* precio_platos = sacar_corchetes(restaurante_info[4]);
 	char* cantidad_hornos = restaurante_info[5];
 	char* cantidad_cocineros =  restaurante_info[0];
+	char* cantidad_pedidos = string_itoa(obtener_cantidad_pedidos(restaurante));
 
-	char* respuesta[8] = {afinidades, posiciones[0], posiciones[1], platos, precio_platos, cantidad_hornos, "0", cantidad_cocineros};
+	char* respuesta[8] = {afinidades, posiciones[0], posiciones[1], platos, precio_platos, cantidad_hornos, cantidad_pedidos, cantidad_cocineros};
 	send_messages_socket(socket, respuesta, 8);
 	//Responder el mensaje indicando los datos del Restaurante.
 
+}
+
+int obtener_cantidad_pedidos(char* restaurante){
+	return 0;
 }
 
 void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* comida){
@@ -511,6 +516,9 @@ void iniciar_consola(){
 }
 
 void process_line(char* line){
+	if (string_length(line) <= 1){
+		return;
+	}
 	line = string_substring_until(line, (string_length(line)-1));
 	char** lineas = string_split(line, " ");
 	char* array[8];

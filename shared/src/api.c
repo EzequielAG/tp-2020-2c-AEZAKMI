@@ -488,22 +488,27 @@ List* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
     t_mensajes* respuesta = receive_simple_messages(socket);
 
     printf("%s \n" , respuesta->mensajes[0]);
+    if (*respuesta->size == 1) {
+        return NULL;
+    } 
+
+    printf("PASOS=[%s]\nTIEMPOS=[%s]\n" , respuesta->mensajes[1], respuesta->mensajes[2]);
+
+    char** respuesta_pasos = string_split(respuesta->mensajes[1], ",");
+    char** respuesta_tiempos = string_split(respuesta->mensajes[2], ",");
 
 
-    // char** respuesta_pasos = string_split(respuesta->mensajes[1], ",");
+    for(int i = 0; respuesta_pasos[i]!=NULL; i++){
 
+        t_paso* paso = malloc(sizeof(t_paso));
+    
+        paso->nombre_paso = string_new();
+        string_append(&paso->nombre_paso, respuesta_pasos[i]);
+        paso->ciclo_cpu = atoi(respuesta_tiempos[i]);
 
-    // for(int i = 0; respuesta_pasos[i]!=NULL; i=i+2){
+        pushbacklist(lista_pasos_receta,paso);
 
-    //     t_paso* paso = NULL;
-
-    //     paso->nombre_paso = respuesta_pasos[i];
-    //     paso->ciclo_cpu = atoi(respuesta_pasos[i+1]);
-    //     //paso->se_ejecuto = 0;
-
-    //     pushbacklist(lista_pasos_receta,paso);
-
-    // }
+    }
 
 
     if(modulo->socket <= 0){

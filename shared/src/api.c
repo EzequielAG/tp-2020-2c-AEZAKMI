@@ -103,7 +103,7 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
         printf("Faltan parametros \n");
         return NULL;
     }
-    // char* [7] = [afinidades] [pos x] [pos y]     [precioRecetas]     [cantidadHornos] [cantidadPedidos] [cantidadCocineros]
+    // char* [7] = [afinidades] [pos x] [pos y]   [platos] [precioPlatos] [cantidadHornos] [cantidadPedidos] [cantidadCocineros]
     //             plato,plato     1      4    receta1,12|receta2,25|...       3                 5                  3
     char* tipo_mensaje = string_itoa(obtener_restaurante);
     char* obtener_restaurante[2] ={tipo_mensaje,restaurante};
@@ -116,10 +116,10 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
     respuesta_obtener_restaurante->afinidades = obtener_list_mensajes(respuesta->mensajes[0]);
     respuesta_obtener_restaurante->pos_x = respuesta->mensajes[1];
     respuesta_obtener_restaurante->pos_y = respuesta->mensajes[2];
-    respuesta_obtener_restaurante->recetas_precio = obtener_receta_precios(respuesta->mensajes[3]);
-    respuesta_obtener_restaurante->cantidad_hornos = respuesta->mensajes[4];
-    respuesta_obtener_restaurante->cantidad_pedidos = respuesta->mensajes[5];
-    respuesta_obtener_restaurante->cantidad_cocineros = respuesta->mensajes[6];
+    respuesta_obtener_restaurante->recetas_precio = obtener_receta_precios(respuesta->mensajes[3], respuesta->mensajes[4]);
+    respuesta_obtener_restaurante->cantidad_hornos = respuesta->mensajes[5];
+    respuesta_obtener_restaurante->cantidad_pedidos = respuesta->mensajes[6];
+    respuesta_obtener_restaurante->cantidad_cocineros = respuesta->mensajes[7];
 
     for (int i= 0; i < *respuesta->size; i++){
        printf("%s ", respuesta->mensajes[i]);
@@ -149,17 +149,24 @@ List* obtener_list_mensajes(char* array_mensaje){
     return resultado;
 }
 
-receta_precio** obtener_receta_precios(char* array_mensajes){
+List* obtener_receta_precios(char* platos, char* precioplatos){
 
-    char** array_string = string_split(array_mensajes, "|");
+    char** array_platos = string_split(platos, ",");
+    char** array_precioplatos = string_split(precioplatos, ",");
 
-    receta_precio** receta_precio_final = malloc ( sizeof(receta_precio) * sizeof(receta_precio) );
+    List* receta_precio_final = malloc (sizeof(List));
+    initlist(receta_precio_final);
 
-    for(int i = 0; array_string[i]!=NULL; i++){
-        char** receta_precio_individual = string_split(array_string[i], ",");
+    for(int i = 0; array_platos[i]!=NULL; i++){
+        receta_precio* recetaprecio = malloc(sizeof(receta_precio));
 
-        receta_precio_final[i]->receta = receta_precio_individual[0];
-        receta_precio_final[i]->precio = receta_precio_individual[1];
+        recetaprecio->receta = string_new();
+        string_append(&recetaprecio->receta,  array_platos[i]);
+       
+        recetaprecio->precio = string_new();
+        string_append(&recetaprecio->precio, array_precioplatos[i]);
+
+        pushbacklist(receta_precio_final, recetaprecio);
 
     }
 

@@ -692,7 +692,7 @@ char* get_receta_data(char* nombre_receta){
 }
 
 char* get_restaurante_data(char* restaurante){
-	return afip_file_to_char(get_path_restaurante(restaurante));
+	return afip_file_to_char(get_path_info_file(restaurante));
 }
 
 char* data_to_char(char* data){

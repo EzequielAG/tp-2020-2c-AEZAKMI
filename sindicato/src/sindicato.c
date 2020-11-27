@@ -287,18 +287,20 @@ void handle_obtener_restaurante(int socket, char* restaurante){
 	}
 
 	//Obtener todo los datos del archivo info.AFIP.
-	// char* [7] = [afinidades] [pos x] [pos y] [precioRecetas] [cantidadHornos] [cantidadPedidos] [cantidadCocineros]
-	char* restaurante_char = data_to_char(get_restaurante_data(restaurante));
+	// char* [7] = [afinidades] [pos x] [pos y] [platos] [precioplatos] [cantidadHornos] [cantidadPedidos] [cantidadCocineros]
+	char* restaurante_char = get_restaurante_data(restaurante);
+	restaurante_char = data_to_char(restaurante_char);
 	char** restaurante_info = string_split(restaurante_char, " ");
 
-	char* cantidad_cocineros = restaurante_info[0];
 	char** posiciones = string_get_string_as_array(restaurante_info[1]);
-	char** afinidades = string_get_string_as_array(restaurante_info[2]);
-	char** platos = string_get_string_as_array(restaurante_info[2]);
-	char** precio_platos = string_get_string_as_array(restaurante_info[3]);
-	char* cantidad_hornos = restaurante_info[4];
+	char* afinidades = sacar_corchetes(restaurante_info[2]);
+	char* platos = sacar_corchetes(restaurante_info[3]);
+	char* precio_platos = sacar_corchetes(restaurante_info[4]);
+	char* cantidad_hornos = restaurante_info[5];
+	char* cantidad_cocineros =  restaurante_info[0];
 
-
+	char* respuesta[8] = {afinidades, posiciones[0], posiciones[1], platos, precio_platos, cantidad_hornos, "0", cantidad_cocineros};
+	send_messages_socket(socket, respuesta, 8);
 	//Responder el mensaje indicando los datos del Restaurante.
 
 }
@@ -349,8 +351,8 @@ void handle_obtener_receta(int socket, char* comida){
 	char* receta_char = data_to_char(get_receta_data(comida));
 
 	char** receta_pasos_y_tiempos = string_split(receta_char, " ");
-	char* receta_pasos = string_substring(receta_pasos_y_tiempos[0], 1, strlen(receta_pasos_y_tiempos[0]) - 2 );
-	char* receta_tiempos = string_substring(receta_pasos_y_tiempos[1], 1, strlen(receta_pasos_y_tiempos[1]) - 2 );
+	char* receta_pasos = sacar_corchetes(receta_pasos_y_tiempos[0]);
+	char* receta_tiempos = sacar_corchetes(receta_pasos_y_tiempos[1]);
 
 	char* respuesta[3] = {comida, receta_pasos, receta_tiempos};
 
@@ -358,6 +360,10 @@ void handle_obtener_receta(int socket, char* comida){
 	send_messages_socket(socket, respuesta, 3);
 
 	
+}
+
+char* sacar_corchetes(char* array){
+	return string_substring(array, 1, strlen(array) - 2 );
 }
 
 void handle_terminar_pedido(int socket, char* id_pedido, char* restaurante){
@@ -507,38 +513,39 @@ void iniciar_consola(){
 void process_line(char* line){
 	line = string_substring_until(line, (string_length(line)-1));
 	char** lineas = string_split(line, " ");
+	char* array[8];
 	int longitud = 0, long_aux = 0;
 	while (lineas[long_aux] != NULL){
 		char* aux_string = string_new();
+		string_append(&aux_string, lineas[long_aux]);
 		if (string_starts_with(lineas[long_aux], "[")){
-			string_append(&aux_string, lineas[long_aux]);
 			while(!string_ends_with(lineas[long_aux], "]")){
 				long_aux++;
 				string_append(&aux_string, lineas[long_aux]);
 			}
-			lineas[longitud] = aux_string;
 		}
+		array[longitud] = aux_string;
 		long_aux++;
 		longitud++;
 	}
-	
-	if (strcmp("CrearRestaurante", lineas[0])== 0){
+
+	if (strcmp("CrearRestaurante", array[0])== 0){
 		printf("Se reconoce el comando Crear Restaurante: %s\n", line);
 		if (longitud < 8){
 			printf("No se tienen los suficientes parametros para llamar a Crear restaurante, se requieren 7 y se obtuvieron: %d\n", longitud - 1);
 		}
-		handle_crear_restaurante(lineas[1], lineas[2], lineas[3], lineas[4], lineas[5], lineas[6], lineas[7]);
+		handle_crear_restaurante(array[1], array[2], array[3], array[4], array[5], array[6], array[7]);
 		return;
 	}
-	if (strcmp("CrearReceta", lineas[0])== 0){
+	if (strcmp("CrearReceta", array[0])== 0){
 		printf("Se reconoce el comando Crear Receta: %s\n", line);
 		if (longitud < 4){
 			printf("No se tienen los suficientes parametros para llamar a Crear restaurante, se requieren 7 y se obtuvieron: %d\n", longitud - 1);
 		}
-		handle_crear_receta(lineas[1], lineas[2], lineas[3]);
+		handle_crear_receta(array[1], array[2], array[3]);
 		return;
 	}
-	if (strcmp("Exit\n", lineas[0]) != 0){
+	if (strcmp("Exit\n", array[0]) != 0){
 		printf("No se reconoce el comando ingresado: %s\n", line);
 		return;
 	}
@@ -575,3 +582,4 @@ char * getlinefromconsole(void) {
 	*line = '\0';
 	return linep;
 }
+

@@ -161,8 +161,10 @@ char* get_block_data(uint32_t block){
 	char* block_file_path = get_path_block_file(block);
 	FILE* block_file = get_or_create_file(block_file_path, "rb");
 	int size = get_data_size(block_file);
-	char* data = string_new();
+	char* data = calloc(size + 1 , sizeof(char));
 	fread (data, size, 1, block_file);
+	fclose(block_file);
+	data[size] = '\0';
 	return data;
 }
 
@@ -629,7 +631,7 @@ List* obtenerBloquesActuales(uint32_t initial_block){
 
 
 uint32_t getSiguienteBloque(uint32_t bloque){
-	uint32_t siguiente = -1;
+	
 	FILE * fp = get_or_create_file(get_path_block_file(bloque), "r");
 	if (fp == NULL){
 		log_error(logger, "[Save Block] No se obtuvo el archivo bloque");
@@ -651,7 +653,8 @@ uint32_t getSiguienteBloque(uint32_t bloque){
 		return EXIT_FAILURE;
 	}
 
-	resultado = fscanf(fp, "%d", &siguiente);
+	uint32_t siguiente = -1;
+	resultado = fread(&siguiente, sizeof(uint32_t), 1, fp);
 
 	if (resultado == -1){
 		log_error(logger, "[Get Siguiente Bloque] No se pudo mover a la posicion del siguiente");

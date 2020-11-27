@@ -522,9 +522,9 @@ t_pedido* get_pedido(char* restaurante, char* id_pedido){
 	return create_pedido_config(restaurante, id_pedido);
 }
 
-t_info* get_restaurante(char* restaurante){
-	return create_info_config(restaurante);
-}
+// t_info* get_restaurante(char* restaurante){
+// 	return create_info_config(restaurante);
+// }
 
 // t_receta* get_receta(char* comida){
 // 	return create_receta_config(comida);
@@ -683,9 +683,16 @@ bool create_afip_file(char* content, char* path){
 	return true;
 }
 
-char* get_receta(char* nombre_receta){
-	t_afip_file* afip_file = read_afip_file(get_path_receta_file(nombre_receta));
-	return read_blocks(afip_file);
+char* afip_file_to_char(char* path){
+	return read_blocks(read_afip_file(path));
+}
+
+char* get_receta_data(char* nombre_receta){
+	return afip_file_to_char(get_path_receta_file(nombre_receta));
+}
+
+char* get_restaurante_data(char* restaurante){
+	return afip_file_to_char(get_path_restaurante(restaurante));
 }
 
 char* data_to_char(char* data){

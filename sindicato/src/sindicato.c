@@ -280,11 +280,24 @@ void handle_obtener_restaurante(int socket, char* restaurante){
 	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_restaurante(restaurante)){
-		// TODO: En caso de no existir se deberá informar dicha situación.
+		log_error(logger, "[Obtener Restaurante] El restaurante no existe.");
+		char* respuesta[1] = {"El restaurante no existe"};
+		send_messages_socket(socket, respuesta, 1);
+		return;
 	}
 
 	//Obtener todo los datos del archivo info.AFIP.
-	// t_info* info = get_restaurante(restaurante);
+	// char* [7] = [afinidades] [pos x] [pos y] [precioRecetas] [cantidadHornos] [cantidadPedidos] [cantidadCocineros]
+	char* restaurante_char = data_to_char(get_restaurante_data(restaurante));
+	char** restaurante_info = string_split(restaurante_char, " ");
+
+	char* cantidad_cocineros = restaurante_info[0];
+	char** posiciones = string_get_string_as_array(restaurante_info[1]);
+	char** afinidades = string_get_string_as_array(restaurante_info[2]);
+	char** platos = string_get_string_as_array(restaurante_info[2]);
+	char** precio_platos = string_get_string_as_array(restaurante_info[3]);
+	char* cantidad_hornos = restaurante_info[4];
+
 
 	//Responder el mensaje indicando los datos del Restaurante.
 
@@ -333,8 +346,7 @@ void handle_obtener_receta(int socket, char* comida){
 		return;
 	}
 
-	char* receta = get_receta(comida);
-	char* receta_char = data_to_char(receta);
+	char* receta_char = data_to_char(get_receta_data(comida));
 
 	char** receta_pasos_y_tiempos = string_split(receta_char, " ");
 	char** receta_pasos = string_get_string_as_array(receta_pasos_y_tiempos[0]);

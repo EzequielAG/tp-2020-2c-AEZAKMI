@@ -381,7 +381,7 @@ void *ejecutarAlgoritmo(){
 }
 
 void* ejecutarLRU(){
-	l_pagina* pagina = popbacklist(&pilaPaginasAlgoritmos);
+	l_pagina* pagina = popfrontlist(&pilaPaginasAlgoritmos);
 	l_frame* frame = pagina->frame;
 	char string_log[200];
     sprintf(string_log, "Victima seleccionada: %s | Direccion principal: %p | Direccion virtual: %p ", frame->plato, pagina->frame, pagina->swap);

@@ -45,7 +45,7 @@ void clock_cpu(){
     while(true){
         sleep(app_config->retardo_ciclo_cpu);
 
-        log_info(logger, "-----------CICLO-------------");
+        //log_info(logger, "-----------CICLO-------------");
 
         for (IteratorList il = beginlist(suscriptores_cpu); il != NULL; il = nextlist(il)){
             sem_t* suscriptor = (sem_t*) dataiterlist(il);

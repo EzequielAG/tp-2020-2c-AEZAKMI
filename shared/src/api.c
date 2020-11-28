@@ -324,7 +324,7 @@ char* enviar_mensaje_plato_listo(t_modulo* modulo, char* restaurante, char* id_p
     return respuesta->mensajes[0];
 };
 
-r_consultar_pedido* enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido){
+char* enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido){
 
     if(id_pedido == NULL){
         printf("Faltan parametros \n");
@@ -341,22 +341,22 @@ r_consultar_pedido* enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_p
     
     t_mensajes* respuesta = receive_simple_messages(socket);
 
-    r_consultar_pedido* respuesta_consulta_pedido = malloc(sizeof(r_consultar_pedido));
+    // r_consultar_pedido* respuesta_consulta_pedido = malloc(sizeof(r_consultar_pedido));
 
-    respuesta_consulta_pedido->restaurante = respuesta->mensajes[0];
-    respuesta_consulta_pedido->estado = respuesta->mensajes[1];
-    respuesta_consulta_pedido->info_comidas = obtener_informacion_comidas(respuesta->mensajes[2],respuesta->mensajes[3],respuesta->mensajes[4]);
+    // respuesta_consulta_pedido->restaurante = respuesta->mensajes[0];
+    // respuesta_consulta_pedido->estado = respuesta->mensajes[1];
+    // respuesta_consulta_pedido->info_comidas = obtener_informacion_comidas(respuesta->mensajes[2],respuesta->mensajes[3],respuesta->mensajes[4]);
 
-
-    for (int i= 0; i < *respuesta->size; i++){
-       printf("%s ", respuesta->mensajes[i]);
-    } printf("\n");
+    printf("%s ", respuesta->mensajes[0]);
+    // for (int i= 0; i < *respuesta->size; i++){
+    //    printf("%s ", respuesta->mensajes[i]);
+    // } printf("\n");
 
     if(modulo->socket <= 0){
         liberar_conexion(socket);
     }
 
-    return respuesta_consulta_pedido;
+    return respuesta->mensajes[0];
 
 };
 

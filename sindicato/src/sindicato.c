@@ -36,6 +36,7 @@ void handle_client(t_result* result){
 		switch(tipo_mensaje)
 		{
 			case consultar_platos:
+				//OK
 				handle_consultar_platos(result->socket, result->mensajes->mensajes[1]);
 				break;
 			case guardar_pedido:
@@ -46,6 +47,7 @@ void handle_client(t_result* result){
 				handle_guardar_plato(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3], result->mensajes->mensajes[4]);
 				break;
 			case confirmar_pedido:
+				//OK
 				handle_confirmar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 				break;
 			case obtener_pedido:
@@ -179,62 +181,101 @@ void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* 
 	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_restaurante(restaurante)) {
-		// TODO: En caso de no existir se deberá informar dicha situación.
+		log_error(logger, "[Guardar Plato] El restaurante no existe");
+		char* respuesta[1] = {"El restaurante no existe."};
+		send_messages_socket(socket, respuesta, 1);
+		return;
 	}
 
 	//Verificar si el Pedido existe dentro del File System. 
 	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_pedido(restaurante, id_pedido)){
-		// TODO: En caso de no existir se deberá informar dicha situación.
+		log_error(logger, "[Guardar Plato] El pedido ya existe");
+		char* respuesta[1] = {"El pedido no existe."};
+		send_messages_socket(socket, respuesta, 1);
+		return;
 	}
 
-	t_pedido* pedido = create_pedido_config(restaurante, id_pedido);
+	char* pedido = get_pedido_data(restaurante, id_pedido);
+
+	pedido =  data_to_char(pedido);
+
+	char** pedido_info = string_split(pedido, " ");
+
 	//Verificar que el pedido esté en estado “Pendiente”. En caso contrario se deberá informar dicha situación.
-	if (pedido->estado_pedido != PENDIENTE){
-		// TODO: En caso contrario se deberá informar dicha situación.
+	if (strcmp(pedido_info[0], "Pendiente") != 0){
+		log_error(logger, "[Guardar Plato] El pedido no esta en estado Pendiente");
+		char* respuesta[1] = {"El pedido no esta en estado Pendiente"};
+		send_messages_socket(socket, respuesta, 1);
+		return;
 	}
+
+	
 
 	//Verificar si ese plato ya existe dentro del archivo.
 	//En caso de existir, se deberán agregar la cantidad pasada por parámetro a la actual. 
 	//En caso de no existir se deberá agregar el plato a la lista de Platos y anexar la cantidad que se tiene que cocinar de dicho plato y aumentar el precio total del pedido.
-	
-	// t_link_element* elemento = pedido->lista_platos->head;
-	// int i = 0;
-	// while (elemento->data != NULL){
-	// 	char* plato = elemento->data;
-	// 	if (platos_iguales(, comida)){
-	// 		pedido->lista_platos
-	// 	}
-	// 	elemento = elemento->next;
-	// 	i++;
-	// }
-	// for (int i = 0; i < pedido->lista_platos->elements_count; i++){
-	// 	if (platos_iguales(pedido->lista_platos->head))
-	// }
-	// if (list_any_satisfy(pedido->lista_platos, (void*)platos_iguales)){
-	// 	int i, posicion;
-	// 	int cant_platos = list_size(pedido->lista_platos);
-	// 	for (i=0; i<=cant_platos; i++){
-	// 		char* plato_existente = list_get(pedido->lista_platos, i);
-	// 		if (strcmp(plato_existente, comida)){
-	// 			posicion = i;
-	// 		}
-	// 	}
-	// 	list_replace(pedido->cantidad_platos, posicion, cantidad);
-	// } else {
-	// 	list_add(pedido->lista_platos, comida);
-	// 	list_add(pedido->cantidad_platos, cantidad);
-	// }
+	char** platos = string_split(sacar_corchetes(pedido_info[1]), ",");
+	char** cantidad_total = string_split(sacar_corchetes(pedido_info[2]), ",");
+	char** cantidad_lista = string_split(sacar_corchetes(pedido_info[3]), ",");
+	bool actualizado = false;
+	char* platos_actualizado = string_new();
+	char* cantidad_actualizada = string_new();
+	char* cantidad_lista_actualizada = string_new();
+	string_append(&platos_actualizado, "[");
+	string_append(&cantidad_actualizada, "[");
+	string_append(&cantidad_lista_actualizada, "[");
+	int i = 0;
+	while(platos[i] != NULL){
+		if (strcmp(platos[i], comida) == 0){
+			cantidad_total[i] = string_itoa(atoi(cantidad_total[i]) + atoi(cantidad));
+			actualizado = true;
+		}
+		if (i != 0){
+			string_append(&platos_actualizado, ",");
+			string_append(&cantidad_actualizada, ",");
+			string_append(&cantidad_lista_actualizada, ",");
+		}
+		string_append(&platos_actualizado, platos[i]);
+		string_append(&cantidad_actualizada, cantidad_total[i]);
+		string_append(&cantidad_lista_actualizada, cantidad_lista[i]);
+		i++;
+	}
+
+	if (!actualizado){
+		if (i != 0){
+			string_append(&platos_actualizado, ",");
+			string_append(&cantidad_actualizada, ",");
+			string_append(&cantidad_lista_actualizada, ",");
+		}
+		string_append(&platos_actualizado, comida);
+		string_append(&cantidad_actualizada, cantidad);
+		string_append(&cantidad_lista_actualizada, "0");
+	}
+	string_append(&platos_actualizado, "]");
+	string_append(&cantidad_actualizada, "]");
+	string_append(&cantidad_lista_actualizada, "]");
+	pedido_info[1] = platos_actualizado;
+	pedido_info[2] = cantidad_actualizada;
+	pedido_info[3] = cantidad_lista_actualizada;
+
+	char* data_actualizada = string_new();
+	string_append_with_format(&data_actualizada, "ESTADO_PEDIDO=%s\nLISTA_PLATOS=%s\nCANTIDAD_PLATOS=%s\nCANTIDAD_LISTA=%s\nPRECIO_TOTAL=%s", pedido_info[0], pedido_info[1], pedido_info[2], pedido_info[3], pedido_info[4]);
+
+	char* path_pedido = get_path_pedido_file(restaurante, id_pedido);
+	bool updated = update_afip_file(data_actualizada, path_pedido);
+
+	if (!updated){
+		log_error(logger, "[Confirmar Pedido] No se pudo guardar el contenido actualizado");
+		char* respuesta[1] = {"No se pudo guardar el contenido actualizado"};
+		send_messages_socket(socket, respuesta, 1);
+		return;
+	}
 
 	//Responder el mensaje indicando si se pudo realizar la operación correctamente (Ok/Fail).
-	char* respuesta[1];
+	char* respuesta[1] = {"Ok"};
 
-	if (true){
-		respuesta[0] = "Ok";
-	} else {
-		respuesta[0] = "Fail";
-	}
 	send_messages_socket(socket, respuesta, 1);
 
 }

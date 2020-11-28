@@ -71,6 +71,7 @@ void handle_client(t_result* result){
 				handle_terminar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 				break;
 			case handshake_restaurante:
+				//OK
 				handle_handshake_restaurante(result->socket);
 				break;
 			case handshake_cliente:
@@ -152,7 +153,7 @@ void handle_guardar_pedido(int socket, char* restaurante, char* id_pedido){
 	//En caso de que no exista, se deberá crear el archivo.
 	if (existe_pedido(restaurante, id_pedido)){
 		log_error(logger, "[Guardar Pedido] El pedido ya existe");
-		respuesta[0] = "El pedido no existe.";
+		respuesta[0] = "El pedido ya existe.";
 		send_messages_socket(socket, respuesta, 1);
 		return;
 	}
@@ -194,7 +195,7 @@ void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_pedido(restaurante, id_pedido)){
 		log_error(logger, "[Guardar Plato] El pedido ya existe");
-		char* respuesta[1] = {"El pedido no existe."};
+		char* respuesta[1] = {"El pedido ya existe."};
 		send_messages_socket(socket, respuesta, 1);
 		return;
 	}
@@ -311,7 +312,7 @@ void handle_confirmar_pedido(int socket, char* id_pedido, char* restaurante){
 	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_pedido(restaurante, id_pedido)){
-		log_error(logger, "[Guardar Pedido] El pedido ya existe");
+		log_error(logger, "[Guardar Pedido] El pedido no existe");
 		char* respuesta[1] = {"El pedido no existe."};
 		send_messages_socket(socket, respuesta, 1);
 		return;
@@ -383,7 +384,7 @@ void handle_obtener_pedido(int socket, char* restaurante, char* id_pedido){
 	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_pedido(restaurante, id_pedido)){
-		log_error(logger, "[Guardar Pedido] El pedido ya existe");
+		log_error(logger, "[Guardar Pedido] El pedido no existe");
 		char* respuesta[1] = {"El pedido no existe."};
 		send_messages_socket(socket, respuesta, 1);
 		return;
@@ -475,7 +476,7 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* co
 	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_pedido(restaurante, id_pedido)){
-		log_error(logger, "[Plato Listo] El pedido ya existe");
+		log_error(logger, "[Plato Listo] El pedido no existe");
 		char* respuesta[1] = {"El pedido no existe."};
 		send_messages_socket(socket, respuesta, 1);
 		return;
@@ -500,8 +501,8 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* co
 	//Verificar que el pedido esté en estado “Confirmado”. 
 	//En caso contrario se deberá informar dicha situación.
 	if (strcmp(pedido_info[0], "Confirmado") != 0){
-		log_error(logger, "[Plato Listo] El pedido no esta en estado Pendiente");
-		char* respuesta[1] = {"El pedido no esta en estado Pendiente"};
+		log_error(logger, "[Plato Listo] El pedido no esta en estado Confirmado");
+		char* respuesta[1] = {"El pedido no esta en estado Confirmado"};
 		send_messages_socket(socket, respuesta, 1);
 		flock(fileno(fp), LOCK_UN);
 		fclose(fp);
@@ -606,7 +607,7 @@ void handle_terminar_pedido(int socket, char* id_pedido, char* restaurante){
 	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_pedido(restaurante, id_pedido)){
-		log_error(logger, "[Terminar Pedido] El pedido ya existe");
+		log_error(logger, "[Terminar Pedido] El pedido no existe");
 		char* respuesta[1] = {"El pedido no existe."};
 		send_messages_socket(socket, respuesta, 1);
 		return;

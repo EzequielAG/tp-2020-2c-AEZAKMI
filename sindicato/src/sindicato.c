@@ -44,6 +44,7 @@ void handle_client(t_result* result){
 				handle_guardar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 				break;
 			case guardar_plato:
+				//OK
 				handle_guardar_plato(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2], result->mensajes->mensajes[3], result->mensajes->mensajes[4]);
 				break;
 			case confirmar_pedido:
@@ -66,6 +67,7 @@ void handle_client(t_result* result){
 				handle_obtener_receta(result->socket, result->mensajes->mensajes[1]);
 				break;
 			case terminar_pedido:
+				//OK
 				handle_terminar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 				break;
 			case handshake_restaurante:

@@ -593,7 +593,7 @@ void restaurante_destroy(t_restaurante_config* restaurante_config) {
 
 void handshake_init(t_modulo modulo1, t_modulo modulo2){
     
-    int handshake_sindicato_r = handshake_sindicato(&modulo2);
+    handshake_sindicato_r = handshake_sindicato(&modulo2);
 
     if (handshake_sindicato_r == -1){
         printf("No se pudo realizar la conexion inicial con el modulo sindicato\n");
@@ -610,7 +610,7 @@ void handshake_init(t_modulo modulo1, t_modulo modulo2){
   
     }
 
-    int handshake_app_r = handshake_app(&modulo1);
+    handshake_app_r = handshake_app(&modulo1);
 
     if (handshake_app_r == -1){
         printf("No se pudo realizar la conexion inicial con el modulo app\n");

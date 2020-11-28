@@ -34,6 +34,8 @@ sem_t* sem_block;
 sem_t* sem_ready;
 sem_t* sem_horno_libre;
 sem_t* sem_finalizar_pedido;
+int handshake_app_r;
+int handshake_sindicato_r;
 
 
 

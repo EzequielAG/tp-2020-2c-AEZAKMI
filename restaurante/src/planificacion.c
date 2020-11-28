@@ -21,9 +21,6 @@ void clock_cpu(){
     
     while(true){
         sleep(restaurante_config->retardo_ciclo_cpu); //todo: pasar tiempo del config
-
-        log_info(logger, "-----------CICLO-------------");
-
         for (IteratorList il = beginlist(suscriptores_cpu); il != NULL; il = nextlist(il)){
             sem_t* suscriptor = (sem_t*) dataiterlist(il);
             sem_post(suscriptor);
@@ -33,6 +30,25 @@ void clock_cpu(){
 
 
 void inicializar_colas_ready(){
+
+    if(sizelist(afinidades)<cantidad_cocineros){
+        t_ready* cola_ready_nueva = malloc(sizeof(t_ready));
+        cola_ready_nueva->afinidad = "GENERAL";
+        initlist(&cola_ready_nueva->pcb_espera);
+        initlist(&cola_ready_nueva->cocineros);
+        cola_ready_nueva->sem_cocinero_libre = malloc(sizeof(sem_t));
+        sem_init(cola_ready_nueva->sem_cocinero_libre, 0, 0);
+        cola_ready_nueva->sem_pcb_espera = malloc(sizeof(sem_t));
+        sem_init(cola_ready_nueva->sem_pcb_espera, 0, 0);
+        char string_log[100];
+        sprintf(string_log, "Se crea cola de ready de afinidad GENERAL");
+        log_info(logger, string_log);
+        pthread_t ejecuta_controlador_cola;
+        pthread_create(&ejecuta_controlador_cola, NULL, (void*) controlador_ready, cola_ready_nueva);
+        pthread_detach(ejecuta_controlador_cola);
+        pushbacklist(&colas_ready,cola_ready_nueva);
+
+    }
 
     for(IteratorList iter_afinidades = beginlist(afinidades); iter_afinidades != NULL; iter_afinidades = nextlist(iter_afinidades)){
         char* afinidad_lista = iter_afinidades->data;
@@ -55,25 +71,6 @@ void inicializar_colas_ready(){
             pushbacklist(&colas_ready,cola_ready_nueva);
 
         }
-    }
-
-    if(sizelist(afinidades)<cantidad_cocineros){
-        t_ready* cola_ready_nueva = malloc(sizeof(t_ready));
-        cola_ready_nueva->afinidad = "GENERAL";
-        initlist(&cola_ready_nueva->pcb_espera);
-        initlist(&cola_ready_nueva->cocineros);
-        cola_ready_nueva->sem_cocinero_libre = malloc(sizeof(sem_t));
-        sem_init(cola_ready_nueva->sem_cocinero_libre, 0, 0);
-        cola_ready_nueva->sem_pcb_espera = malloc(sizeof(sem_t));
-        sem_init(cola_ready_nueva->sem_pcb_espera, 0, 0);
-        char string_log[100];
-        sprintf(string_log, "Se crea cola de ready de afinidad GENERAL");
-        log_info(logger, string_log);
-        pthread_t ejecuta_controlador_cola;
-        pthread_create(&ejecuta_controlador_cola, NULL, (void*) controlador_ready, cola_ready_nueva);
-        pthread_detach(ejecuta_controlador_cola);
-        pushbacklist(&colas_ready,cola_ready_nueva);
-
     }
  
 }
@@ -241,6 +238,10 @@ void paso_a_exec_RR(t_exec* cocinero){
                 return;
             } else if (!strcmp(proximo_paso->nombre_paso, "Hornear")){
                 pushbacklist(&pcb_espera_horno, cocinero->pcb);
+                char string_log[100];
+                sprintf(string_log, "El pcb %d se enconla en BLOCK", cocinero->pcb->pid);
+                log_info(logger, string_log);
+                
                 sem_post(sem_block);
                 pushbacklist(&cola->cocineros, cocinero);
                 sem_post(cola->sem_cocinero_libre);
@@ -320,7 +321,7 @@ void asignar_pcb_cocinero(t_pcb* pcb, t_exec* cocinero){
     cocinero->pcb = pcb;
 
     char string_log[100];
-    sprintf(string_log, "El pcb %d pasa a EXEC\nSe le asigna al cocinero con afinidad %s\n", pcb->pid, cocinero->afinidad);
+    sprintf(string_log, "PCB %d - EXEC\n Se le asigna al cocinero con afinidad %s\n", pcb->pid, cocinero->afinidad);
     log_info(logger, string_log);
 
     pushbacklist(&suscriptores_cpu, pcb->ciclo_cpu);
@@ -329,11 +330,12 @@ void asignar_pcb_cocinero(t_pcb* pcb, t_exec* cocinero){
 
 void paso_ready(t_pcb* pcb){
 
-
     t_ready* cola = cola_por_afinidad(pcb->afinidad);
+
     char string_log[100];
-    sprintf(string_log, "El pcb %d pasa a READY", pcb->pid);
+    sprintf(string_log, "PCB %d - READY", pcb->pid);
     log_info(logger, string_log);
+
     desuscribirse_clock(pcb->ciclo_cpu);
     pushbacklist(&cola->pcb_espera, pcb);
     sem_post(cola->sem_pcb_espera);
@@ -346,10 +348,25 @@ int paso_exit(t_pcb* pcb){
     pushbacklist(&colas_exit,pcb->plato);
     pcb->estado = EXIT;
 
-    enviar_mensaje_plato_listo(&modulo_app,restaurante_config->nombre_restaurante, string_itoa(pcb->id_pedido), pcb->plato->nombre);
-    enviar_mensaje_plato_listo(&modulo_sindicato,restaurante_config->nombre_restaurante, string_itoa(pcb->id_pedido), pcb->plato->nombre);
+    char string_log_exit[100];
+    sprintf(string_log_exit, "PCB %d - EXIT \n", pcb->pid);
+    log_info(logger, string_log_exit);
 
-    printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
+
+     if(handshake_app_r != -1){
+        enviar_mensaje_plato_listo(&modulo_app,restaurante_config->nombre_restaurante, string_itoa(pcb->id_pedido), pcb->plato->nombre);
+    }
+
+    if(handshake_sindicato_r != -1){
+        enviar_mensaje_plato_listo(&modulo_sindicato,restaurante_config->nombre_restaurante, string_itoa(pcb->id_pedido), pcb->plato->nombre);
+
+    }
+   
+
+
+      
+
+    
 
     if(termino_pedido(pcb->id_pedido) == 1){
         
@@ -357,7 +374,11 @@ int paso_exit(t_pcb* pcb){
         enviar_mensaje_terminar_pedido(&modulo_sindicato,string_itoa(pcb->id_pedido),restaurante_config->nombre_restaurante);
         
         if(!strcmp(mensaje_terminar,"OK")){
-            printf(" - El pedido %i fue reportado al Sindicato como finalizado\n",pcb->id_pedido);
+            
+            char string_log_exit2[100];
+            sprintf(string_log_exit2, "FINALIZACION PEDIDO %d \n", pcb->id_pedido);
+            log_info(logger, string_log_exit2);
+    
         }
         else{
             printf(" - Se produjo un error al reportar el pedido %i como finalizado al Sindicato \n",pcb->id_pedido);
@@ -374,6 +395,8 @@ void paso_block(t_horno* horno){
         sem_wait(horno->sem_horno);
         sem_wait(horno->pcb->ciclo_cpu);
         paso_a_block(horno);
+
+        
     }
 
 }
@@ -383,13 +406,14 @@ void paso_a_block(t_horno* horno){
     
     for(int i = 0; i < paso->ciclo_cpu; i++){
         sem_wait(horno->pcb->ciclo_cpu);
-        
-        // printf("HORNO %i - Paso: %s \n",horno->pcb,   paso->nombre_paso);
+
+        char string_log[100];
+        sprintf(string_log, "PCB %d - HORNEAR", horno->pcb->pid);
+        log_info(logger, string_log);
     }
 
-    // char string_log[100];
-    // sprintf(string_log, " - Paso BLOCK: %s", paso->nombre_paso);
-    // log_info(logger, string_log);
+    
+
 
     horno->ocupado = 0;
     pushbacklist(&hornos,horno);
@@ -572,6 +596,10 @@ t_pcb* crear_pcb(int id_pedido,int pid,t_plato* plato, char* afinidad){
     pcb->plato = plato;    
     pcb->ciclo_cpu = malloc(sizeof(sem_t));
     sem_init(pcb->ciclo_cpu, 0 ,0);
+
+    char string_log[100];
+    sprintf(string_log, " - PCB creado %d - Plato %s \n",pid, plato->nombre);
+    log_info(logger, string_log);
     
     paso_ready(pcb);
 

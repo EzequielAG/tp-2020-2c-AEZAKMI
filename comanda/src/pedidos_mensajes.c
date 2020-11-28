@@ -37,6 +37,7 @@ void handle_client(t_result* result){
 }
 
 int existe_restaurante(char* restaurante){
+    
     IteratorList iterador = NULL;
     l_proceso* resto = NULL;
 

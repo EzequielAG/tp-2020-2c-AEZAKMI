@@ -8,7 +8,7 @@
 
 
 // FUNCIONES
-void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger);
+void restaurante_init();
 void restaurante_finally(t_restaurante_config* restaurante_config, t_log* logger);
 t_restaurante_config* restaurante_config_loader(char* path_config_file);
 void restaurante_config_parser(t_config* config, t_restaurante_config* restaurante_config);

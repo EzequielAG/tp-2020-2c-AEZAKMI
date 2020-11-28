@@ -20,7 +20,7 @@ void iniciar_clock(){
 void clock_cpu(){
     
     while(true){
-        sleep(restaurante_config->retardo_cpu); //todo: pasar tiempo del config
+        sleep(restaurante_config->retardo_ciclo_cpu); //todo: pasar tiempo del config
 
         log_info(logger, "-----------CICLO-------------");
 

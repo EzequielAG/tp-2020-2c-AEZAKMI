@@ -121,7 +121,7 @@ typedef struct {
     char* algoritmo_planificador;
     char* nombre_restaurante;
     char* ip_escucha;
-    int retardo_cpu;
+    int retardo_ciclo_cpu;
 } t_restaurante_config;
 
 t_restaurante_config* restaurante_config;

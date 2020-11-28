@@ -12,13 +12,12 @@ int main(int argc, char *argv[]){
     sem_init(sem_mutex_confirmar_pedido, 0, 1);
     
     
-    pthread_t iniciar_servidor_thread;
-    pthread_create(&iniciar_servidor_thread, NULL, (void*) iniciar_servidor_desacoplado, NULL);
     
 
     //INICIALIZACION CON VARIABLES GLOBALES
-    restaurante_init(&restaurante_config, &logger);
+    restaurante_init();
    
+
     modulo_app.ip = restaurante_config->ip_app;
     modulo_app.puerto =restaurante_config->puerto_app;
     modulo_app.socket = 0;
@@ -28,6 +27,10 @@ int main(int argc, char *argv[]){
     modulo_sindicato.puerto = restaurante_config->puerto_sindicato;
     modulo_sindicato.socket = 0;
     modulo_sindicato.identificacion = "RESTAURANTE";
+
+    pthread_t iniciar_servidor_thread;
+    pthread_create(&iniciar_servidor_thread, NULL, (void*) iniciar_servidor_desacoplado, NULL);
+
     handshake_init(modulo_app,modulo_sindicato);
 
     data_restaurante();
@@ -80,10 +83,27 @@ void handle_client(t_result* result){
                 List* platos = enviar_mensaje_consultar_platos(&modulo_sindicato, restaurante_config->nombre_restaurante);
 
                 int cant_platos = sizelist(*platos);
+                int variableRandom = 1;
+
+                char* platosAux[1];
+                platosAux[0] = string_new();
+
+                for(IteratorList iter = beginlist(*platos); iter != NULL; iter = nextlist(iter)){
+
+                    char* otroPlatoAyx = (char*) dataiterlist(iter);
+
+                    if(variableRandom == 1){
+                        string_append(&platosAux[0], otroPlatoAyx);
+                        variableRandom = 0;
+                    }else{
+                        string_append(&platosAux[0], ",");
+                        string_append(&platosAux[0], otroPlatoAyx);
+                    }
+                }
 
                 if(cant_platos != 0)
                 {
-                    send_messages_socket(result->socket,list_a_char(*platos), cant_platos);
+                    send_messages_socket(result->socket, platosAux, 1);
                 }
 
             } else if (tipo_mensaje == crear_pedido) {
@@ -131,14 +151,14 @@ void handle_crear_pedido(int socket){
     respuesta[0] = respuesta_guardar_pedido;
 
    
-    if(!strcmp(respuesta[0],"Ok")){
+    if(strcmp(respuesta[0],"Ok")){
         char* respuesta_ok[1];
-        respuesta_ok[0] = "El pedido fue generado con exito";
+        respuesta_ok[0] = "Fail";
         send_messages_socket(socket, respuesta_ok, 1);
         return;
     }
     
-    send_messages_socket(socket, respuesta, 1);
+    send_messages_socket(socket, id, 1);
     //liberar_conexion(socket);
     
 }
@@ -486,9 +506,9 @@ void escuchar_mensajes_socket(t_parameter* parametro){
 
 // DATOS RESTAURANTE
 
-void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger){
-    *restaurante_config = restaurante_config_loader("./cfg/restaurante.config");
-    *logger = init_logger((*restaurante_config)->ruta_log, "restaurante", LOG_LEVEL_INFO);
+void restaurante_init(){
+    restaurante_config = restaurante_config_loader("./cfg/restaurante.config");
+    logger = init_logger(restaurante_config->ruta_log, "restaurante", LOG_LEVEL_INFO);
     pos_x = malloc(sizeof(char*));
     pos_y = malloc(sizeof(char*));
     initlist(&recetas_precios);
@@ -548,7 +568,7 @@ void restaurante_config_parser(t_config* config, t_restaurante_config* restauran
     restaurante_config->algoritmo_planificador = strdup(config_get_string_value(config, "ALGORITMO_PLANIFICACION"));
     restaurante_config->nombre_restaurante = strdup(config_get_string_value(config, "NOMBRE_RESTAURANTE"));
     restaurante_config->ip_escucha = strdup(config_get_string_value(config, "IP_ESCUCHA"));
-    restaurante_config->retardo_cpu = config_get_int_value(config, "RETARDO_CPU");
+    restaurante_config->retardo_ciclo_cpu = config_get_int_value(config, "RETARDO_CICLO_CPU");
 }
 
 void restaurante_destroy(t_restaurante_config* restaurante_config) {

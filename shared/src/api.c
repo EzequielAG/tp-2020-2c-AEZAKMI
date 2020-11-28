@@ -215,7 +215,10 @@ List* enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
         liberar_conexion(socket);
     }
 
-    return obtener_list_mensajes(respuesta->mensajes[0]);
+    char* variableAuxiliar = string_new();
+    string_append(&variableAuxiliar, respuesta->mensajes[0]);
+
+    return obtener_list_mensajes(variableAuxiliar);
 }
 
 char* enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido){

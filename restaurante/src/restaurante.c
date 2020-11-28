@@ -11,7 +11,9 @@ int main(int argc, char *argv[]){
     sem_mutex_confirmar_pedido = malloc(sizeof(sem_t));
     sem_init(sem_mutex_confirmar_pedido, 0, 1);
     
-
+    
+    pthread_t iniciar_servidor_thread;
+    pthread_create(&iniciar_servidor_thread, NULL, (void*) iniciar_servidor_desacoplado, NULL);
     
 
     //INICIALIZACION CON VARIABLES GLOBALES
@@ -42,14 +44,18 @@ int main(int argc, char *argv[]){
 
 
 
-    iniciar_servidor(restaurante_config->ip_escucha, restaurante_config->puerto_escucha, handle_client);
+    
 
-
+    pthread_join(iniciar_servidor_thread, NULL);
     //planificacion_fifo();
 
     // ver_estado_pcb();
 
     return 0;
+}
+
+void iniciar_servidor_desacoplado(){
+    iniciar_servidor(restaurante_config->ip_escucha, restaurante_config->puerto_escucha, handle_client);
 }
 
 // Comienzo handles
@@ -72,11 +78,7 @@ void handle_client(t_result* result){
             if (tipo_mensaje == consultar_platos){
                 // HACER SI HAY PLATOS
                 List* platos = enviar_mensaje_consultar_platos(&modulo_sindicato, restaurante_config->nombre_restaurante);
-                for(IteratorList iter = beginlist(*platos); iter != NULL; iter = nextlist(iter)){
-                    char* asd = (char*) dataiterlist(iter);
 
-                    printf("NKJSADBJSHAD: %s", asd);
-                }
                 int cant_platos = sizelist(*platos);
 
                 if(cant_platos != 0)
@@ -85,11 +87,11 @@ void handle_client(t_result* result){
                 }
 
             } else if (tipo_mensaje == crear_pedido) {
-                //QUITO SINDICATO PARA TESTEAR
+                
                 handle_crear_pedido(result->socket);
 
             } else if (tipo_mensaje == anadir_plato) {
-                //QUITO SINDICATO PARA TESTEAR
+
                 handle_anadir_plato(result);
 
             } else if (tipo_mensaje == confirmar_pedido) {
@@ -418,9 +420,9 @@ void data_restaurante(){
 
 int handshake_app(t_modulo* modulo){
 
-    char* mensajes[4] = {string_itoa(handshake_restaurante), restaurante_config->nombre_restaurante, pos_x, pos_y};
+    char* mensajes[6] = {string_itoa(handshake_restaurante), restaurante_config->nombre_restaurante, pos_x, pos_y, restaurante_config->ip_escucha, restaurante_config->puerto_escucha};
 
-    socket_app = send_messages_and_return_socket(modulo->identificacion, modulo->ip, modulo->puerto, mensajes, 4);
+    socket_app = send_messages_and_return_socket(modulo->identificacion, modulo->ip, modulo->puerto, mensajes, 6);
 
     if (socket_app == -1){
         return -1;
@@ -432,9 +434,11 @@ int handshake_app(t_modulo* modulo){
         return -1;
     }
 
+    close(socket_app);
+
     printf("El handshake con el modulo APP fue correcto\n");
 
-    escuchar_mensajes_socket_desacoplado(socket_app);
+    //escuchar_mensajes_socket_desacoplado(socket_app);
 
     return 0;
 }

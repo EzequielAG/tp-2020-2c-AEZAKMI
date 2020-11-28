@@ -8,7 +8,7 @@ void handle_client(t_result* result){
                 handle_handshake_cliente(result->socket, result->mensajes->mensajes[1], atoi(result->mensajes->mensajes[2]), atoi(result->mensajes->mensajes[3]));
             break;
             case handshake_restaurante:
-                handle_handshake_restaurante(result->socket, result->mensajes->mensajes[1], atoi(result->mensajes->mensajes[2]), atoi(result->mensajes->mensajes[3]));
+                handle_handshake_restaurante(result->socket, result->mensajes->mensajes[1], atoi(result->mensajes->mensajes[2]), atoi(result->mensajes->mensajes[3]), result->mensajes->mensajes[4], result->mensajes->mensajes[5]);
             break;
             case consultar_restaurantes:
                 handle_consultar_restaurantes(result->socket);
@@ -42,35 +42,45 @@ void handle_client(t_result* result){
     return;
 }
 
-void handle_handshake_restaurante(int socket, char* nombre_restaurante, int pos_x, int pos_y){
+void handle_handshake_restaurante(int socket, char* nombre_restaurante, int pos_x, int pos_y, char* ip, char* puerto){
     t_restaurante* restaurante = buscar_restaurante_lista(nombre_restaurante);
             
     if (restaurante == NULL){
-        restaurante = nuevo_restaurante(socket, nombre_restaurante, pos_x, pos_y);
+        restaurante = nuevo_restaurante(socket, nombre_restaurante, pos_x, pos_y, ip, puerto);
         pushbacklist(&lista_restaurantes, restaurante);
         
         if(!strcmp(nombre_restaurante, "Resto Default")){
             restaurante->platos = listaPlatosDefault;
         } else {
             t_modulo modulo_restaurante;
-            modulo_restaurante.socket = socket;
+            modulo_restaurante.ip = ip;
+            modulo_restaurante.puerto = puerto;
             modulo_restaurante.identificacion = "APP";
+            modulo_restaurante.socket = 0;
             restaurante->platos = *enviar_mensaje_consultar_platos(&modulo_restaurante, nombre_restaurante);
         }
     } else {
         restaurante->socket = socket;
+        restaurante->ip = string_new();
+        string_append(&restaurante->ip, ip);
+        restaurante->puerto = string_new();
+        string_append(&restaurante->puerto, puerto);
     }
     
     send_message_socket(socket, "OK");
 }
 
-t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante, int pos_x, int pos_y){
+t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante, int pos_x, int pos_y, char* ip, char* puerto){
     t_restaurante* restaurante = malloc(sizeof(t_restaurante));
     restaurante->socket = socket;
     restaurante->nombre_restaurante = string_new();
     restaurante->platos = listaPlatosDefault;
     restaurante->posicion.posx = pos_x;
     restaurante->posicion.posy = pos_y;
+    restaurante->ip = string_new();
+    string_append(&restaurante->ip, ip);
+    restaurante->puerto = string_new();
+    string_append(&restaurante->puerto, puerto);
     string_append(&restaurante->nombre_restaurante, nombre_restaurante);
 
     return restaurante;
@@ -141,10 +151,10 @@ char* obtener_id_pedido(t_restaurante* restaurante){
     sem_wait(sem_id_pedido);
 
     t_modulo modulo_restaurante;
-    modulo_restaurante.ip = NULL;
-    modulo_restaurante.puerto = NULL;
-    modulo_restaurante.socket = restaurante->socket;
+    modulo_restaurante.ip = restaurante->ip;
+    modulo_restaurante.puerto = restaurante->puerto;
     modulo_restaurante.identificacion = "APP";
+    modulo_restaurante.socket = 0;
 
     char* id_pedido = enviar_mensaje_crear_pedido(&modulo_restaurante);
 
@@ -219,12 +229,6 @@ void handle_consultar_platos(int socket, char* idCliente){
     List lista_platos;
     initlist(&lista_platos);
 
-    t_modulo modulo_restaurante;
-    modulo_restaurante.ip = NULL;
-    modulo_restaurante.puerto = NULL;
-    modulo_restaurante.socket = 0;
-    modulo_restaurante.identificacion = "APP";
-
     t_cliente* cliente = buscar_cliente_lista(idCliente);
 
     t_restaurante* restaurante = cliente->restaurante;
@@ -238,7 +242,11 @@ void handle_consultar_platos(int socket, char* idCliente){
 
     }
 
-    modulo_restaurante.socket = restaurante->socket;
+    t_modulo modulo_restaurante;
+    modulo_restaurante.ip = restaurante->ip;
+    modulo_restaurante.puerto = restaurante->puerto;
+    modulo_restaurante.identificacion = "APP";
+    modulo_restaurante.socket = 0;
 
     lista_platos = *enviar_mensaje_consultar_platos(&modulo_restaurante, NULL);
     
@@ -273,17 +281,15 @@ void handle_anadir_plato(int socket, char* id_cliente, char* plato, char* id_ped
 
     char* respuesta[1];
 
-    t_modulo modulo_restaurante;
-    modulo_restaurante.ip = NULL;
-    modulo_restaurante.puerto = NULL;
-    modulo_restaurante.socket = 0;
-    modulo_restaurante.identificacion = "APP";
-
     t_cliente* cliente = buscar_cliente_lista(id_cliente);
 
     t_restaurante* restaurante = cliente->restaurante;
 
-    modulo_restaurante.socket = restaurante->socket;
+    t_modulo modulo_restaurante;
+    modulo_restaurante.ip = restaurante->ip;
+    modulo_restaurante.puerto = restaurante->puerto;
+    modulo_restaurante.identificacion = "APP";
+    modulo_restaurante.socket = 0;
 
     if(!plato_en_restaurante(plato, restaurante->platos)){
         respuesta[0] = "FAIL";
@@ -364,16 +370,15 @@ void handle_confirmar_pedido(int socket, char* id_cliente, char* id_pedido){
     r_consultar_pedido pedido;
     r_obtener_pedido *pedidoAux;
 
-    t_modulo modulo_restaurante;
-    modulo_restaurante.ip = NULL;
-    modulo_restaurante.puerto = NULL;
-    modulo_restaurante.socket = 0;
-    modulo_restaurante.identificacion = "APP";
-
     t_cliente* cliente = buscar_cliente_lista(id_cliente);
 
     t_restaurante* restaurante = cliente->restaurante;
-    modulo_restaurante.socket = restaurante->socket;
+
+    t_modulo modulo_restaurante;
+    modulo_restaurante.ip = restaurante->ip;
+    modulo_restaurante.puerto = restaurante->puerto;
+    modulo_restaurante.identificacion = "APP";
+    modulo_restaurante.socket = 0;
 
 
     pedidoAux = enviar_mensaje_obtener_pedido(&modulo_comanda, id_pedido, restaurante->nombre_restaurante);

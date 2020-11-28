@@ -7,7 +7,7 @@ int main(void){
     crear_lista_platos_default();
 
     //INSERTO RESTAURANTE DEFAULT
-    t_restaurante* restaurante = nuevo_restaurante(0, "Resto Default", app_config->posicion_rest_default_x, app_config->posicion_rest_default_y);
+    t_restaurante* restaurante = nuevo_restaurante(0, "Resto Default", app_config->posicion_rest_default_x, app_config->posicion_rest_default_y, "", "");
     pushbacklist(&lista_restaurantes, restaurante);
 
     pthread_t thread;

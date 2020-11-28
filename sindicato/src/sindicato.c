@@ -31,6 +31,16 @@ void iniciar_servidor_sindicato(){
 
 void handle_client(t_result* result){
 
+	char* mensaje = string_new();
+	string_append(&mensaje, "[Handle] Se recibió el mensaje: ");
+	for (int i = 0; i < *result->mensajes->size; i++){
+		string_append(&mensaje, result->mensajes->mensajes[i]);
+		string_append(&mensaje, " "); 
+	}
+
+	log_info(logger, mensaje);
+	free(mensaje);
+
 	if (result->operacion == MENSAJES){
 		int tipo_mensaje = atoi(result->mensajes->mensajes[0]);
 		switch(tipo_mensaje)

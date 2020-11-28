@@ -3,6 +3,7 @@
 
 #include "sindicato_fs.h"
 #include <unistd.h>
+#include <sys/file.h>
 
 // VARIABLES Y ESTRUCTURAS
 

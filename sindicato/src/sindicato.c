@@ -71,6 +71,7 @@ void handle_client(t_result* result){
 				handle_terminar_pedido(result->socket, result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 				break;
 			case handshake_restaurante:
+				//OK
 				handle_handshake_restaurante(result->socket);
 				break;
 			case handshake_cliente:
@@ -152,7 +153,7 @@ void handle_guardar_pedido(int socket, char* restaurante, char* id_pedido){
 	//En caso de que no exista, se deberá crear el archivo.
 	if (existe_pedido(restaurante, id_pedido)){
 		log_error(logger, "[Guardar Pedido] El pedido ya existe");
-		respuesta[0] = "El pedido no existe.";
+		respuesta[0] = "El pedido ya existe.";
 		send_messages_socket(socket, respuesta, 1);
 		return;
 	}
@@ -194,9 +195,19 @@ void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_pedido(restaurante, id_pedido)){
 		log_error(logger, "[Guardar Plato] El pedido ya existe");
-		char* respuesta[1] = {"El pedido no existe."};
+		char* respuesta[1] = {"El pedido ya existe."};
 		send_messages_socket(socket, respuesta, 1);
 		return;
+	}
+
+	char* pedido_file = get_path_pedido_file(restaurante, id_pedido);
+
+	FILE* fp = fopen(pedido_file, "rw+");
+
+	int lock = flock(fileno(fp), LOCK_EX);
+
+	if (lock == -1){
+		log_error(logger, "NO PUDE CREAR EL LOCK");
 	}
 
 	char* pedido = get_pedido_data(restaurante, id_pedido);
@@ -210,6 +221,8 @@ void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* 
 		log_error(logger, "[Guardar Plato] El pedido no esta en estado Pendiente");
 		char* respuesta[1] = {"El pedido no esta en estado Pendiente"};
 		send_messages_socket(socket, respuesta, 1);
+		flock(fileno(fp), LOCK_UN);
+		fclose(fp);
 		return;
 	}
 
@@ -268,6 +281,8 @@ void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* 
 	char* path_pedido = get_path_pedido_file(restaurante, id_pedido);
 	bool updated = update_afip_file(data_actualizada, path_pedido);
 
+	flock(fileno(fp), LOCK_UN);
+	fclose(fp);
 	if (!updated){
 		log_error(logger, "[Confirmar Pedido] No se pudo guardar el contenido actualizado");
 		char* respuesta[1] = {"No se pudo guardar el contenido actualizado"};
@@ -297,10 +312,20 @@ void handle_confirmar_pedido(int socket, char* id_pedido, char* restaurante){
 	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_pedido(restaurante, id_pedido)){
-		log_error(logger, "[Guardar Pedido] El pedido ya existe");
+		log_error(logger, "[Guardar Pedido] El pedido no existe");
 		char* respuesta[1] = {"El pedido no existe."};
 		send_messages_socket(socket, respuesta, 1);
 		return;
+	}
+
+	char* pedido_file = get_path_pedido_file(restaurante, id_pedido);
+
+	FILE* fp = fopen(pedido_file, "rw+");
+
+	int lock = flock(fileno(fp), LOCK_EX);
+
+	if (lock == -1){
+		log_error(logger, "NO PUDE CREAR EL LOCK");
 	}
 
 	char* pedido = get_pedido_data(restaurante, id_pedido);
@@ -314,6 +339,8 @@ void handle_confirmar_pedido(int socket, char* id_pedido, char* restaurante){
 		log_error(logger, "[Confirmar Pedido] El pedido no esta en estado Pendiente");
 		char* respuesta[1] = {"El pedido no esta en estado Pendiente"};
 		send_messages_socket(socket, respuesta, 1);
+		flock(fileno(fp), LOCK_UN);
+		fclose(fp);
 		return;
 	}
 
@@ -327,6 +354,8 @@ void handle_confirmar_pedido(int socket, char* id_pedido, char* restaurante){
 	char* path_pedido = get_path_pedido_file(restaurante, id_pedido);
 	bool updated = update_afip_file(data_actualizada, path_pedido);
 
+	flock(fileno(fp), LOCK_UN);
+	fclose(fp);
 	if (!updated){
 		log_error(logger, "[Confirmar Pedido] No se pudo guardar el contenido actualizado");
 		char* respuesta[1] = {"No se pudo guardar el contenido actualizado"};
@@ -340,48 +369,52 @@ void handle_confirmar_pedido(int socket, char* id_pedido, char* restaurante){
 }
 
 void handle_obtener_pedido(int socket, char* restaurante, char* id_pedido){
-	// if (ES_TEST){
-	// 	char* respuesta[4];
-	// 	respuesta[0] = "CONFIRMADO";
-	// 	respuesta[1] = "PLATO1,PLATO2";
-	// 	respuesta[2] = "1,1";
-	// 	respuesta[3] = "1,0";
-	// 	send_messages_socket(socket, respuesta, 4);
-	// } else {
-		//Verificar si el Restaurante existe dentro del File System. 
-		//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
-		//En caso de no existir se deberá informar dicha situación.
-		if (!existe_restaurante(restaurante)){
-			log_error(logger, "[Obtener Pedido] El restaurante no existe");
-			char* respuesta[1] = {"El restaurante no existe."};
-			send_messages_socket(socket, respuesta, 1);
-			return;
-		}
 
-		//Verificar si el Pedido existe dentro del File System. 
-		//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
-		//En caso de no existir se deberá informar dicha situación.
-		if (!existe_pedido(restaurante, id_pedido)){
-			log_error(logger, "[Guardar Pedido] El pedido ya existe");
-			char* respuesta[1] = {"El pedido no existe."};
-			send_messages_socket(socket, respuesta, 1);
-			return;
-		}
+	//Verificar si el Restaurante existe dentro del File System. 
+	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 
+	//En caso de no existir se deberá informar dicha situación.
+	if (!existe_restaurante(restaurante)){
+		log_error(logger, "[Obtener Pedido] El restaurante no existe");
+		char* respuesta[1] = {"El restaurante no existe."};
+		send_messages_socket(socket, respuesta, 1);
+		return;
+	}
 
+	//Verificar si el Pedido existe dentro del File System. 
+	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
+	//En caso de no existir se deberá informar dicha situación.
+	if (!existe_pedido(restaurante, id_pedido)){
+		log_error(logger, "[Guardar Pedido] El pedido no existe");
+		char* respuesta[1] = {"El pedido no existe."};
+		send_messages_socket(socket, respuesta, 1);
+		return;
+	}
+	
+	char* pedido_file = get_path_pedido_file(restaurante, id_pedido);
 
-		char* pedido = get_pedido_data(restaurante, id_pedido);
-		pedido =  data_to_char(pedido);
+	FILE* fp = fopen(pedido_file, "rw+");
 
-		char** pedido_info = string_split(pedido, " ");
-		char* estado = pedido_info[0];
-		char* platos = sacar_corchetes(pedido_info[1]);
-		char* cantidad_lista = sacar_corchetes(pedido_info[3]);
-		char* cantidad_total = sacar_corchetes(pedido_info[2]);
-		//Responder el mensaje indicando si se pudo realizar en conjunto con la información del pedido si correspondiera.
+	int lock = flock(fileno(fp), LOCK_EX);
 
-		char* respuesta[4] = {estado, platos, cantidad_lista, cantidad_total};
-		send_messages_socket(socket, respuesta, 4);
-	// }
+	if (lock == -1){
+		log_error(logger, "NO PUDE CREAR EL LOCK");
+	}
+
+	char* pedido = get_pedido_data(restaurante, id_pedido);
+	pedido =  data_to_char(pedido);
+
+	char** pedido_info = string_split(pedido, " ");
+	char* estado = pedido_info[0];
+	char* platos = sacar_corchetes(pedido_info[1]);
+	char* cantidad_lista = sacar_corchetes(pedido_info[3]);
+	char* cantidad_total = sacar_corchetes(pedido_info[2]);
+	//Responder el mensaje indicando si se pudo realizar en conjunto con la información del pedido si correspondiera.
+
+	char* respuesta[4] = {estado, platos, cantidad_lista, cantidad_total};
+	send_messages_socket(socket, respuesta, 4);
+
+	flock(fileno(fp), LOCK_UN);
+	fclose(fp);
 }
 
 void handle_obtener_restaurante(int socket, char* restaurante){
@@ -443,10 +476,20 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* co
 	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_pedido(restaurante, id_pedido)){
-		log_error(logger, "[Plato Listo] El pedido ya existe");
+		log_error(logger, "[Plato Listo] El pedido no existe");
 		char* respuesta[1] = {"El pedido no existe."};
 		send_messages_socket(socket, respuesta, 1);
 		return;
+	}
+
+	char* pedido_file = get_path_pedido_file(restaurante, id_pedido);
+
+	FILE* fp = fopen(pedido_file, "rw+");
+
+	int lock = flock(fileno(fp), LOCK_EX);
+
+	if (lock == -1){
+		log_error(logger, "NO PUDE CREAR EL LOCK");
 	}
 
 	char* pedido = get_pedido_data(restaurante, id_pedido);
@@ -458,9 +501,11 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* co
 	//Verificar que el pedido esté en estado “Confirmado”. 
 	//En caso contrario se deberá informar dicha situación.
 	if (strcmp(pedido_info[0], "Confirmado") != 0){
-		log_error(logger, "[Plato Listo] El pedido no esta en estado Pendiente");
-		char* respuesta[1] = {"El pedido no esta en estado Pendiente"};
+		log_error(logger, "[Plato Listo] El pedido no esta en estado Confirmado");
+		char* respuesta[1] = {"El pedido no esta en estado Confirmado"};
 		send_messages_socket(socket, respuesta, 1);
+		flock(fileno(fp), LOCK_UN);
+		fclose(fp);
 		return;
 	}
 
@@ -489,6 +534,8 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* co
 		log_error(logger, "[Plato Listo] No existe ese plato en ese archivo");
 		char* respuesta[1] = {"No existe ese plato en ese archivo"};
 		send_messages_socket(socket, respuesta, 1);
+		flock(fileno(fp), LOCK_UN);
+		fclose(fp);
 		return;
 	}
 	string_append(&cantidad_lista_actualizada, "]");
@@ -499,6 +546,9 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* co
 
 	char* path_pedido = get_path_pedido_file(restaurante, id_pedido);
 	bool updated = update_afip_file(data_actualizada, path_pedido);
+
+	flock(fileno(fp), LOCK_UN);
+	fclose(fp);
 
 	if (!updated){
 		log_error(logger, "[Plato Listo] No se pudo guardar el contenido actualizado");
@@ -557,10 +607,20 @@ void handle_terminar_pedido(int socket, char* id_pedido, char* restaurante){
 	//Para esto se deberá buscar dentro del directorio del Restaurante si existe dicho pedido. 
 	//En caso de no existir se deberá informar dicha situación.
 	if (!existe_pedido(restaurante, id_pedido)){
-		log_error(logger, "[Terminar Pedido] El pedido ya existe");
+		log_error(logger, "[Terminar Pedido] El pedido no existe");
 		char* respuesta[1] = {"El pedido no existe."};
 		send_messages_socket(socket, respuesta, 1);
 		return;
+	}
+	
+	char* pedido_file = get_path_pedido_file(restaurante, id_pedido);
+
+	FILE* fp = fopen(pedido_file, "rw+");
+
+	int lock = flock(fileno(fp), LOCK_EX);
+
+	if (lock == -1){
+		log_error(logger, "NO PUDE CREAR EL LOCK");
 	}
 
 	char* pedido = get_pedido_data(restaurante, id_pedido);
@@ -572,6 +632,8 @@ void handle_terminar_pedido(int socket, char* id_pedido, char* restaurante){
 		log_error(logger, "[Terminar Pedido] El pedido no esta en estado Confirmado");
 		char* respuesta[1] = {"El pedido no esta en estado Confirmado"};
 		send_messages_socket(socket, respuesta, 1);
+		flock(fileno(fp), LOCK_UN);
+		fclose(fp);
 		return;
 	}
 
@@ -584,6 +646,9 @@ void handle_terminar_pedido(int socket, char* id_pedido, char* restaurante){
 
 	char* path_pedido = get_path_pedido_file(restaurante, id_pedido);
 	bool updated = update_afip_file(data_actualizada, path_pedido);
+
+	flock(fileno(fp), LOCK_UN);
+	fclose(fp);
 
 	if (!updated){
 		log_error(logger, "[Terminar Pedido] No se pudo guardar el contenido actualizado");

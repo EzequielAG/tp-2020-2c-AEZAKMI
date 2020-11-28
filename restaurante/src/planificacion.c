@@ -31,6 +31,25 @@ void clock_cpu(){
 
 void inicializar_colas_ready(){
 
+    if(sizelist(afinidades)<cantidad_cocineros){
+        t_ready* cola_ready_nueva = malloc(sizeof(t_ready));
+        cola_ready_nueva->afinidad = "GENERAL";
+        initlist(&cola_ready_nueva->pcb_espera);
+        initlist(&cola_ready_nueva->cocineros);
+        cola_ready_nueva->sem_cocinero_libre = malloc(sizeof(sem_t));
+        sem_init(cola_ready_nueva->sem_cocinero_libre, 0, 0);
+        cola_ready_nueva->sem_pcb_espera = malloc(sizeof(sem_t));
+        sem_init(cola_ready_nueva->sem_pcb_espera, 0, 0);
+        char string_log[100];
+        sprintf(string_log, "Se crea cola de ready de afinidad GENERAL");
+        log_info(logger, string_log);
+        pthread_t ejecuta_controlador_cola;
+        pthread_create(&ejecuta_controlador_cola, NULL, (void*) controlador_ready, cola_ready_nueva);
+        pthread_detach(ejecuta_controlador_cola);
+        pushbacklist(&colas_ready,cola_ready_nueva);
+
+    }
+
     for(IteratorList iter_afinidades = beginlist(afinidades); iter_afinidades != NULL; iter_afinidades = nextlist(iter_afinidades)){
         char* afinidad_lista = iter_afinidades->data;
 
@@ -52,25 +71,6 @@ void inicializar_colas_ready(){
             pushbacklist(&colas_ready,cola_ready_nueva);
 
         }
-    }
-
-    if(sizelist(afinidades)<cantidad_cocineros){
-        t_ready* cola_ready_nueva = malloc(sizeof(t_ready));
-        cola_ready_nueva->afinidad = "GENERAL";
-        initlist(&cola_ready_nueva->pcb_espera);
-        initlist(&cola_ready_nueva->cocineros);
-        cola_ready_nueva->sem_cocinero_libre = malloc(sizeof(sem_t));
-        sem_init(cola_ready_nueva->sem_cocinero_libre, 0, 0);
-        cola_ready_nueva->sem_pcb_espera = malloc(sizeof(sem_t));
-        sem_init(cola_ready_nueva->sem_pcb_espera, 0, 0);
-        char string_log[100];
-        sprintf(string_log, "Se crea cola de ready de afinidad GENERAL");
-        log_info(logger, string_log);
-        pthread_t ejecuta_controlador_cola;
-        pthread_create(&ejecuta_controlador_cola, NULL, (void*) controlador_ready, cola_ready_nueva);
-        pthread_detach(ejecuta_controlador_cola);
-        pushbacklist(&colas_ready,cola_ready_nueva);
-
     }
  
 }

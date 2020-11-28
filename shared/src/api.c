@@ -176,7 +176,7 @@ List* obtener_receta_precios(char* platos, char* precioplatos){
         if (array_precioplatos[i] == NULL){
             string_append(&recetaprecio->precio, "0");
         }else{
-string_append(&recetaprecio->precio,  array_precioplatos[i]);
+            string_append(&recetaprecio->precio,  array_precioplatos[i]);
         }
 
         pushbacklist(receta_precio_final, recetaprecio);
@@ -211,7 +211,9 @@ List* enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
     }
     printf("\n");
     
-    liberar_conexion(socket);
+    if(modulo->socket <= 0){
+        liberar_conexion(socket);
+    }
 
     return obtener_list_mensajes(respuesta->mensajes[0]);
 }

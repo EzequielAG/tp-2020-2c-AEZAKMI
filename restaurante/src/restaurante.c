@@ -72,6 +72,11 @@ void handle_client(t_result* result){
             if (tipo_mensaje == consultar_platos){
                 // HACER SI HAY PLATOS
                 List* platos = enviar_mensaje_consultar_platos(&modulo_sindicato, restaurante_config->nombre_restaurante);
+                for(IteratorList iter = beginlist(*platos); iter != NULL; iter = nextlist(iter)){
+                    char* asd = (char*) dataiterlist(iter);
+
+                    printf("NKJSADBJSHAD: %s", asd);
+                }
                 int cant_platos = sizelist(*platos);
 
                 if(cant_platos != 0)

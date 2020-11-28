@@ -284,6 +284,7 @@ void paso_a_exec_RR(t_exec* cocinero){
             pushbacklist(&cola->cocineros, cocinero);
             sem_post(cola->sem_cocinero_libre);
         }
+        i++;
     }
     
     paso_ready(cocinero->pcb);

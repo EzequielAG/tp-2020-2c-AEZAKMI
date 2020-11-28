@@ -78,15 +78,15 @@ void handle_client(t_result* result){
         }
     
         
-        if (tipo_mensaje == consultar_platos){
-            // HACER SI HAY PLATOS
-            List* platos = enviar_mensaje_consultar_platos(&modulo_sindicato, restaurante_config->nombre_restaurante);
-            int cant_platos = sizelist(*platos);
+            if (tipo_mensaje == consultar_platos){
+                // HACER SI HAY PLATOS
+                List* platos = enviar_mensaje_consultar_platos(&modulo_sindicato, restaurante_config->nombre_restaurante);
+                int cant_platos = sizelist(*platos);
 
-            if(cant_platos == 0)
-            {
-                send_messages_socket(result->socket,list_a_char(*platos), cant_platos);
-            }
+                if(cant_platos != 0)
+                {
+                    send_messages_socket(result->socket,list_a_char(*platos), cant_platos);
+                }
 
             } else if (tipo_mensaje == crear_pedido) {
                 //QUITO SINDICATO PARA TESTEAR

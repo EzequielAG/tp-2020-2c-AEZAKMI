@@ -500,6 +500,7 @@ List* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
     char* tipo_mensaje = string_itoa(obtener_receta);
     int socket;
     List* lista_pasos_receta = malloc(sizeof(List));
+    initlist(lista_pasos_receta);
 
     char* obtener_receta[2] ={tipo_mensaje, nombre_plato};
     socket = enviar_mensaje_modulo(modulo, obtener_receta, 2);

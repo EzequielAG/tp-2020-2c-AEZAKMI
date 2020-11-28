@@ -230,14 +230,13 @@ void paso_a_exec_FIFO(t_exec* cocinero){
         pushbacklist(&cola->cocineros, cocinero);
         sem_post(cola->sem_cocinero_libre);
         return;
-    } 
-    // else if (!strcmp(paso->nombre_paso, "Hornear")){
-    //     pushbacklist(&pcb_espera_horno, cocinero->pcb);
-    //     sem_post(sem_block);
-    //     pushbacklist(&cola->cocineros, cocinero);
-    //     sem_post(cola->sem_cocinero_libre);
-    //     return;
-    // }
+    } else if (!strcmp(paso->nombre_paso, "Hornear")){
+        pushbacklist(&pcb_espera_horno, cocinero->pcb);
+        sem_post(sem_block);
+        pushbacklist(&cola->cocineros, cocinero);
+        sem_post(cola->sem_cocinero_libre);
+        return;
+    }
     paso_ready(cocinero->pcb);
     pushbacklist(&cola->cocineros, cocinero);
     sem_post(cola->sem_cocinero_libre);
@@ -382,14 +381,15 @@ int paso_exit(t_pcb* pcb){
     pushbacklist(&colas_exit,pcb->plato);
     pcb->estado = EXIT;
 
-    //enviar_mensaje_plato_listo(&modulo_app,restaurante_config->nombre_restaurante, (char*)pcb->id_pedido, pcb->plato->nombre);
-    //enviar_mensaje_plato_listo(&modulo_sindicato,restaurante_config->nombre_restaurante, (char*)pcb->id_pedido, pcb->plato->nombre);
+    enviar_mensaje_plato_listo(&modulo_app,restaurante_config->nombre_restaurante, (char*)pcb->id_pedido, pcb->plato->nombre);
+    enviar_mensaje_plato_listo(&modulo_sindicato,restaurante_config->nombre_restaurante, (char*)pcb->id_pedido, pcb->plato->nombre);
 
     printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
 
     if(termino_pedido(pcb->id_pedido) == 1){
         
-        char* mensaje_terminar = "OK"; //DESCOMENTAR CUANDO SINDICATO ESTE LISTO enviar_mensaje_terminar_pedido(&modulo_sindicato,(char*)pcb->id_pedido,restaurante_config->nombre_restaurante);
+        char* mensaje_terminar = "OK";
+        enviar_mensaje_terminar_pedido(&modulo_sindicato,(char*)pcb->id_pedido,restaurante_config->nombre_restaurante);
         
         if(!strcmp(mensaje_terminar,"OK")){
             printf(" - El pedido %i fue reportado al Sindicato como finalizado\n",pcb->id_pedido);
@@ -575,13 +575,17 @@ t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_tota
 
     t_plato* plato = malloc(sizeof(t_plato));
 
-    plato->nombre = nombre;
-    plato->pasos = pasos;
+    plato->nombre = string_new();
+    string_append(&plato->nombre, nombre);
+    plato->pasos = malloc(sizeof(List));
+    initlist(plato->pasos);
+    memcpy(plato->pasos, pasos, sizeof(List));
     plato->cantidad_total = cantidad_total;
     plato->cantidad_listo = cantidad_listo;
 
     crear_pcb(pedido_id,pid,plato, nombre);
 
+    printf("PLATO SIGUIENTE DE LISTA: %p\n", plato->pasos->first->next);
 
     return plato;
 

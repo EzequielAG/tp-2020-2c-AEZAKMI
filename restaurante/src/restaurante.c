@@ -8,6 +8,10 @@ int main(int argc, char *argv[]){
     sem_finalizar_pedido = malloc(sizeof(sem_t));
     sem_init(sem_finalizar_pedido, 0, 1);
 
+    sem_mutex_confirmar_pedido = malloc(sizeof(sem_t));
+    sem_init(sem_mutex_confirmar_pedido, 0, 1);
+    
+
     
 
     //INICIALIZACION CON VARIABLES GLOBALES
@@ -38,13 +42,7 @@ int main(int argc, char *argv[]){
 
 
 
-    pthread_t iniciar_server;
-    pthread_create(&iniciar_server, NULL, (void*) escuchar_servidor, handle_client);
-    pthread_detach(iniciar_server);
-    
-
-
-    sem_wait(sem_exec);
+    iniciar_servidor("127.0.0.1", "5002", handle_client);
 
 
     //planificacion_fifo();
@@ -52,13 +50,6 @@ int main(int argc, char *argv[]){
     // ver_estado_pcb();
 
     return 0;
-}
-
-void* escuchar_servidor(void* handle_client){
-    
-    iniciar_servidor("127.0.0.1", "5002", handle_client);
-
-    return NULL;
 }
 
 // Comienzo handles
@@ -165,7 +156,7 @@ void handle_anadir_plato(t_result* result){
 
 
 void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS 
-
+    sem_wait(sem_mutex_confirmar_pedido);
     r_obtener_pedido* pedido = enviar_mensaje_obtener_pedido(&modulo_sindicato,restaurante_config->nombre_restaurante,result->mensajes->mensajes[1]);
 
     List lista_platos_confirmados;
@@ -184,11 +175,19 @@ void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS
 
         for(int i = 0; i < (atoi(info_comida->cantidad_total) - atoi(info_comida->cantidad_lista));i++)
         {
-            List* lista_pasos = malloc(sizeof(List));
-            initlist(lista_pasos);
-            memcpy(lista_pasos, lista_pasosAux, sizeof(List));
+            List lista_pasos;
+            initlist(&lista_pasos);
 
-            t_plato* plato_creado = crear_plato(info_comida->comida ,lista_pasos, pedido_id, atoi(info_comida->cantidad_total), atoi(info_comida->cantidad_lista),asignar_pid());
+            for(IteratorList iter = beginlist(*lista_pasosAux); iter != NULL; iter = nextlist(iter)){
+                t_paso* paso = (t_paso*) dataiterlist(iter);
+
+                t_paso* pasoAux = malloc(sizeof(t_paso));
+                memcpy(pasoAux, paso, sizeof(t_paso));
+                pushbacklist(&lista_pasos, pasoAux);
+            }
+
+
+            t_plato* plato_creado = crear_plato(info_comida->comida ,&lista_pasos, pedido_id, atoi(info_comida->cantidad_total), atoi(info_comida->cantidad_lista),asignar_pid());
             pushbacklist(&lista_platos_confirmados,plato_creado);
         }
         
@@ -203,7 +202,7 @@ void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS
 
     pushbacklist(&lista_pedidos,pedido_creado);
 
-
+    sem_post(sem_mutex_confirmar_pedido);
 }
 
 

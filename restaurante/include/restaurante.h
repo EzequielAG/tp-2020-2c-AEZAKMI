@@ -37,6 +37,7 @@ void ver_estado_pcb();
 void* escuchar_servidor(void* handle_client);
 void modificar_pcb();
 sem_t* sem_id;
+sem_t* sem_mutex_confirmar_pedido;
 char* armar_string_obtener_pedido(r_obtener_pedido* pedido);
 
 

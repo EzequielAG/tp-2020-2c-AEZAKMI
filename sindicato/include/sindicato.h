@@ -27,5 +27,8 @@ void process_line(char* line);
 void handle_crear_restaurante(char* nombre, char* cantidad_cocineros, char* posicion, char* afinidad_cocineros, char* platos, char* precio_platos, char* cantidad_hornos);
 void handle_crear_receta(char* nombre, char* pasos, char* tiempo_pasos);
 void handle_handshake_restaurante(int socket);
-
+bool platos_iguales(char* plato, char* comida);
+char* sacar_corchetes(char* array);
+int obtener_cantidad_pedidos(char* restaurante);
+void handle_handshake_cliente(int socket);
 #endif

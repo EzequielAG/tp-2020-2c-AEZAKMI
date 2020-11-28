@@ -41,7 +41,7 @@ typedef struct {
     List* afinidades;
     char* pos_x;
     char* pos_y;
-    receta_precio** recetas_precio;
+    List* recetas_precio;
     char* cantidad_hornos;
     char* cantidad_pedidos;
     char* cantidad_cocineros;
@@ -77,7 +77,7 @@ typedef struct {
 
 int obtener_numero_mensaje(char* mensaje_tipo);
 
-receta_precio** obtener_receta_precios(char* array_mensajes);
+List* obtener_receta_precios(char* platos, char* precioplatos);
 
 
 char** obtener_array_mensajes(char* array_mensaje);

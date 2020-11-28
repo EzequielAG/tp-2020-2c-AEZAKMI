@@ -103,7 +103,8 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
         printf("Faltan parametros \n");
         return NULL;
     }
-
+    // char* [7] = [afinidades] [pos x] [pos y]   [platos] [precioPlatos] [cantidadHornos] [cantidadPedidos] [cantidadCocineros]
+    //             plato,plato     1      4    receta1,12|receta2,25|...       3                 5                  3
     char* tipo_mensaje = string_itoa(obtener_restaurante);
     char* obtener_restaurante[2] ={tipo_mensaje,restaurante};
     int socket = enviar_mensaje_modulo(modulo, obtener_restaurante, 2);
@@ -115,10 +116,10 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
     respuesta_obtener_restaurante->afinidades = obtener_list_mensajes(respuesta->mensajes[0]);
     respuesta_obtener_restaurante->pos_x = respuesta->mensajes[1];
     respuesta_obtener_restaurante->pos_y = respuesta->mensajes[2];
-    respuesta_obtener_restaurante->recetas_precio = obtener_receta_precios(respuesta->mensajes[3]);
-    respuesta_obtener_restaurante->cantidad_hornos = respuesta->mensajes[4];
-    respuesta_obtener_restaurante->cantidad_pedidos = respuesta->mensajes[5];
-    respuesta_obtener_restaurante->cantidad_cocineros = respuesta->mensajes[6];
+    respuesta_obtener_restaurante->recetas_precio = obtener_receta_precios(respuesta->mensajes[3], respuesta->mensajes[4]);
+    respuesta_obtener_restaurante->cantidad_hornos = respuesta->mensajes[5];
+    respuesta_obtener_restaurante->cantidad_pedidos = respuesta->mensajes[6];
+    respuesta_obtener_restaurante->cantidad_cocineros = respuesta->mensajes[7];
 
     for (int i= 0; i < *respuesta->size; i++){
        printf("%s ", respuesta->mensajes[i]);
@@ -134,7 +135,7 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
 char** obtener_array_mensajes(char* array_mensaje){
 
     char** array_string = string_split(array_mensaje, ",");
-    array_string =separar_por_comillas(array_string);
+    // array_string =separar_por_comillas(array_string);
  
     return array_string;
 
@@ -148,17 +149,26 @@ List* obtener_list_mensajes(char* array_mensaje){
     return resultado;
 }
 
-receta_precio** obtener_receta_precios(char* array_mensajes){
+List* obtener_receta_precios(char* platos, char* precioplatos){
 
-    char** array_string = string_split(array_mensajes, "|");
+    char** array_platos = string_split(platos, ",");
+    char** array_precioplatos = string_split(precioplatos, ",");
 
-    receta_precio** receta_precio_final = malloc ( sizeof(receta_precio) * sizeof(receta_precio) );
+    List* receta_precio_final = malloc (sizeof(List));
+    initlist(receta_precio_final);
 
-    for(int i = 0; array_string[i]!=NULL; i++){
-        char** receta_precio_individual = string_split(array_string[i], ",");
+    for(int i = 0; array_platos[i]!=NULL; i++){
+        receta_precio* recetaprecio = malloc(sizeof(receta_precio));
 
-        receta_precio_final[i]->receta = receta_precio_individual[0];
-        receta_precio_final[i]->precio = receta_precio_individual[1];
+        recetaprecio->receta = string_new();
+        string_append(&recetaprecio->receta,  array_platos[i]);
+
+        recetaprecio->precio = string_new();
+        if (array_precioplatos[i] == NULL){
+            string_append(&recetaprecio->precio, "0");
+        }
+
+        pushbacklist(receta_precio_final, recetaprecio);
 
     }
 
@@ -177,15 +187,10 @@ List* enviar_mensaje_consultar_platos(t_modulo* modulo, char* restaurante){
     char* tipo_mensaje = string_itoa(consultar_platos);
     int socket;
 
-    if(!strcmp((modulo->identificacion),"sindicato")){
-        char* consulta_platos[2] ={tipo_mensaje,restaurante};
-        socket = enviar_mensaje_modulo(modulo, consulta_platos, 2);
-    }else{
-        char* consulta_platos[1] ={tipo_mensaje};
-        socket = enviar_mensaje_modulo(modulo, consulta_platos, 1);
-    }
+    char* consulta_platos[2] ={tipo_mensaje,restaurante};
+    socket = enviar_mensaje_modulo(modulo, consulta_platos, 2);
 
-     if(socket == -1){
+    if(socket == -1){
         return NULL;
     }
 
@@ -379,6 +384,9 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
     }
     // char* [4] = [estado]     [platos]    [cantidadLista]     [cantidadTotal]
     //             PENDIENTE   plato,plato       1,2,3              1,2,3
+
+    // estado = Pendiente/Confirmado/Terminado
+
     char* tipo_mensaje = string_itoa(obtener_pedido);
 
     int socket = 0;
@@ -392,7 +400,7 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
     for (int i= 0; i < *respuesta->size; i++){
         printf("%s ", respuesta->mensajes[i]);
     } printf("\n");
-    if(!strcmp(respuesta->mensajes[0],"FAIL")){
+    if(*respuesta->size != 4){
 
         r_obtener_pedido* respuesta_obtener_pedido = NULL;
         
@@ -487,18 +495,23 @@ List* enviar_mensaje_obtener_receta(t_modulo* modulo, char* nombre_plato){
     t_mensajes* respuesta = receive_simple_messages(socket);
 
     printf("%s \n" , respuesta->mensajes[0]);
+    if (*respuesta->size == 1) {
+        return NULL;
+    } 
 
+    printf("PASOS=[%s]\nTIEMPOS=[%s]\n" , respuesta->mensajes[1], respuesta->mensajes[2]);
 
     char** respuesta_pasos = string_split(respuesta->mensajes[1], ",");
+    char** respuesta_tiempos = string_split(respuesta->mensajes[2], ",");
 
 
-    for(int i = 0; respuesta_pasos[i]!=NULL; i=i+2){
+    for(int i = 0; respuesta_pasos[i]!=NULL; i++){
 
-        t_paso* paso = NULL;
-
-        paso->nombre_paso = respuesta_pasos[i];
-        paso->ciclo_cpu = atoi(respuesta_pasos[i+1]);
-        //paso->se_ejecuto = 0;
+        t_paso* paso = malloc(sizeof(t_paso));
+    
+        paso->nombre_paso = string_new();
+        string_append(&paso->nombre_paso, respuesta_pasos[i]);
+        paso->ciclo_cpu = atoi(respuesta_tiempos[i]);
 
         pushbacklist(lista_pasos_receta,paso);
 

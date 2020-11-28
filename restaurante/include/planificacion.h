@@ -16,6 +16,7 @@
 List afinidades;
 List platos_restaurante;
 List lista_pedidos;
+List lista_controladora_ready;
 char* pos_x;
 char* pos_y;
 int cantidad_hornos;
@@ -49,7 +50,7 @@ typedef enum estado_proceso{
 typedef struct {
     
     char* nombre;
-    List pasos;
+    List* pasos;
     int cantidad_total;
     int cantidad_listo;
  
@@ -102,6 +103,13 @@ typedef struct{
 
 }t_exec;
 
+typedef struct{
+
+    t_pcb* pcb;
+    t_exec* exec;
+
+}t_controlar_ready;
+
 typedef struct {
     char* puerto_escucha;
     char* ip_sindicato;
@@ -129,7 +137,7 @@ void inicializar_colas();
 void inicializar_colas_ready();
 void inicializar_colas_exec();
 void inicializar_colas_io();
-void asignar_pcb_cocinero(t_ready* cola);
+void asignar_pcb_cocinero(t_pcb* pcb, t_exec* cocinero);
 void controlador_ready(t_ready* cola);
 void controlador_a_ready(t_ready* cola);
 void desuscribirse_clock(sem_t* ciclo_cpu);

@@ -180,22 +180,15 @@ void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS
         
         printf("Pedido %i - Info comida = %s \n",pedido_id,info_comida->comida);
 
-        List lista_pasos;
-        initlist(&lista_pasos);
-        lista_pasos = *enviar_mensaje_obtener_receta(&modulo_sindicato, info_comida->comida);
-
-        for(IteratorList iter_pasos = beginlist(lista_pasos); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
-
-                t_paso* paso = iter_pasos->data;
-                printf(" - Paso = %s \n",paso->nombre_paso);
-                printf(" - Ciclo CPU = %i \n",paso->ciclo_cpu);
-
-        }
-
+        List *lista_pasosAux = enviar_mensaje_obtener_receta(&modulo_sindicato, info_comida->comida);
 
         for(int i = 0; i < (atoi(info_comida->cantidad_total) - atoi(info_comida->cantidad_lista));i++)
         {
-            t_plato* plato_creado = crear_plato(info_comida->comida ,&lista_pasos, pedido_id, atoi(info_comida->cantidad_total), atoi(info_comida->cantidad_lista),asignar_pid());
+            List* lista_pasos = malloc(sizeof(List));
+            initlist(lista_pasos);
+            memcpy(lista_pasos, lista_pasosAux, sizeof(List));
+
+            t_plato* plato_creado = crear_plato(info_comida->comida ,lista_pasos, pedido_id, atoi(info_comida->cantidad_total), atoi(info_comida->cantidad_lista),asignar_pid());
             pushbacklist(&lista_platos_confirmados,plato_creado);
         }
         

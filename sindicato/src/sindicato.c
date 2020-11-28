@@ -628,7 +628,7 @@ void handle_terminar_pedido(int socket, char* id_pedido, char* restaurante){
 	char** pedido_info = string_split(pedido, " ");
 
 	//Verificar que el pedido esté en estado “Confirmado”. En caso contrario se deberá informar dicha situación.
-	if (strcmp(pedido_info[0], "Confirmado") != 0){
+	if (strcmp(pedido_info[0], "Confirmado") != 0){ //TODO: CAMBIE ACA
 		log_error(logger, "[Terminar Pedido] El pedido no esta en estado Confirmado");
 		char* respuesta[1] = {"El pedido no esta en estado Confirmado"};
 		send_messages_socket(socket, respuesta, 1);

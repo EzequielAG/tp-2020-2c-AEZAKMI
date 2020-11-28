@@ -64,6 +64,8 @@ typedef struct {
     char* nombre_restaurante;
     List platos;
     t_posicion posicion;
+    char* ip;
+    char* puerto;
 } t_restaurante;
 
 typedef struct {

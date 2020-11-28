@@ -21,8 +21,8 @@ void handle_seleccionar_restaurante(int socket, char* restaurante, char* cliente
 char* obtener_id_pedido(t_restaurante*);
 void  handle_crear_pedido(int, char*);
 void handle_handshake_cliente(int socket, char* id_cliente, int, int);
-void handle_handshake_restaurante(int socket, char* nombre_restaurante, int, int);
-t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante, int, int);
+void handle_handshake_restaurante(int socket, char* nombre_restaurante, int pos_x, int pos_y, char* ip, char* puerto);
+t_restaurante* nuevo_restaurante(int socket, char* nombre_restaurante, int pos_x, int pos_y, char* ip, char* puerto);
 void handle_consultar_platos(int, char*);
 void handle_anadir_plato(int,char*, char*, char*);
 int plato_en_restaurante(char* plato, List lista);

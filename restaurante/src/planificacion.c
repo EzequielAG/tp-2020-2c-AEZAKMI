@@ -7,40 +7,7 @@ void inicializar_colas()
     inicializar_colas_exec();
    
     printf("\n \n");
-    // printf("Las colas de ready creadas son: \n");
-    // for(IteratorList iter_ready = beginlist(colas_ready); iter_ready != NULL; iter_ready = nextlist(iter_ready)){
-    //     t_ready* cola_ready = iter_ready->data;
-    //     //printf("- %s \n",cola_ready->afinidad);
-
-
-    //     // for(IteratorList iter_espera = beginlist(cola_ready->pcb_espera); iter_espera != NULL; iter_espera = nextlist(iter_espera)){
-    //     //     t_pcb* pcb = iter_espera->data;
-
-    //     //     printf("Plato en espera %s \n",pcb->plato->nombre);
-
-    //     // }
-    //     printf("Los cocineros tienen afinidad: \n");
-    //     for(IteratorList iter_cocinero = beginlist(cola_ready->cocineros); iter_cocinero != NULL; iter_cocinero = nextlist(iter_cocinero)){
-    //         t_exec* cocinero = iter_cocinero->data;
-
-    //         printf(" %s \n",cocinero->afinidad);
-
-
-    //     }
-
-    // } printf("---------- \n");
-
-    // printf("La cantidad de hornos creadas es de: \n");
-    // for(IteratorList iter_horno = beginlist(hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
-    //     t_horno* horno = iter_horno->data;
-    //     printf("- %d \n", horno->ocupado);
-
-    // }printf("---------- \n");
-
-    
-
-
-  
+ 
 
 }
 
@@ -53,7 +20,7 @@ void iniciar_clock(){
 void clock_cpu(){
     
     while(true){
-        sleep(2); //todo: pasar tiempo del config
+        sleep(restaurante_config->retardo_cpu); //todo: pasar tiempo del config
 
         log_info(logger, "-----------CICLO-------------");
 
@@ -221,7 +188,9 @@ void paso_a_exec_FIFO(t_exec* cocinero){
     
     for(int i = 0; i<paso->ciclo_cpu; i++){ 
         sem_wait(cocinero->pcb->ciclo_cpu);
-        printf("PCB %i - Ejecutando paso %s \n",cocinero->pcb->pid,paso->nombre_paso);
+        char string_log[100];
+        sprintf(string_log, "PCB %i - Ejecutando paso %s \n",cocinero->pcb->pid,paso->nombre_paso);
+        log_info(logger, string_log);
     }
     paso = frontlist(*plato->pasos);
 
@@ -385,7 +354,7 @@ int paso_exit(t_pcb* pcb){
     if(termino_pedido(pcb->id_pedido) == 1){
         
         char* mensaje_terminar = "OK";
-        enviar_mensaje_terminar_pedido(&modulo_sindicato,(char*)pcb->id_pedido,restaurante_config->nombre_restaurante);
+        enviar_mensaje_terminar_pedido(&modulo_sindicato,string_itoa(pcb->id_pedido),restaurante_config->nombre_restaurante);
         
         if(!strcmp(mensaje_terminar,"OK")){
             printf(" - El pedido %i fue reportado al Sindicato como finalizado\n",pcb->id_pedido);
@@ -414,8 +383,13 @@ void paso_a_block(t_horno* horno){
     
     for(int i = 0; i < paso->ciclo_cpu; i++){
         sem_wait(horno->pcb->ciclo_cpu);
-        printf("HORNO %i - Paso: %s \n",horno->pcb->pid,   paso->nombre_paso);
+        
+        // printf("HORNO %i - Paso: %s \n",horno->pcb,   paso->nombre_paso);
     }
+
+    // char string_log[100];
+    // sprintf(string_log, " - Paso BLOCK: %s", paso->nombre_paso);
+    // log_info(logger, string_log);
 
     horno->ocupado = 0;
     pushbacklist(&hornos,horno);
@@ -581,7 +555,6 @@ t_plato* crear_plato(char* nombre, List* pasos, int pedido_id, int cantidad_tota
 
     crear_pcb(pedido_id,pid,plato, nombre);
 
-    printf("PLATO SIGUIENTE DE LISTA: %p\n", plato->pasos->first->next);
 
     return plato;
 
@@ -595,7 +568,6 @@ t_pcb* crear_pcb(int id_pedido,int pid,t_plato* plato, char* afinidad){
     pcb->id_pedido = id_pedido;
     pcb->afinidad = string_new();
     string_append(&pcb->afinidad, afinidad_por_nombre_plato(afinidad));
-    printf("AFINIDAD DEVUELTA: %s\n", afinidad_por_nombre_plato(afinidad));
     pcb->estado = NEW;
     pcb->plato = plato;    
     pcb->ciclo_cpu = malloc(sizeof(sem_t));

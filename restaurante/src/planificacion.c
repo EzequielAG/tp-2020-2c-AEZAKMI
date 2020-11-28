@@ -244,7 +244,6 @@ void paso_a_exec_FIFO(t_exec* cocinero){
     
 }
 
-
 void paso_a_exec_RR(t_exec* cocinero){
 
     t_ready* cola = cola_por_afinidad(cocinero->afinidad);
@@ -257,11 +256,10 @@ void paso_a_exec_RR(t_exec* cocinero){
 
     int i = 0;
 
-    while(i < quant && paso != NULL && strcmp(paso->nombre_paso, "HORNEAR")){
+    while(i < quant){
         sem_wait(cocinero->pcb->ciclo_cpu);
         paso->ciclo_cpu -= 1;
         printf("PCB %i - Ejecutando paso %s \n",cocinero->pcb->pid,paso->nombre_paso);
-        i++;
         if(paso->ciclo_cpu == 0)
         {
             popfrontlist(plato->pasos);
@@ -272,7 +270,7 @@ void paso_a_exec_RR(t_exec* cocinero){
                 pushbacklist(&cola->cocineros, cocinero);
                 sem_post(cola->sem_cocinero_libre);
                 return;
-            } else if (!strcmp(proximo_paso->nombre_paso, "HORNEAR")){
+            } else if (!strcmp(proximo_paso->nombre_paso, "Hornear")){
                 pushbacklist(&pcb_espera_horno, cocinero->pcb);
                 sem_post(sem_block);
                 pushbacklist(&cola->cocineros, cocinero);
@@ -280,10 +278,8 @@ void paso_a_exec_RR(t_exec* cocinero){
                 return;
             } 
             
-            paso_ready(cocinero->pcb);
-            pushbacklist(&cola->cocineros, cocinero);
-            sem_post(cola->sem_cocinero_libre);
         }
+        i++;
     }
     
     paso_ready(cocinero->pcb);
@@ -381,8 +377,8 @@ int paso_exit(t_pcb* pcb){
     pushbacklist(&colas_exit,pcb->plato);
     pcb->estado = EXIT;
 
-    enviar_mensaje_plato_listo(&modulo_app,restaurante_config->nombre_restaurante, (char*)pcb->id_pedido, pcb->plato->nombre);
-    enviar_mensaje_plato_listo(&modulo_sindicato,restaurante_config->nombre_restaurante, (char*)pcb->id_pedido, pcb->plato->nombre);
+    //enviar_mensaje_plato_listo(&modulo_app,restaurante_config->nombre_restaurante, string_itoa(pcb->id_pedido), pcb->plato->nombre);
+    enviar_mensaje_plato_listo(&modulo_sindicato,restaurante_config->nombre_restaurante, string_itoa(pcb->id_pedido), pcb->plato->nombre);
 
     printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
 

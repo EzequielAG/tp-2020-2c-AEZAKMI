@@ -14,6 +14,7 @@
 
 //VARIABLES GLOBALES
 List afinidades;
+List platos_restaurante;
 List lista_pedidos;
 char* pos_x;
 char* pos_y;
@@ -26,7 +27,7 @@ int socket_sindicato;
 int socket_app;
 t_modulo modulo_sindicato;
 t_modulo modulo_app;
-receta_precio** recetas;
+List recetas_precios;
 sem_t* sem_exec;
 sem_t* sem_block;
 sem_t* sem_ready;

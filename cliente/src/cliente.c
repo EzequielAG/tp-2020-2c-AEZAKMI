@@ -18,6 +18,7 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
+
     int resultado = handshake(modulo);
 
     printf("HANDSHAKE %d",resultado);

@@ -8,6 +8,8 @@ int main(int argc, char *argv[]){
     sem_finalizar_pedido = malloc(sizeof(sem_t));
     sem_init(sem_finalizar_pedido, 0, 1);
 
+    
+
     //INICIALIZACION CON VARIABLES GLOBALES
     restaurante_init(&restaurante_config, &logger);
    
@@ -23,12 +25,11 @@ int main(int argc, char *argv[]){
     handshake_init(modulo_app,modulo_sindicato);
 
     data_restaurante();
-
-    cantidad_pedidos = 0;
    
     inicializar_colas();
 
-    caso_uso();
+
+
 
 
     pthread_t iniciar_planificacion;
@@ -36,13 +37,18 @@ int main(int argc, char *argv[]){
     pthread_detach(iniciar_planificacion);
 
 
+
+    pthread_t iniciar_server;
+    pthread_create(&iniciar_server, NULL, (void*) escuchar_servidor, handle_client);
+    pthread_detach(iniciar_server);
+    
+
+
     sem_wait(sem_exec);
 
 
-    //sem_wait(sem_exec);
 
-    //iniciar_servidor("127.0.0.1", "5002", handle_client);
-    //handle_client();
+ 
     
     
 
@@ -55,7 +61,7 @@ int main(int argc, char *argv[]){
 
 void* escuchar_servidor(void* handle_client){
     
-    // iniciar_servidor("127.0.0.1", "5002", handle_client);
+    iniciar_servidor("127.0.0.1", "5002", handle_client);
 
     return NULL;
 }
@@ -75,6 +81,7 @@ void handle_client(t_result* result){
             send_message_socket(result->socket, "OK");
 
         }
+    
         
         if (tipo_mensaje == consultar_platos){
             // HACER SI HAY PLATOS
@@ -111,11 +118,18 @@ void handle_crear_pedido(int socket){
     char* id[1];
     char* respuesta[1];
     id[0] = string_itoa(asignar_pedido_id());
-       
-    respuesta[0] = "OK";//enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,id[0]);
 
-    if(!strcmp(respuesta[0],"OK")){
-        send_messages_socket(socket, id, 1);
+    char* respuesta_guardar_pedido = enviar_mensaje_guardar_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,id[0]);
+
+
+    printf("Guardar_pedido %s\n", respuesta_guardar_pedido);
+    respuesta[0] = respuesta_guardar_pedido;
+
+   
+    if(!strcmp(respuesta[0],"Ok")){
+        char* respuesta_ok[1];
+        respuesta_ok[0] = "El pedido fue generado con exito";
+        send_messages_socket(socket, respuesta_ok, 1);
         return;
     }
     
@@ -181,7 +195,7 @@ void handle_obtener_restaurante(r_obtener_restaurante* respuesta){
     cantidad_hornos = atoi(respuesta->cantidad_hornos);
     cantidad_pedidos = atoi(respuesta->cantidad_pedidos);
     cantidad_cocineros = atoi(respuesta->cantidad_cocineros);
-    recetas = respuesta->recetas_precio; // REVISAR ESTO
+    recetas_precios = *respuesta->recetas_precio; // REVISAR ESTO
 
 }
 void caso_uso(){
@@ -329,13 +343,18 @@ void data_restaurante(){
 
     printf("<< RESTAURANTE >> Iniciado con posiciones x = %s ; y = %s\n", pos_x,pos_y);
     
-    for(int j = 0;j< 0;j++)  {
-
-        printf("<< RESTAURANTE >> Iniciado con recetas = %s %s\n", recetas[j]->precio, recetas[j]->receta);
-    }
 
     printf("<< RESTAURANTE >> Iniciado con cantidad de hornos = %d\n", cantidad_hornos);
     printf("<< RESTAURANTE >> Iniciado con cantidad de cocineros = %d\n", cantidad_cocineros);
+    printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %i\n", cantidad_pedidos);
+
+   for(IteratorList iter_plato = beginlist(recetas_precios); iter_plato != NULL; iter_plato = nextlist(iter_plato))
+    {
+        receta_precio* receta_precio = iter_plato->data;
+
+        printf("<< RESTAURANTE >> Iniciado con plato = %s y precio = %s \n", receta_precio->receta, receta_precio->precio);
+
+    }
     printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %i\n", cantidad_pedidos);
 
 }
@@ -419,7 +438,8 @@ void restaurante_init(t_restaurante_config** restaurante_config, t_log** logger)
     *logger = init_logger((*restaurante_config)->ruta_log, "restaurante", LOG_LEVEL_INFO);
     pos_x = malloc(sizeof(char*));
     pos_y = malloc(sizeof(char*));
-    recetas = malloc(sizeof(receta_precio**));
+    initlist(&recetas_precios);
+    // recetas = malloc(sizeof(receta_precio**));
     cantidad_pedidos = 0;
     cantidad_platos = 0;
     pid = 0;
@@ -486,6 +506,7 @@ void restaurante_destroy(t_restaurante_config* restaurante_config) {
     free(restaurante_config->algoritmo_planificador);
     free(restaurante_config->nombre_restaurante);
     free(restaurante_config);
+
 }
 
 void handshake_init(t_modulo modulo1, t_modulo modulo2){
@@ -497,7 +518,15 @@ void handshake_init(t_modulo modulo1, t_modulo modulo2){
         inicializacion_default();
     }
     else{
-        handle_obtener_restaurante(enviar_mensaje_obtener_restaurante(&modulo2, restaurante_config->nombre_restaurante));
+        r_obtener_restaurante* restaurante_datos = enviar_mensaje_obtener_restaurante(&modulo2, restaurante_config->nombre_restaurante);
+
+        if(restaurante_datos==NULL){    
+            printf("No existe el restaurante en sindicato \n");
+
+        }else{
+            handle_obtener_restaurante(restaurante_datos);
+        }
+  
     }
 
     int handshake_app_r = handshake_app(&modulo1);

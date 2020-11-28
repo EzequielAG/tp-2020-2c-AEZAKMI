@@ -171,15 +171,27 @@ void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS
     List lista_platos_confirmados;
     initlist(&lista_platos_confirmados);
 
-    int pedido_id = asignar_pedido_id();
+    int pedido_id =  atoi(result->mensajes->mensajes[1]);//asignar_pedido_id();
 
     for(IteratorList iter_plato = beginlist(*pedido->info_comidas); iter_plato != NULL; iter_plato = nextlist(iter_plato)){
 
-        informacion_comidas* info_comida = iter_plato -> data;
+        informacion_comidas* info_comida = iter_plato->data;
         //TODO: AGREGAR LISTA PASOS
+        
+        printf("Pedido %i - Info comida = %s \n",pedido_id,info_comida->comida);
 
         List lista_pasos;
         initlist(&lista_pasos);
+        lista_pasos = *enviar_mensaje_obtener_receta(&modulo_sindicato, info_comida->comida);
+
+        for(IteratorList iter_pasos = beginlist(lista_pasos); iter_pasos != NULL; iter_pasos = nextlist(iter_pasos)){
+
+                t_paso* paso = iter_pasos->data;
+                printf(" - Paso = %s \n",paso->nombre_paso);
+                printf(" - Ciclo CPU = %i \n",paso->ciclo_cpu);
+
+        }
+
 
         for(int i = 0; i < (atoi(info_comida->cantidad_total) - atoi(info_comida->cantidad_lista));i++)
         {

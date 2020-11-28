@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
 
 
 
-    iniciar_servidor("127.0.0.1", "5002", handle_client);
+    iniciar_servidor(restaurante_config->ip_escucha, restaurante_config->puerto_escucha, handle_client);
 
 
     //planificacion_fifo();
@@ -363,24 +363,48 @@ void data_restaurante(){
 
     for(IteratorList iterator_afinidades = beginlist(afinidades); iterator_afinidades != NULL; iterator_afinidades = nextlist(iterator_afinidades))
     {
-        printf("<< RESTAURANTE >> Iniciado con afinidades = %s \n", (char*)iterator_afinidades->data);
+        // printf("<< RESTAURANTE >> Iniciado con afinidades = %s \n", (char*)iterator_afinidades->data);
+
+        char string_log[100];
+        sprintf(string_log, "<< RESTAURANTE >> Iniciado con afinidades = %s \n", (char*)iterator_afinidades->data);
+        log_info(logger, string_log);
     }
 
-    printf("<< RESTAURANTE >> Iniciado con posiciones x = %s ; y = %s\n", pos_x,pos_y);
-    
+    // printf("<< RESTAURANTE >> Iniciado con posiciones x = %s ; y = %s\n", pos_x,pos_y);
+    // printf("<< RESTAURANTE >> Iniciado con cantidad de hornos = %d\n", cantidad_hornos);
+    // printf("<< RESTAURANTE >> Iniciado con cantidad de cocineros = %d\n", cantidad_cocineros);
+    // printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %i\n", cantidad_pedidos);
+        
+    char string_log1[100];
+    sprintf(string_log1, "<< RESTAURANTE >> Iniciado con posiciones x = %s ; y = %s\n", pos_x,pos_y);
+    log_info(logger, string_log1);
 
-    printf("<< RESTAURANTE >> Iniciado con cantidad de hornos = %d\n", cantidad_hornos);
-    printf("<< RESTAURANTE >> Iniciado con cantidad de cocineros = %d\n", cantidad_cocineros);
-    printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %i\n", cantidad_pedidos);
+    char string_log2[100];
+    sprintf(string_log2, "<< RESTAURANTE >> Iniciado con cantidad de hornos = %d\n", cantidad_hornos);
+    log_info(logger, string_log2);
+
+    char string_log3[100];
+    sprintf(string_log3, "<< RESTAURANTE >> Iniciado con cantidad de cocineros = %d\n", cantidad_cocineros);
+    log_info(logger, string_log3);
+
+    char string_log4[100];
+    sprintf(string_log4, "<< RESTAURANTE >> Iniciado con cantidad de pedidos = %i\n", cantidad_pedidos);
+    log_info(logger, string_log4);
+
 
    for(IteratorList iter_plato = beginlist(recetas_precios); iter_plato != NULL; iter_plato = nextlist(iter_plato))
     {
         receta_precio* receta_precio = iter_plato->data;
 
-        printf("<< RESTAURANTE >> Iniciado con plato = %s y precio = %s \n", receta_precio->receta, receta_precio->precio);
+    char string_log5[100];
+    sprintf(string_log5, "<< RESTAURANTE >> Iniciado con plato = %s y precio = %s \n", receta_precio->receta, receta_precio->precio);
+    log_info(logger, string_log5);
 
     }
-    printf("<< RESTAURANTE >> Iniciado con cantidad de pedidos = %i\n", cantidad_pedidos);
+
+    char string_log6[100];
+    sprintf(string_log6, "<< RESTAURANTE >> Iniciado con cantidad de pedidos = %i\n", cantidad_pedidos);
+    log_info(logger, string_log6);
 
 }
 
@@ -519,6 +543,8 @@ void restaurante_config_parser(t_config* config, t_restaurante_config* restauran
     restaurante_config->ruta_log = strdup(config_get_string_value(config, "ARCHIVO_LOG"));
     restaurante_config->algoritmo_planificador = strdup(config_get_string_value(config, "ALGORITMO_PLANIFICACION"));
     restaurante_config->nombre_restaurante = strdup(config_get_string_value(config, "NOMBRE_RESTAURANTE"));
+    restaurante_config->ip_escucha = strdup(config_get_string_value(config, "IP_ESCUCHA"));
+    restaurante_config->retardo_cpu = config_get_int_value(config, "RETARDO_CPU");
 }
 
 void restaurante_destroy(t_restaurante_config* restaurante_config) {
@@ -540,7 +566,6 @@ void handshake_init(t_modulo modulo1, t_modulo modulo2){
 
     if (handshake_sindicato_r == -1){
         printf("No se pudo realizar la conexion inicial con el modulo sindicato\n");
-        inicializacion_default();
     }
     else{
         r_obtener_restaurante* restaurante_datos = enviar_mensaje_obtener_restaurante(&modulo2, restaurante_config->nombre_restaurante);

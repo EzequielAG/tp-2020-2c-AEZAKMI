@@ -116,10 +116,11 @@ void handle_crear_pedido(int socket, char* id_cliente){
         sem_post(sem_id_pedido);
     }
 
-    if(strcmp(id_pedido, "FAIL")){
-        enviar_mensaje_guardar_pedido(&modulo_comanda, restaurante->nombre_restaurante, respuesta[0]);
+    if(strcmp(respuesta[0], "FAIL")){
+        respuesta[0] = enviar_mensaje_guardar_pedido(&modulo_comanda, restaurante->nombre_restaurante, respuesta[0]);
+    } if(strcmp(respuesta[0], "FAIL")){
+        inicializar_pedido_semaforo(id_pedido, restaurante->nombre_restaurante);
     }
-    inicializar_pedido_semaforo(id_pedido, restaurante->nombre_restaurante);
     send_messages_socket(socket, respuesta, 1);
 
 }
@@ -385,13 +386,13 @@ void handle_confirmar_pedido(int socket, char* id_cliente, char* id_pedido){
         arrayReturn[0] = armar_string_consultar_pedido(&pedido);
     }
     if(!strcmp(restaurante->nombre_restaurante, "Resto Default")){
-        crear_pcb(restaurante->nombre_restaurante, atoi(id_pedido), id_cliente);
 
         respuesta[0] = enviar_mensaje_confirmar_pedido(&modulo_comanda, id_pedido, restaurante->nombre_restaurante);
             if(!strcmp(respuesta[0], "FAIL")){
                 send_messages_socket(socket, respuesta, 1);
                 return;
             }
+        crear_pcb(restaurante->nombre_restaurante, atoi(id_pedido), id_cliente);
 
         send_messages_socket(socket, respuesta, 1);
 

@@ -14,11 +14,11 @@ typedef struct {
     int id_pedido;
     char* restaurante;
     char* cliente;
-    int estimacion;
-    int estimacion_anterior;
+    double estimacion;
+    double estimacion_anterior;
     int rafaga_anterior;
     int ciclos_espera;
-    int valorHRRN;
+    double valorHRRN;
     t_repartidor* repartidor_actual;
 } t_pcb;
 
@@ -29,6 +29,7 @@ sem_t* sem_pcb_ready;
 List pcb_ready;
 sem_t* sem_grado_multiprocesamiento;
 List pedidos_terminados;
+sem_t* sem_ciclo_espera_HRRN;
 
 typedef struct {
     int posx;

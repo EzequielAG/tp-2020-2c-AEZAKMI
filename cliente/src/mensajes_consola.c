@@ -3,15 +3,16 @@
 void leer_consola(t_log* logger,t_modulo* modulo) {
 
     pthread_t thread_mensaje;
-    t_struct_mensajes* t_parametro_mensajes = malloc(sizeof(t_struct_mensajes));
-
-	t_parametro_mensajes->modulo = modulo;
 	
 	char* leido = readline(">");
+    
 
 	while(strncmp(leido, "", 1) != 0) {
+        t_struct_mensajes* t_parametro_mensajes = malloc(sizeof(t_struct_mensajes));
+        t_parametro_mensajes->modulo = modulo;
 		log_info(logger, leido);
-        t_parametro_mensajes->mensaje_completo = leido;
+        t_parametro_mensajes->mensaje_completo = string_new();
+        string_append(& t_parametro_mensajes->mensaje_completo, leido);
         pthread_create(&thread_mensaje,NULL,(void*)enviar_mensajes_por_consola, t_parametro_mensajes);
 	    pthread_detach(thread_mensaje);
         //enviar_mensajes_por_consola(t_parametro_mensajes);

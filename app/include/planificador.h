@@ -23,5 +23,7 @@ void clock_cpu();
 void planificar_corto_plazo_FIFO();
 void planificar_corto_plazo_SJF();
 void asignar_datos_pedido(t_pcb* pcb);
+void planificar_corto_plazo_HRRN();
+void aumentar_espera_HRRN();
 t_repartidor* obtener_repartidor_mas_cercano(t_pcb* pcb);
 #endif

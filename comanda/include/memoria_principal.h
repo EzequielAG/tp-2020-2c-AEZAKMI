@@ -66,13 +66,20 @@ void desalojarPedido(l_proceso *resto, l_segmento* segmento);
 void pasarPaginasAPrincipal(l_segmento*);
 void ocuparFrame(void*, t_bitarray *, List);
 void desocuparFrame(void*, t_bitarray *, List);
+char* obtenerEstadoPedido(int estado);
 void pasarSupremo(l_pagina* paginaSwap);
 void imprimirBitMap();
 void imprimirTodo();
 void imprimirMemoria();
 void *puntero_memoria_principal;
 
+// SEMAFOROS
 
+sem_t* sem_mutex_algoritmos;
+sem_t* sem_ocupar_frame;
+sem_t* sem_mutex_swap_libre;
+sem_t* sem_mutex_eliminar_segmento;
+sem_t* sem_mutex_num_pagina;
 // FINDS
 
 void *frameLibre();

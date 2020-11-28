@@ -128,11 +128,11 @@ void handle_obtener_pedido(t_result* result){
 
     if(segmento != NULL){
 
-        string_append(&arrayReturn[0], string_itoa(segmento->estadoPedido));
+        string_append(&arrayReturn[0], obtenerEstadoPedido(segmento->estadoPedido));
 
         for(iterator = beginlist(*segmento->punteroTablaPaginas); iterator != NULL; iterator = nextlist(iterator)){
             l_pagina* pagina = (l_pagina*) dataiterlist(iterator);
-            l_frame* frame = pagina->frame;
+            l_frame* frame = pagina->swap;
 
             char* cantidad = string_itoa(frame->cantidadPlato);
             char* cantidadLista = string_itoa(frame->cantidadLista);
@@ -152,9 +152,6 @@ void handle_obtener_pedido(t_result* result){
         send_messages_socket(result->socket, arrayReturn, 1);
         imprimirTodo();
     }
-    // for(int i=0; i<4; i++){
-    //     free(arrayReturn[i]);
-    // }
     liberar_conexion(result->socket);
    
 }

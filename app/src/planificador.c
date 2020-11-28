@@ -16,9 +16,12 @@ void iniciar_planificador(){
     sem_pcb_ready =  malloc(sizeof(sem_t));
     sem_init(sem_pcb_ready, 0, 0);
 
+    sem_ciclo_espera_HRRN = malloc(sizeof(sem_t));
+    sem_init(sem_ciclo_espera_HRRN, 0, 0);
+
     sem_grado_multiprocesamiento = malloc(sizeof(sem_t));
     sem_init(sem_grado_multiprocesamiento, 0, app_config->grado_multiprocesamiento);
-    
+
     iniciar_repartidores();
 
     //pcb_prueba();
@@ -71,8 +74,6 @@ void iniciar_repartidores(){
         repartidor_actual->cansancio = 0;
         repartidor_actual->nuevo_pedido = malloc(sizeof(sem_t));
         sem_init(repartidor_actual->nuevo_pedido, 0, 0);
-        // repartidor_actual->espera_pedido = malloc(sizeof(sem_t));
-        // sem_init(repartidor_actual->espera_pedido, 0, 0);
         repartidor_actual->ciclo_cpu = malloc(sizeof(sem_t));
         sem_init(repartidor_actual->ciclo_cpu, 0, 0);
 
@@ -103,6 +104,7 @@ void iniciar_planificador_corto_plazo(){
     } else if (!strcmp(app_config->algoritmo_planificacion, "SJF")){
         planificar_corto_plazo_SJF();
     } else if (!strcmp(app_config->algoritmo_planificacion, "HRRN")){
+        pushbacklist(&suscriptores_cpu, sem_ciclo_espera_HRRN);
         pthread_t thread;
         pthread_create(&thread,NULL,(void*)aumentar_espera_HRRN, NULL);
 	    pthread_detach(thread);
@@ -122,8 +124,10 @@ void planificar_largo_plazo(){
         repartidor->pcb_actual = pcb;
         pcb->repartidor_actual = repartidor;
 
+        t_restaurante *restaurante = buscar_restaurante_lista(pcb->restaurante);
+
         char string_log[200];
-        sprintf(string_log, "Se asigna PCB: x=%d - y=%d | REPARTIDOR: x=%d - y=%d\n", repartidor->pedido->posicion_restaurante.posx, repartidor->pedido->posicion_restaurante.posy, repartidor->posicion.posx, repartidor->posicion.posy);
+        sprintf(string_log, "Se asigna PCB: x=%d - y=%d | REPARTIDOR: x=%d - y=%d\n", restaurante->posicion.posx, restaurante->posicion.posy, repartidor->posicion.posx, repartidor->posicion.posy);
         log_info(logger, string_log);
 
         sem_post(repartidor->nuevo_pedido);
@@ -238,7 +242,7 @@ void planificar_corto_plazo_HRRN(){
         sem_wait(sem_grado_multiprocesamiento);
         sem_wait(sem_mutex_sjf);
 
-        int alpha = app_config->alpha;
+        double alpha = app_config->alpha;
 
         int mejor = 999999;
         IteratorList elMejor;
@@ -249,10 +253,10 @@ void planificar_corto_plazo_HRRN(){
 
             if(pcb->estimacion == -1){
                 pcb->estimacion = alpha*pcb->rafaga_anterior + (1-alpha)*pcb->estimacion_anterior;
-                pcb->valorHRRN = (pcb->estimacion+pcb->espera)/pcb->estimacion;
             }
+            pcb->valorHRRN = (pcb->estimacion+pcb->ciclos_espera)/pcb->estimacion;
             if(pcb->valorHRRN < mejor){
-                mejor = pcb->estimacion;
+                mejor = pcb->valorHRRN;
                 elMejor = iter;
             }
 
@@ -262,6 +266,7 @@ void planificar_corto_plazo_HRRN(){
         pcb->rafaga_anterior = 0;
         pcb->estimacion_anterior = pcb->estimacion;
         pcb->estimacion = -1;
+        pcb->ciclos_espera = 0;
 
         sem_post(sem_mutex_sjf);
 
@@ -278,10 +283,10 @@ void aumentar_espera_HRRN(){
 
     while(true){
         sem_wait(sem_ciclo_espera_HRRN);
-        for(IteratorList iter = beginlist(pcb_ready); iter != NULL; iter = nextlist(iter){
+        for(IteratorList iter = beginlist(pcb_ready); iter != NULL; iter = nextlist(iter)){
             t_pcb* pcb = (t_pcb*) dataiterlist(iter);
 
-            pcb->ciclo_espera += 1;
+            pcb->ciclos_espera += 1;
         }
     }
 }

@@ -66,8 +66,10 @@ void crear_pagina2(l_segmento *segmento, int cantidad, char *plato){
     l_pagina *pagina = malloc(sizeof(l_pagina));
 
 	l_frame *frame;
-
+	sem_wait(sem_mutex_num_pagina);
 	pagina->numPagina = numeroPaginaGlobal;
+	numeroPaginaGlobal += 1;
+	sem_post(sem_mutex_num_pagina);
 
 	pagina->bitUso = 0;
     pagina->bitPresencia = 0;
@@ -83,8 +85,6 @@ void crear_pagina2(l_segmento *segmento, int cantidad, char *plato){
 
     pushbacklist(segmento->punteroTablaPaginas, pagina);
 
-	numeroPaginaGlobal += 1;
-
 	modificarPagina(pagina);
 
 }
@@ -92,13 +92,10 @@ void crear_pagina2(l_segmento *segmento, int cantidad, char *plato){
 void terminarPlatoPagina(l_pagina *pagina){
 
 	l_frame *frame = pagina->frame;
-	if(frame->cantidadLista < frame->cantidadPlato){
-		frame->cantidadLista += 1;
-	}
+
+	frame->cantidadLista += 1;
 
 	pagina->bitModificado = 1;
-
-	//pagina->frame->cantidadLista += 1; //FALTA CONDICION POR SI NO QUEDAN PLATOS EN COLA
 
 }
 
@@ -144,7 +141,7 @@ void eliminarSegmento(l_proceso *resto, l_segmento* segmento){
 	l_pagina *pagina = NULL;
 
     IteratorList iterador = NULL;
-
+	sem_wait(sem_mutex_eliminar_segmento);
     for(iterador = beginlist(*segmento->punteroTablaPaginas);iterador!=NULL;iterador = nextlist(iterador)){
         pagina = dataiterlist(iterador);
 
@@ -155,8 +152,6 @@ void eliminarSegmento(l_proceso *resto, l_segmento* segmento){
 		}
 		desocuparFrame(pagina->swap, bitMapSwap, tablaSwap);
 		pagina->swap = NULL;
-
-		//free(pagina);
 		
     }
 
@@ -168,6 +163,8 @@ void eliminarSegmento(l_proceso *resto, l_segmento* segmento){
 	free(segmento->idPedido);
 
 	free(segmento);
+
+	sem_post(sem_mutex_eliminar_segmento);
 	
 
 }
@@ -227,7 +224,7 @@ void *frameLibre(){
 }
 
 void ocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
-
+	sem_wait(sem_ocupar_frame);
 	if(bitMapp == bitMapSwap){
 		for(int i=0; tamanioBitMapSwap > i; i++){
 
@@ -235,6 +232,7 @@ void ocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
 
 			if(punteroFrame == frame){
 				bitarray_set_bit(bitMapSwap, i);
+				sem_post(sem_ocupar_frame);
 				return;
 			}
 
@@ -246,6 +244,7 @@ void ocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
 
 			if(punteroFrame == frame){
 				bitarray_set_bit(bitMap, i);
+				sem_post(sem_ocupar_frame);
 				return;
 			}
 
@@ -257,7 +256,7 @@ void ocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
 }
 
 void desocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
-	
+	sem_wait(sem_ocupar_frame);
 	if(bitMapp == bitMapSwap){
 		for(int i=0; tamanioBitMapSwap > i; i++){
 
@@ -265,6 +264,7 @@ void desocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
 
 			if(punteroFrame == frame){
 				bitarray_clean_bit(bitMapSwap, i);
+				sem_post(sem_ocupar_frame);
 				return;
 			}
 
@@ -276,6 +276,7 @@ void desocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
 
 			if(punteroFrame == frame){
 				bitarray_clean_bit(bitMap, i);
+				sem_post(sem_ocupar_frame);
 				return;
 			}
 
@@ -284,7 +285,7 @@ void desocuparFrame(void* frame, t_bitarray *bitMapp, List lista){
 }
 
 void *frameLibreSwap(){
-	
+	sem_wait(sem_mutex_swap_libre);
 	for(int i=0; tamanioBitMapSwap > i; i++){
 
 		int bitOcupado = bitarray_test_bit(bitMapSwap, i);
@@ -292,11 +293,13 @@ void *frameLibreSwap(){
 
 		if(!bitOcupado){
 			bitarray_set_bit(bitMapSwap, i);
+			sem_post(sem_mutex_swap_libre);
 			return punteroSwap;
 		}
 
 	}
 
+	printf("\n\n\nSWAP LLENO\n\n\n");
 	return NULL;
 }
 
@@ -340,19 +343,15 @@ int pasarAPrincipal(l_pagina* paginaSwap){
 	if(paginaSwap->bitPresencia == 1){
 		return 1;
 	}
-
+	sem_wait(sem_mutex_algoritmos);
 	void* espacioLibre = ejecutarAlgoritmo();
 
-	if(espacioLibre != NULL){
-		
-		ocuparFrame(espacioLibre, bitMap, tablaFrames);
-		paginaSwap->frame = espacioLibre;
-		memcpy(espacioLibre, paginaSwap->swap, 32);
-    	paginaSwap->bitPresencia = 1;
-		return 1;
-	}
-
-	return 0;
+	ocuparFrame(espacioLibre, bitMap, tablaFrames);
+	paginaSwap->frame = espacioLibre;
+	memcpy(espacioLibre, paginaSwap->swap, 32);
+	paginaSwap->bitPresencia = 1;
+	sem_post(sem_mutex_algoritmos);
+	return 1;
 
 }
 
@@ -362,14 +361,19 @@ void *ejecutarAlgoritmo(){
 
 	if(framelibre != NULL) 
 		return framelibre;
+
 	char string_log[100];
     sprintf(string_log, "Ejecutando algoritmo: %s", algoritmo);
     log_info(logger, string_log);
-	if(!strcmp(algoritmo, "LRU")) 
-		return ejecutarLRU();
 	
-	if(!strcmp(algoritmo, "CLOCK_MEJ"))
-		return ejecutarClockMej();
+	if(!strcmp(algoritmo, "LRU")){
+		void* direccion = ejecutarLRU();
+		return direccion;
+	}
+	if(!strcmp(algoritmo, "CLOCK_MEJ")){
+		void* direccion = ejecutarClockMej();
+		return direccion;
+	}
 	
 	printf("ALGORITMO INVALIDO\n");
 
@@ -476,7 +480,7 @@ l_proceso *find_resto_lista(char* nombreRestaurante){
             return resto;
         }
     }
-     return NULL;
+    return NULL;
 
 }
 

@@ -30,6 +30,21 @@ int main(int argc, char *argv[]){
     semaforo_contador = malloc(sizeof(sem_t));
     sem_init(semaforo_contador, 0, 0);
 
+    sem_mutex_algoritmos = malloc(sizeof(sem_t));
+    sem_init(sem_mutex_algoritmos, 0, 1);
+
+    sem_ocupar_frame = malloc(sizeof(sem_t));
+    sem_init(sem_ocupar_frame, 0, 1);
+
+    sem_mutex_swap_libre = malloc(sizeof(sem_t));
+    sem_init(sem_mutex_swap_libre, 0, 1);
+
+    sem_mutex_eliminar_segmento = malloc(sizeof(sem_t));
+    sem_init(sem_mutex_eliminar_segmento, 0, 1);
+
+    sem_mutex_num_pagina = malloc(sizeof(sem_t));
+    sem_init(sem_mutex_num_pagina, 0, 1);
+    
     inicioClockMej = 1;
     
     printf("Imprimiendo el path %s", comanda_config->ruta_log);

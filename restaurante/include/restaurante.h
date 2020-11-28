@@ -29,6 +29,7 @@ void consultar_platos_f();
 void handle_crear_pedido(int socket);
 void handle_anadir_plato(t_result* result);
 void handle_confirmar_pedido(t_result* result);
+void handle_consultar_pedido(t_result* result);
 void data_restaurante();
 void ver_info_pedido(List* lista_pedidos);
 void caso_uso();
@@ -36,12 +37,7 @@ void ver_estado_pcb();
 void* escuchar_servidor(void* handle_client);
 void modificar_pcb();
 sem_t* sem_id;
-
-
-
-
-
-
+char* armar_string_obtener_pedido(r_obtener_pedido* pedido);
 
 
 #endif

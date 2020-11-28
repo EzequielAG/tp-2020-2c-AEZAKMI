@@ -105,11 +105,17 @@ r_obtener_restaurante* enviar_mensaje_obtener_restaurante(t_modulo* modulo, char
     }
     // char* [7] = [afinidades] [pos x] [pos y]   [platos] [precioPlatos] [cantidadHornos] [cantidadPedidos] [cantidadCocineros]
     //             plato,plato     1      4    receta1,12|receta2,25|...       3                 5                  3
+
     char* tipo_mensaje = string_itoa(obtener_restaurante);
     char* obtener_restaurante[2] ={tipo_mensaje,restaurante};
     int socket = enviar_mensaje_modulo(modulo, obtener_restaurante, 2);
 
     t_mensajes* respuesta = receive_simple_messages(socket);
+
+    if(!strcmp("El restaurante no existe",respuesta->mensajes[0])){
+        printf("NO EXISTE RESTAURANTE \n");
+        return NULL;
+    }
 
     r_obtener_restaurante* respuesta_obtener_restaurante = malloc (sizeof(r_obtener_restaurante));
 
@@ -158,18 +164,22 @@ List* obtener_receta_precios(char* platos, char* precioplatos){
     initlist(receta_precio_final);
 
     for(int i = 0; array_platos[i]!=NULL; i++){
+
         receta_precio* recetaprecio = malloc(sizeof(receta_precio));
 
         recetaprecio->receta = string_new();
         string_append(&recetaprecio->receta,  array_platos[i]);
 
         recetaprecio->precio = string_new();
+        
+
         if (array_precioplatos[i] == NULL){
             string_append(&recetaprecio->precio, "0");
+        }else{
+string_append(&recetaprecio->precio,  array_precioplatos[i]);
         }
 
         pushbacklist(receta_precio_final, recetaprecio);
-
     }
 
     return receta_precio_final;

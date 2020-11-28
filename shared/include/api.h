@@ -95,7 +95,7 @@ char* enviar_mensaje_anadir_plato(t_modulo* modulo, char* plato, char* id_pedido
 char* enviar_mensaje_guardar_plato(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida, char* cantidad);
 char* enviar_mensaje_confirmar_pedido(t_modulo* modulo,char* id_pedido, char* restaurante);
 char* enviar_mensaje_plato_listo(t_modulo* modulo, char* restaurante, char* id_pedido, char* comida);
-r_consultar_pedido* enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido);
+char* enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_pedido);
 r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 char* enviar_mensaje_finalizar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);
 char* enviar_mensaje_terminar_pedido(t_modulo* modulo, char* id_pedido,char* restaurante);

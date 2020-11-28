@@ -7,35 +7,35 @@ void inicializar_colas()
     inicializar_colas_exec();
    
     printf("\n \n");
-    printf("Las colas de ready creadas son: \n");
-    for(IteratorList iter_ready = beginlist(colas_ready); iter_ready != NULL; iter_ready = nextlist(iter_ready)){
-        t_ready* cola_ready = iter_ready->data;
-        //printf("- %s \n",cola_ready->afinidad);
+    // printf("Las colas de ready creadas son: \n");
+    // for(IteratorList iter_ready = beginlist(colas_ready); iter_ready != NULL; iter_ready = nextlist(iter_ready)){
+    //     t_ready* cola_ready = iter_ready->data;
+    //     //printf("- %s \n",cola_ready->afinidad);
 
 
-        // for(IteratorList iter_espera = beginlist(cola_ready->pcb_espera); iter_espera != NULL; iter_espera = nextlist(iter_espera)){
-        //     t_pcb* pcb = iter_espera->data;
+    //     // for(IteratorList iter_espera = beginlist(cola_ready->pcb_espera); iter_espera != NULL; iter_espera = nextlist(iter_espera)){
+    //     //     t_pcb* pcb = iter_espera->data;
 
-        //     printf("Plato en espera %s \n",pcb->plato->nombre);
+    //     //     printf("Plato en espera %s \n",pcb->plato->nombre);
 
-        // }
-        printf("Los cocineros tienen afinidad: \n");
-        for(IteratorList iter_cocinero = beginlist(cola_ready->cocineros); iter_cocinero != NULL; iter_cocinero = nextlist(iter_cocinero)){
-            t_exec* cocinero = iter_cocinero->data;
+    //     // }
+    //     printf("Los cocineros tienen afinidad: \n");
+    //     for(IteratorList iter_cocinero = beginlist(cola_ready->cocineros); iter_cocinero != NULL; iter_cocinero = nextlist(iter_cocinero)){
+    //         t_exec* cocinero = iter_cocinero->data;
 
-            printf(" %s \n",cocinero->afinidad);
+    //         printf(" %s \n",cocinero->afinidad);
 
 
-        }
+    //     }
 
-    } printf("---------- \n");
+    // } printf("---------- \n");
 
-    printf("La cantidad de hornos creadas es de: \n");
-    for(IteratorList iter_horno = beginlist(hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
-        t_horno* horno = iter_horno->data;
-        printf("- %d \n", horno->ocupado);
+    // printf("La cantidad de hornos creadas es de: \n");
+    // for(IteratorList iter_horno = beginlist(hornos); iter_horno != NULL; iter_horno = nextlist(iter_horno)){
+    //     t_horno* horno = iter_horno->data;
+    //     printf("- %d \n", horno->ocupado);
 
-    }printf("---------- \n");
+    // }printf("---------- \n");
 
     
 
@@ -611,6 +611,8 @@ int es_paso_io(t_paso* paso){
 
 
 void planificacion(){
+
+  
 
     pthread_t planificar_hornos;
     pthread_create(&planificar_hornos, NULL, (void*) controlador_hornos, NULL);

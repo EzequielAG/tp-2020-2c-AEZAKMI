@@ -18,6 +18,7 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
+
     int resultado = handshake(modulo);
 
     printf("HANDSHAKE %d",resultado);
@@ -52,7 +53,7 @@ t_cliente_config* cliente_config_loader(char* path_config_file) {
 
     cliente_config_parser(config, cliente_config);
     config_destroy(config);
-
+//
     return cliente_config;
 }
 

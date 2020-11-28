@@ -382,8 +382,8 @@ int paso_exit(t_pcb* pcb){
     pushbacklist(&colas_exit,pcb->plato);
     pcb->estado = EXIT;
 
-    enviar_mensaje_plato_listo(&modulo_app,restaurante_config->nombre_restaurante, (char*)pcb->id_pedido, pcb->plato->nombre);
-    enviar_mensaje_plato_listo(&modulo_sindicato,restaurante_config->nombre_restaurante, (char*)pcb->id_pedido, pcb->plato->nombre);
+    //enviar_mensaje_plato_listo(&modulo_app,restaurante_config->nombre_restaurante, string_itoa(pcb->id_pedido), pcb->plato->nombre);
+    enviar_mensaje_plato_listo(&modulo_sindicato,restaurante_config->nombre_restaurante, string_itoa(pcb->id_pedido), pcb->plato->nombre);
 
     printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
 

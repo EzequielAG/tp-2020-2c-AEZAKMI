@@ -46,9 +46,11 @@ char* get_path_bitmap_file(){
 }
 
 char* get_path_block_file(uint32_t id){
+	char* path_block = string_from_format("/Blocks/%d.AFIP", id);
 	char* path = string_new();
 	string_append(&path, sindicato_config->punto_montaje);
-	string_append(&path, string_from_format("/Blocks/%d.AFIP", id));
+	string_append(&path, path_block);
+	free(path_block);
 	return path;
 }
 /* --- END SUITES DE PATH O RUTAS --- */
@@ -356,8 +358,8 @@ void crear_bitmap(){
 		bitarray_clean_bit(bitmap, pos);
 	}
 	update_bitmap_file(bitmap);
-
-	// bitarray_destroy(bitmap);
+	free(bitarray);
+	bitarray_destroy(bitmap);
 }
 
 t_bitarray* get_bitarray(){
@@ -379,8 +381,9 @@ t_bitarray* get_bitarray(){
 	}
 
 	fclose(bitmap_file);
-
-	return bitarray_create_with_mode(bitarray, bitarray_size, LSB_FIRST);
+	t_bitarray* bitarray_created = bitarray_create_with_mode(bitarray, bitarray_size, LSB_FIRST);
+	free(bitarray);
+	return bitarray_created;
 }
 
 void modify_block(t_bitarray * bitmap, bool status, int position){
@@ -467,7 +470,9 @@ void crear_files(){
 void create_blocks(){
 	int cantidad_bloques = atoi(sindicato_config->blocks);
 	for(int id=0; id < cantidad_bloques; id++){
-		FILE * bloque = get_or_create_file(get_path_block_file(id), "w");
+		char* path_block_file = get_path_block_file(id);
+		FILE * bloque = get_or_create_file(path_block_file, "w");
+		free(path_block_file);
 		fclose(bloque);
 	}
 

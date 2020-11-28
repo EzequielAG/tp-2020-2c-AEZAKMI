@@ -355,6 +355,7 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* pl
         t_pedido_espera* pedido_espera = buscar_pedido_espera(id_pedido, restaurante);
         eliminar_pedido_espera(id_pedido, restaurante);
         sem_post(pedido_espera->semaforo);
+        printf("PEDIDO LISTO: %s\n", id_pedido);
     }
 
     send_messages_socket(socket, respuesta, 1);
@@ -365,10 +366,10 @@ void handle_plato_listo(int socket, char* restaurante, char* id_pedido, char* pl
 void handle_confirmar_pedido(int socket, char* id_cliente, char* id_pedido){
 
     char* respuesta[1];
-    char* arrayReturn[1];
+    // char* arrayReturn[1];
 
-    r_consultar_pedido pedido;
-    r_obtener_pedido *pedidoAux;
+    // r_consultar_pedido pedido;
+    // r_obtener_pedido *pedidoAux;
 
     t_cliente* cliente = buscar_cliente_lista(id_cliente);
 
@@ -381,15 +382,15 @@ void handle_confirmar_pedido(int socket, char* id_cliente, char* id_pedido){
     modulo_restaurante.socket = 0;
 
 
-    pedidoAux = enviar_mensaje_obtener_pedido(&modulo_comanda, id_pedido, restaurante->nombre_restaurante);
+    // pedidoAux = enviar_mensaje_obtener_pedido(&modulo_comanda, id_pedido, restaurante->nombre_restaurante);
     
-    if(pedidoAux != NULL){
-        pedido.restaurante = NULL;
-        pedido.estado = pedidoAux->estado;
-        pedido.info_comidas = pedidoAux->info_comidas;
+    // if(pedidoAux != NULL){
+    //     pedido.restaurante = NULL;
+    //     pedido.estado = pedidoAux->estado;
+    //     pedido.info_comidas = pedidoAux->info_comidas;
 
-        arrayReturn[0] = armar_string_consultar_pedido(&pedido);
-    }
+    //     arrayReturn[0] = armar_string_consultar_pedido(&pedido);
+    // }
     if(!strcmp(restaurante->nombre_restaurante, "Resto Default")){
 
         respuesta[0] = enviar_mensaje_confirmar_pedido(&modulo_comanda, id_pedido, restaurante->nombre_restaurante);
@@ -404,7 +405,7 @@ void handle_confirmar_pedido(int socket, char* id_cliente, char* id_pedido){
         return;
     }
     
-    respuesta[0] = enviar_mensaje_confirmar_pedido(&modulo_restaurante, id_pedido, NULL);
+    respuesta[0] = enviar_mensaje_confirmar_pedido(&modulo_restaurante, id_pedido, restaurante->nombre_restaurante);
     if(!strcmp(respuesta[0], "FAIL")){
         send_messages_socket(socket, respuesta, 1);
         return;

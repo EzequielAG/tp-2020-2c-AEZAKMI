@@ -368,7 +368,7 @@ void handle_confirmar_pedido(int socket, char* id_pedido, char* restaurante){
 	send_messages_socket(socket, respuesta, 1);
 }
 
-void handle_obtener_pedido(int socket, char* restaurante, char* id_pedido){
+void handle_obtener_pedido(int socket, char* id_pedido, char* restaurante){
 
 	//Verificar si el Restaurante existe dentro del File System. 
 	//Para esto se deberá buscar dentro del directorio Restaurantes si existe un subdirectorio con el nombre del Restaurante. 

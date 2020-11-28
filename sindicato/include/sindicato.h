@@ -14,7 +14,7 @@ void handle_client(t_result* result);
 void handle_consultar_platos(int socket, char* restaurante);
 void handle_guardar_plato(int socket, char* restaurante, char* id_pedido, char* comida, char* cantidad);
 void handle_confirmar_pedido(int socket, char* id_pedido,  char* restaurante);
-void handle_obtener_pedido(int socket, char* restaurante,  char* id_pedido);
+void handle_obtener_pedido(int socket, char* id_pedido,  char* restaurante);
 void handle_obtener_restaurante(int socket, char* restaurante);
 void handle_plato_listo(int socket, char* restaurante,  char* id_pedido, char* comida);
 void handle_obtener_receta(int socket, char* comida);

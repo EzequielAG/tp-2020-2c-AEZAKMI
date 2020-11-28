@@ -123,7 +123,7 @@ void handle_obtener_pedido(t_result* result){
 
     IteratorList iterator = NULL;
     char* arrayReturn[4] = {string_new(), string_new(), string_new(), string_new()};
-
+    // sem_wait(sem_mutex_obtener_pedido);
     l_segmento* segmento = obtener_pedido_en_memoria(result->mensajes->mensajes[1], result->mensajes->mensajes[2]);
 
     if(segmento != NULL){
@@ -132,7 +132,7 @@ void handle_obtener_pedido(t_result* result){
 
         for(iterator = beginlist(*segmento->punteroTablaPaginas); iterator != NULL; iterator = nextlist(iterator)){
             l_pagina* pagina = (l_pagina*) dataiterlist(iterator);
-            l_frame* frame = pagina->swap;
+            l_frame* frame = pagina->frame;
 
             char* cantidad = string_itoa(frame->cantidadPlato);
             char* cantidadLista = string_itoa(frame->cantidadLista);
@@ -153,6 +153,7 @@ void handle_obtener_pedido(t_result* result){
         imprimirTodo();
     }
     liberar_conexion(result->socket);
+    // sem_post(sem_mutex_obtener_pedido);
    
 }
 

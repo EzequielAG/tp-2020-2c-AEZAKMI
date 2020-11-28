@@ -184,7 +184,10 @@ void handle_anadir_plato(t_result* result){
 
 void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS 
     sem_wait(sem_mutex_confirmar_pedido);
-    r_obtener_pedido* pedido = enviar_mensaje_obtener_pedido(&modulo_sindicato,restaurante_config->nombre_restaurante,result->mensajes->mensajes[1]);
+    
+    enviar_mensaje_confirmar_pedido(&modulo_sindicato,result->mensajes->mensajes[1],restaurante_config->nombre_restaurante);
+    
+    r_obtener_pedido* pedido = enviar_mensaje_obtener_pedido(&modulo_sindicato,result->mensajes->mensajes[1],restaurante_config->nombre_restaurante);
 
     List lista_platos_confirmados;
     initlist(&lista_platos_confirmados);
@@ -228,6 +231,10 @@ void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS
     t_pedido* pedido_creado = creacion_pedido(pedido_id,&lista_platos_confirmados);
 
     pushbacklist(&lista_pedidos,pedido_creado);
+
+    char* respuesta[1] = {"Ok"};
+
+    send_messages_socket(result->socket, respuesta, 1);
 
     sem_post(sem_mutex_confirmar_pedido);
 }

@@ -289,6 +289,7 @@ int leer_metadata_afip(char * metadata_afip_adress){
 	char * block_size = config_get_string_value(metadata_afip_config, "BLOCK_SIZE");
 	char * blocks = config_get_string_value(metadata_afip_config, "BLOCKS");
 	char * magic_number = config_get_string_value(metadata_afip_config, "MAGIC_NUMBER");
+	config_destroy(metadata_afip_config);
 
 	printf("El tamaño de bloque es de %s\n", block_size);
 	printf("La cantidad de bloques es %s\n", blocks);
@@ -316,6 +317,7 @@ FILE * get_or_create_file(char* path_file, char * mode){
 		log_error(logger, "[Get Or Create File] No se creo el archivo de pedido");
 		exit(-1);
 	}
+	free(path_file);
 	return file;
 }
 /* --- BITMAP --- */

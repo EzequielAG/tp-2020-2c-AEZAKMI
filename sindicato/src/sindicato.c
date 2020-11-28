@@ -799,6 +799,8 @@ void process_line(char* line){
 		longitud++;
 	}
 
+	free(lineas);
+
 	if (strcmp("CrearRestaurante", array[0])== 0){
 		printf("Se reconoce el comando Crear Restaurante: %s\n", line);
 		if (longitud < 8){

@@ -421,6 +421,8 @@ r_obtener_pedido* enviar_mensaje_obtener_pedido(t_modulo* modulo, char* id_pedid
         return respuesta_obtener_pedido;
     }
 
+    printf("%s \n",respuesta->mensajes[0]);
+
     r_obtener_pedido* respuesta_obtener_pedido = malloc(sizeof(r_obtener_pedido));
 
     respuesta_obtener_pedido->estado = respuesta->mensajes[0];

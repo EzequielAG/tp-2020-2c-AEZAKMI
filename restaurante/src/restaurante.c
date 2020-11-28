@@ -111,7 +111,7 @@ void handle_client(t_result* result){
 
 void handle_consultar_pedido(t_result* result){
 
-    r_obtener_pedido* pedido = enviar_mensaje_obtener_pedido(&modulo_sindicato, result->mensajes->mensajes[1],restaurante_config->nombre_restaurante);
+    r_obtener_pedido* pedido = enviar_mensaje_obtener_pedido(&modulo_sindicato, restaurante_config->nombre_restaurante,result->mensajes->mensajes[1]);
 
     char* respuesta[1];
     respuesta[0] = armar_string_obtener_pedido(pedido);
@@ -166,7 +166,7 @@ void handle_anadir_plato(t_result* result){
 
 void handle_confirmar_pedido(t_result* result){ //REVISAR LISTAS 
 
-    r_obtener_pedido* pedido = enviar_mensaje_obtener_pedido(&modulo_sindicato, result->mensajes->mensajes[1],restaurante_config->nombre_restaurante);
+    r_obtener_pedido* pedido = enviar_mensaje_obtener_pedido(&modulo_sindicato,restaurante_config->nombre_restaurante,result->mensajes->mensajes[1]);
 
     List lista_platos_confirmados;
     initlist(&lista_platos_confirmados);

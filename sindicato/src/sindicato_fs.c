@@ -233,16 +233,13 @@ int get_or_create_folder(char* file_adress){
 	DIR* folder_dir;
 
 	if ((folder_dir = opendir(file_adress)) == NULL){
-		printf("No existe la carpeta: %s \n", file_adress);
 		int rv = mkdir(file_adress, 0777);
 		if (rv == 0){
-			printf("Se creo la carpeta: %s \n", file_adress);
 			log_info(logger, "Se creo la carpeta: %s", file_adress);
 			closedir(folder_dir);
 			return 1;
 		}
 		else {
-			printf("No se pudo crear la carpeta\n");
 			log_error(logger, "No se pudo crear la carpeta");
 			return -1;
 		}
@@ -278,6 +275,10 @@ void crear_metadata_default(char * metadata_afip_adress){
 
 	fputs(config, fp);
 	fclose(fp);
+
+	char log1[200];
+	sprintf(log1, "[Crear Metadata] Se creó el archivo %s\n", metadata_afip_adress);
+	log_info(logger, log1);
 }
 
 /* Devuelve 1 si necesita recrear el FS */
@@ -311,9 +312,10 @@ int necesita_recrearse(char * block_size, char * blocks, char * magic_number){
 FILE * get_or_create_file(char* path_file, char * mode){
 	FILE* file = fopen(path_file, mode);
 	if (file == NULL){
-		log_error(logger, "[Get Or Create File] No se creo el archivo de pedido");
+		log_error(logger, "[Get Or Create File] No se creo el archivo");
 		exit(-1);
 	}
+
 	return file;
 }
 /* --- BITMAP --- */
@@ -357,7 +359,11 @@ void crear_bitmap(){
 	}
 	update_bitmap_file(bitmap);
 
+	char log1[200];
+	sprintf(log1, "[Crear Bitmap] Se creó el archivo %s", get_path_bitmap_file());
+	log_info(logger, log1);
 	// bitarray_destroy(bitmap);
+	
 }
 
 t_bitarray* get_bitarray(){
@@ -471,6 +477,11 @@ void create_blocks(){
 		fclose(bloque);
 	}
 
+	char log1[200];
+	sprintf(log1, "[Crear Blocks] Se crearon los %d bloques\n", cantidad_bloques);
+	log_info(logger, log1);
+
+
 }
 
 bool existe_restaurante(char* restaurante){
@@ -511,24 +522,6 @@ bool existe_receta(char* receta){
 		return true;
 	}
 }
-
-t_list* get_platos(char* restaurante){
-	t_info* info_file = create_info_config(restaurante);
-	t_list* platos = info_file->platos;
-	return platos;
-}
-
-t_pedido* get_pedido(char* restaurante, char* id_pedido){
-	return create_pedido_config(restaurante, id_pedido);
-}
-
-// t_info* get_restaurante(char* restaurante){
-// 	return create_info_config(restaurante);
-// }
-
-// t_receta* get_receta(char* comida){
-// 	return create_receta_config(comida);
-// }
 
 int calculate_blocks_required(char* string){
 	int string_size = string_length(string);
@@ -586,6 +579,9 @@ bool save_in_blocks(int initial_block, char* content, int number_of_blocks){
 			*block = available_block;
 			pushbacklist(bloques_actuales, block);
 			faltante--;
+			char log1[200];
+			sprintf(log1, "[Save In Block] Se asignó el nuevo bloque: %d a la cadena iniciada por %d\n", available_block, initial_block);
+			log_info(logger, log1);
 		}
 	} else if (number_of_blocks < (int)sizelist(*bloques_actuales)){
 		int restante = (int)sizelist(*bloques_actuales) - number_of_blocks;
@@ -593,6 +589,9 @@ bool save_in_blocks(int initial_block, char* content, int number_of_blocks){
 			uint32_t* block = popbacklist(bloques_actuales);
 			free_block(*block);
 			restante--;
+			char log1[200];
+			sprintf(log1, "[Save In Block] Se desasigno el bloque: %d a la cadena iniciada por %d\n", *block, initial_block);
+			log_info(logger, log1);
 			free(block);
 		}
 	}
@@ -672,6 +671,9 @@ bool create_afip_file(char* content, char* path){
 	t_afip_file* afip_file = malloc(sizeof(t_afip_file));
 	afip_file->size = string_length(content) + number_of_blocks * sizeof(uint32_t);
 	afip_file->initial_block = get_available_block();
+	char log3[200];
+	sprintf(log3, "[Create Afip File] Se asignó el bloque inicial %d al archivo %s\n", afip_file->initial_block, path);
+	log_info(logger, log3);
 	if(!save_afip_file(path, afip_file)){
 		log_error(logger, "[Create Afip File] No se guardo el archivo afip");
 		return false;
@@ -680,6 +682,11 @@ bool create_afip_file(char* content, char* path){
 		log_error(logger, "[Create Afip File] No se guardaron los bloques");
 		return false;
 	}
+
+	char log1[200];
+	sprintf(log1, "[Create Afip File] Se creó el archivo %s\n", path);
+	log_info(logger, log1);
+
 	return true;
 }
 

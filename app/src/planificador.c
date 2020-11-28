@@ -145,7 +145,7 @@ void planificar_corto_plazo_FIFO(){
         t_pcb* pcb = popfrontlist(&pcb_ready);
 
         char string_log[100];
-        sprintf(string_log, "Repartidor %d pasa a EXEC\n", pcb->repartidor_actual->id);
+        sprintf(string_log, "PASA EXEC: Repartidor %d\n", pcb->repartidor_actual->id);
         log_info(logger, string_log);
         
         pushbacklist(&suscriptores_cpu, pcb->repartidor_actual->ciclo_cpu);
@@ -201,7 +201,7 @@ void planificar_corto_plazo_SJF(){
         sem_wait(sem_grado_multiprocesamiento);
         sem_wait(sem_mutex_sjf);
 
-        int alpha = app_config->alpha;
+        double alpha = app_config->alpha;
 
         int mejor = 999999;
         IteratorList elMejor;
@@ -227,7 +227,7 @@ void planificar_corto_plazo_SJF(){
         sem_post(sem_mutex_sjf);
 
         char string_log[100];
-        sprintf(string_log, "Repartidor %d pasa a EXEC\n", pcb->repartidor_actual->id);
+        sprintf(string_log, "PASA EXEC: Repartidor %d\n", pcb->repartidor_actual->id);
         log_info(logger, string_log);
         
         pushbacklist(&suscriptores_cpu, pcb->repartidor_actual->ciclo_cpu);
@@ -271,7 +271,7 @@ void planificar_corto_plazo_HRRN(){
         sem_post(sem_mutex_sjf);
 
         char string_log[100];
-        sprintf(string_log, "Repartidor %d pasa a EXEC\n", pcb->repartidor_actual->id);
+        sprintf(string_log, "PASA EXEC: Repartidor %d\n", pcb->repartidor_actual->id);
         log_info(logger, string_log);
         
         pushbacklist(&suscriptores_cpu, pcb->repartidor_actual->ciclo_cpu);

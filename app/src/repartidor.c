@@ -55,8 +55,6 @@ void ir_hacia_restaurante(t_repartidor* repartidor){
         sem_wait(repartidor->ciclo_cpu);
         repartidor->pcb_actual->rafaga_anterior += 1;
 
-        log_info(logger, "Repartidor se mueve hacia restaurante");
-
         avanzar_hacia(repartidor, pedido->posicion_restaurante);
     }
 }
@@ -79,11 +77,7 @@ void esperar_pedido(t_repartidor* repartidor){
 
     pasar_a_block(repartidor);
 
-    log_info(logger, "Repartidor espera el pedido");
-
     sem_wait(pedido_espera->semaforo);
-
-    log_info(logger, "Pedido listo");
 
     free(pedido_espera);
 
@@ -99,8 +93,6 @@ void ir_hacia_cliente(t_repartidor* repartidor){
         sem_wait(repartidor->ciclo_cpu);
         repartidor->pcb_actual->rafaga_anterior += 1;
 
-        log_info(logger, "Repartidor avanza hacia el cliente");
-
         avanzar_hacia(repartidor, pedido->posicion_cliente);
 
     }
@@ -109,8 +101,13 @@ void ir_hacia_cliente(t_repartidor* repartidor){
 
 void entregar_pedido(t_repartidor* repartidor){
     desuscribirse_clock(repartidor->ciclo_cpu);
-    log_info(logger, "Pedido entregado");
+    sem_post(sem_grado_multiprocesamiento);
+    char string_log[100];
+    sprintf(string_log, "ENTREGO PEDIDO: Repartidor %d", repartidor->id);
+    log_info(logger, string_log);
     enviar_final_pedido(repartidor->pcb_actual->restaurante, repartidor->pcb_actual->id_pedido);
+    pushbacklist(&repartidores_libres, repartidor);
+    sem_post(sem_entrenador_libre);
 }
 
 bool misma_posicion(t_posicion posicion1, t_posicion posicion2){
@@ -170,18 +167,20 @@ void descansar(t_repartidor* repartidor){
 
     pasar_a_block(repartidor);
 
-    log_info(logger, "Repartidor descansa");
+    char string_log[100];
+    sprintf(string_log, "DESCANSA: Repartidor %d", repartidor->id);
+    log_info(logger, string_log);
 
     for (int i = 0; i < repartidor->tiempo_de_descanso; i++){
         sem_wait(repartidor->ciclo_cpu);
     }
     desuscribirse_clock(repartidor->ciclo_cpu);
+    repartidor->cansancio = 0;
     pasar_a_ready(repartidor);
 }
 
 void pasar_a_ready(t_repartidor* repartidor){
     
-    log_info(logger, "Pasa a ready");
     pushbacklist(&pcb_ready, repartidor->pcb_actual);
     sem_post(sem_pcb_ready);
 }
@@ -191,7 +190,6 @@ void pasar_a_block(t_repartidor* repartidor){
 }
 
 void desuscribirse_clock(sem_t* ciclo_cpu){
-    log_info(logger, "Pasa a block");
     for (IteratorList it = beginlist(suscriptores_cpu); it != NULL ; it = nextlist(it)){
         if ((sem_t*)dataiterlist(it) == ciclo_cpu){
             popiterlist(&suscriptores_cpu, it);

@@ -449,10 +449,13 @@ int paso_exit(t_pcb* pcb){
     pushbacklist(&colas_exit,pcb->plato);
     pcb->estado = EXIT;
 
+    enviar_mensaje_plato_listo(&modulo_app,restaurante_config->nombre_restaurante, (char*)pcb->id_pedido, pcb->plato->nombre);
+    //enviar_mensaje_plato_listo(&modulo_sindicato,restaurante_config->nombre_restaurante, (char*)pcb->id_pedido, pcb->plato->nombre);
+
     printf(" - El plato %s esta en estado %s \n",pcb->plato->nombre, obtener_estado(pcb->estado));
 
-    if(termino_pedido(pcb->id_pedido) == 1)
-    {
+    if(termino_pedido(pcb->id_pedido) == 1){
+        
         char* mensaje_terminar = "OK"; //DESCOMENTAR CUANDO SINDICATO ESTE LISTO enviar_mensaje_terminar_pedido(&modulo_sindicato,(char*)pcb->id_pedido,restaurante_config->nombre_restaurante);
         
         if(!strcmp(mensaje_terminar,"OK")){

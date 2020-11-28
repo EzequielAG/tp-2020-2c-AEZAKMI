@@ -498,7 +498,6 @@ void handshake_init(t_modulo modulo1, t_modulo modulo2){
     }
     else{
         handle_obtener_restaurante(enviar_mensaje_obtener_restaurante(&modulo2, restaurante_config->nombre_restaurante));
-        //inicializacion_default();
     }
 
     int handshake_app_r = handshake_app(&modulo1);

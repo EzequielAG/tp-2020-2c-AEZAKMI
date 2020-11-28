@@ -53,7 +53,7 @@ t_cliente_config* cliente_config_loader(char* path_config_file) {
 
     cliente_config_parser(config, cliente_config);
     config_destroy(config);
-
+//
     return cliente_config;
 }
 

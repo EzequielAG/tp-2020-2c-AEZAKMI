@@ -47,11 +47,6 @@ int main(int argc, char *argv[]){
     sem_wait(sem_exec);
 
 
-
- 
-    
-    
-
     //planificacion_fifo();
 
     // ver_estado_pcb();
@@ -106,11 +101,23 @@ void handle_client(t_result* result){
                 handle_confirmar_pedido(result);
                 
             } else if (tipo_mensaje == consultar_pedido) {
-                // TODO !!: FALTA LOGICA CONSULTAR_PEDIDO
-            }
-    //}
 
+                handle_consultar_pedido(result);
+
+            }
     
+}
+
+
+void handle_consultar_pedido(t_result* result){
+
+    r_obtener_pedido* pedido = enviar_mensaje_obtener_pedido(&modulo_sindicato, result->mensajes->mensajes[1],restaurante_config->nombre_restaurante);
+
+    char* respuesta[1];
+    respuesta[0] = armar_string_obtener_pedido(pedido);
+
+    send_messages_socket(result->socket, respuesta, 1);
+
 }
 
 void handle_crear_pedido(int socket){
@@ -140,7 +147,16 @@ void handle_crear_pedido(int socket){
 
 void handle_anadir_plato(t_result* result){
  
-    char* respuesta[1] = {"OK"};//enviar_mensaje_guardar_plato(&modulo_sindicato, restaurante_config->nombre_restaurante,result->mensajes->mensajes[2] ,result->mensajes->mensajes[1] , "1");
+    char* respuesta[1];
+    respuesta[0] = enviar_mensaje_guardar_plato(&modulo_sindicato, restaurante_config->nombre_restaurante,result->mensajes->mensajes[2] ,result->mensajes->mensajes[1] , "1");
+    
+    if(!strcmp(respuesta[0],"Ok"))
+    {
+        printf("Se guardo el plato %s en el sindicato \n",result->mensajes->mensajes[1]);
+    }
+    else{
+        printf("Hubo un problema al intentar guardar el plato %s en el sindicato \n",result->mensajes->mensajes[1]);
+    }
 
     send_messages_socket(result->socket,respuesta, 1);
     //liberar_conexion(result->socket);
@@ -588,4 +604,40 @@ char* conveRecetasString(receta_precio** recetas)
 	}
 
     return a;
+}
+
+char* armar_string_obtener_pedido(r_obtener_pedido* pedido){
+
+    char* arrayReturn = string_new();
+
+    string_append(&arrayReturn, "{");
+
+    // if(pedido->restaurante != NULL){
+    //     string_append(&arrayReturn, pedido->restaurante);
+    //     string_append(&arrayReturn, ",");
+    // }
+    
+    string_append(&arrayReturn, pedido->estado);
+    string_append(&arrayReturn, ",");
+
+    string_append(&arrayReturn, "[");
+    for (IteratorList iter = beginlist(*pedido->info_comidas); iter != NULL; iter = nextlist(iter)){
+        string_append(&arrayReturn, "{");
+        informacion_comidas* info = (informacion_comidas*) iter->data;
+        string_append(&arrayReturn, info->comida);
+        string_append(&arrayReturn, ",");
+        string_append(&arrayReturn, info->cantidad_total);
+        string_append(&arrayReturn, ",");
+        string_append(&arrayReturn, info->cantidad_lista);
+        string_append(&arrayReturn, "}");
+        string_append(&arrayReturn, ",");
+
+    }
+
+    string_append(&arrayReturn, "]");
+
+    string_append(&arrayReturn, "}");
+
+    return arrayReturn;
+
 }

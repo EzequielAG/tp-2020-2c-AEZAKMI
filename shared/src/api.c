@@ -356,7 +356,7 @@ r_consultar_pedido* enviar_mensaje_consultar_pedido(t_modulo* modulo, char* id_p
         liberar_conexion(socket);
     }
 
-    return NULL;
+    return respuesta_consulta_pedido;
 
 };
 
